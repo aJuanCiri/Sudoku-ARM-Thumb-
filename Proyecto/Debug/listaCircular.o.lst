@@ -1,0 +1,500 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"listaCircular.c"
+  21              	.Ltext0:
+  22              		.file 1 "../listaCircular.c"
+ 2006              		.align	2
+ 2007              		.global	iniciarLista
+ 2009              	iniciarLista:
+ 2010              	.LFB0:
+   1:../listaCircular.c **** /*********************************************************************************************
+   2:../listaCircular.c **** * Fichero:	8led.c
+   3:../listaCircular.c **** * Autor:
+   4:../listaCircular.c **** * Descrip:	Funciones de control del display 8-segmentos
+   5:../listaCircular.c **** * Version:
+   6:../listaCircular.c **** *********************************************************************************************/
+   7:../listaCircular.c **** 
+   8:../listaCircular.c **** #include <stdio.h>
+   9:../listaCircular.c **** #include "44blib.h"
+  10:../listaCircular.c **** 
+  11:../listaCircular.c **** extern void D8Led_symbol(int value);
+  12:../listaCircular.c **** 
+  13:../listaCircular.c **** typedef struct _nodo {
+  14:../listaCircular.c ****    int ID_evento;
+  15:../listaCircular.c ****    int auxData;
+  16:../listaCircular.c ****    int tiempo;
+  17:../listaCircular.c ****    struct _nodo *siguiente;
+  18:../listaCircular.c **** } tipoNodo;
+  19:../listaCircular.c **** 
+  20:../listaCircular.c **** typedef tipoNodo *pNodo;
+  21:../listaCircular.c **** typedef tipoNodo *Lista;
+  22:../listaCircular.c **** 
+  23:../listaCircular.c **** // Funciones con listas:
+  24:../listaCircular.c **** void Insertar(Lista *l, int v, int x, int y);
+  25:../listaCircular.c **** void Borrar(Lista *l, int v);
+  26:../listaCircular.c **** void BorrarLista(Lista *);
+  27:../listaCircular.c **** void MostrarLista(Lista l);
+  28:../listaCircular.c **** 
+  29:../listaCircular.c **** int iniciarLista() {
+ 2011              		.loc 1 29 0
+ 2012              		.cfi_startproc
+ 2013              		@ Function supports interworking.
+ 2014              		@ args = 0, pretend = 0, frame = 8
+ 2015              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2016 0000 0DC0A0E1 		mov	ip, sp
+ 2017              	.LCFI0:
+ 2018              		.cfi_def_cfa_register 12
+ 2019 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2020 0008 04B04CE2 		sub	fp, ip, #4
+ 2021              		.cfi_offset 14, -8
+ 2022              		.cfi_offset 13, -12
+ 2023              		.cfi_offset 11, -16
+ 2024              	.LCFI1:
+ 2025              		.cfi_def_cfa 11, 4
+ 2026 000c 08D04DE2 		sub	sp, sp, #8
+  30:../listaCircular.c ****    Lista lista = NULL;
+ 2027              		.loc 1 30 0
+ 2028 0010 0030A0E3 		mov	r3, #0
+ 2029 0014 10300BE5 		str	r3, [fp, #-16]
+  31:../listaCircular.c **** 
+  32:../listaCircular.c ****    Insertar(&lista, 5, 10, 20);
+ 2030              		.loc 1 32 0
+ 2031 0018 10304BE2 		sub	r3, fp, #16
+ 2032 001c 0300A0E1 		mov	r0, r3
+ 2033 0020 0510A0E3 		mov	r1, #5
+ 2034 0024 0A20A0E3 		mov	r2, #10
+ 2035 0028 1430A0E3 		mov	r3, #20
+ 2036 002c FEFFFFEB 		bl	Insertar
+  33:../listaCircular.c ****    Insertar(&lista, 6, 10, 20);
+ 2037              		.loc 1 33 0
+ 2038 0030 10304BE2 		sub	r3, fp, #16
+ 2039 0034 0300A0E1 		mov	r0, r3
+ 2040 0038 0610A0E3 		mov	r1, #6
+ 2041 003c 0A20A0E3 		mov	r2, #10
+ 2042 0040 1430A0E3 		mov	r3, #20
+ 2043 0044 FEFFFFEB 		bl	Insertar
+  34:../listaCircular.c **** 
+  35:../listaCircular.c ****    MostrarLista(lista);
+ 2044              		.loc 1 35 0
+ 2045 0048 10301BE5 		ldr	r3, [fp, #-16]
+ 2046 004c 0300A0E1 		mov	r0, r3
+ 2047 0050 FEFFFFEB 		bl	MostrarLista
+  36:../listaCircular.c **** 
+  37:../listaCircular.c ****    Borrar(&lista, 5);
+ 2048              		.loc 1 37 0
+ 2049 0054 10304BE2 		sub	r3, fp, #16
+ 2050 0058 0300A0E1 		mov	r0, r3
+ 2051 005c 0510A0E3 		mov	r1, #5
+ 2052 0060 FEFFFFEB 		bl	Borrar
+  38:../listaCircular.c **** 
+  39:../listaCircular.c ****    MostrarLista(lista);
+ 2053              		.loc 1 39 0
+ 2054 0064 10301BE5 		ldr	r3, [fp, #-16]
+ 2055 0068 0300A0E1 		mov	r0, r3
+ 2056 006c FEFFFFEB 		bl	MostrarLista
+  40:../listaCircular.c **** 
+  41:../listaCircular.c ****    BorrarLista(&lista);
+ 2057              		.loc 1 41 0
+ 2058 0070 10304BE2 		sub	r3, fp, #16
+ 2059 0074 0300A0E1 		mov	r0, r3
+ 2060 0078 FEFFFFEB 		bl	BorrarLista
+  42:../listaCircular.c ****    return 0;
+ 2061              		.loc 1 42 0
+ 2062 007c 0030A0E3 		mov	r3, #0
+  43:../listaCircular.c **** }
+ 2063              		.loc 1 43 0
+ 2064 0080 0300A0E1 		mov	r0, r3
+ 2065 0084 0CD04BE2 		sub	sp, fp, #12
+ 2066 0088 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2067 008c 1EFF2FE1 		bx	lr
+ 2068              		.cfi_endproc
+ 2069              	.LFE0:
+ 2071              		.align	2
+ 2072              		.global	Insertar
+ 2074              	Insertar:
+ 2075              	.LFB1:
+  44:../listaCircular.c **** 
+  45:../listaCircular.c **** void Insertar(Lista *lista, int v, int x, int y) {
+ 2076              		.loc 1 45 0
+ 2077              		.cfi_startproc
+ 2078              		@ Function supports interworking.
+ 2079              		@ args = 0, pretend = 0, frame = 24
+ 2080              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2081 0090 0DC0A0E1 		mov	ip, sp
+ 2082              	.LCFI2:
+ 2083              		.cfi_def_cfa_register 12
+ 2084 0094 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2085 0098 04B04CE2 		sub	fp, ip, #4
+ 2086              		.cfi_offset 14, -8
+ 2087              		.cfi_offset 13, -12
+ 2088              		.cfi_offset 11, -16
+ 2089              	.LCFI3:
+ 2090              		.cfi_def_cfa 11, 4
+ 2091 009c 18D04DE2 		sub	sp, sp, #24
+ 2092 00a0 18000BE5 		str	r0, [fp, #-24]
+ 2093 00a4 1C100BE5 		str	r1, [fp, #-28]
+ 2094 00a8 20200BE5 		str	r2, [fp, #-32]
+ 2095 00ac 24300BE5 		str	r3, [fp, #-36]
+  46:../listaCircular.c ****    pNodo nodo;
+  47:../listaCircular.c **** 
+  48:../listaCircular.c ****    // Creamos un nodo para el nuvo valor a insertar
+  49:../listaCircular.c ****    nodo = (pNodo)malloc(sizeof(tipoNodo));
+ 2096              		.loc 1 49 0
+ 2097 00b0 1000A0E3 		mov	r0, #16
+ 2098 00b4 FEFFFFEB 		bl	malloc
+ 2099 00b8 0030A0E1 		mov	r3, r0
+ 2100 00bc 10300BE5 		str	r3, [fp, #-16]
+  50:../listaCircular.c ****    nodo->ID_evento = v;
+ 2101              		.loc 1 50 0
+ 2102 00c0 10301BE5 		ldr	r3, [fp, #-16]
+ 2103 00c4 1C201BE5 		ldr	r2, [fp, #-28]
+ 2104 00c8 002083E5 		str	r2, [r3, #0]
+  51:../listaCircular.c ****    nodo->auxData = x;
+ 2105              		.loc 1 51 0
+ 2106 00cc 10301BE5 		ldr	r3, [fp, #-16]
+ 2107 00d0 20201BE5 		ldr	r2, [fp, #-32]
+ 2108 00d4 042083E5 		str	r2, [r3, #4]
+  52:../listaCircular.c ****    nodo->tiempo = y;
+ 2109              		.loc 1 52 0
+ 2110 00d8 10301BE5 		ldr	r3, [fp, #-16]
+ 2111 00dc 24201BE5 		ldr	r2, [fp, #-36]
+ 2112 00e0 082083E5 		str	r2, [r3, #8]
+  53:../listaCircular.c **** 
+  54:../listaCircular.c ****    // Si la lista está vacía, la lista será el nuevo nodo
+  55:../listaCircular.c ****    // Si no lo está, insertamos el nuevo nodo a continuación del apuntado
+  56:../listaCircular.c ****    // por lista
+  57:../listaCircular.c ****    if(*lista == NULL) *lista = nodo;
+ 2113              		.loc 1 57 0
+ 2114 00e4 18301BE5 		ldr	r3, [fp, #-24]
+ 2115 00e8 003093E5 		ldr	r3, [r3, #0]
+ 2116 00ec 000053E3 		cmp	r3, #0
+ 2117 00f0 0300001A 		bne	.L3
+ 2118              		.loc 1 57 0 is_stmt 0 discriminator 1
+ 2119 00f4 18301BE5 		ldr	r3, [fp, #-24]
+ 2120 00f8 10201BE5 		ldr	r2, [fp, #-16]
+ 2121 00fc 002083E5 		str	r2, [r3, #0]
+ 2122 0100 040000EA 		b	.L4
+ 2123              	.L3:
+  58:../listaCircular.c ****    else nodo->siguiente = (*lista)->siguiente;
+ 2124              		.loc 1 58 0 is_stmt 1
+ 2125 0104 18301BE5 		ldr	r3, [fp, #-24]
+ 2126 0108 003093E5 		ldr	r3, [r3, #0]
+ 2127 010c 0C2093E5 		ldr	r2, [r3, #12]
+ 2128 0110 10301BE5 		ldr	r3, [fp, #-16]
+ 2129 0114 0C2083E5 		str	r2, [r3, #12]
+ 2130              	.L4:
+  59:../listaCircular.c ****    // En cualquier caso, cerramos la lista circular
+  60:../listaCircular.c ****    (*lista)->siguiente = nodo;
+ 2131              		.loc 1 60 0
+ 2132 0118 18301BE5 		ldr	r3, [fp, #-24]
+ 2133 011c 003093E5 		ldr	r3, [r3, #0]
+ 2134 0120 10201BE5 		ldr	r2, [fp, #-16]
+ 2135 0124 0C2083E5 		str	r2, [r3, #12]
+  61:../listaCircular.c **** }
+ 2136              		.loc 1 61 0
+ 2137 0128 0CD04BE2 		sub	sp, fp, #12
+ 2138 012c 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2139 0130 1EFF2FE1 		bx	lr
+ 2140              		.cfi_endproc
+ 2141              	.LFE1:
+ 2143              		.align	2
+ 2144              		.global	Borrar
+ 2146              	Borrar:
+ 2147              	.LFB2:
+  62:../listaCircular.c **** 
+  63:../listaCircular.c **** void Borrar(Lista *lista, int v) {
+ 2148              		.loc 1 63 0
+ 2149              		.cfi_startproc
+ 2150              		@ Function supports interworking.
+ 2151              		@ args = 0, pretend = 0, frame = 16
+ 2152              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2153 0134 0DC0A0E1 		mov	ip, sp
+ 2154              	.LCFI4:
+ 2155              		.cfi_def_cfa_register 12
+ 2156 0138 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2157 013c 04B04CE2 		sub	fp, ip, #4
+ 2158              		.cfi_offset 14, -8
+ 2159              		.cfi_offset 13, -12
+ 2160              		.cfi_offset 11, -16
+ 2161              	.LCFI5:
+ 2162              		.cfi_def_cfa 11, 4
+ 2163 0140 10D04DE2 		sub	sp, sp, #16
+ 2164 0144 18000BE5 		str	r0, [fp, #-24]
+ 2165 0148 1C100BE5 		str	r1, [fp, #-28]
+  64:../listaCircular.c ****    pNodo nodo;
+  65:../listaCircular.c **** 
+  66:../listaCircular.c ****    nodo = *lista;
+ 2166              		.loc 1 66 0
+ 2167 014c 18301BE5 		ldr	r3, [fp, #-24]
+ 2168 0150 003093E5 		ldr	r3, [r3, #0]
+ 2169 0154 10300BE5 		str	r3, [fp, #-16]
+ 2170              	.L8:
+  67:../listaCircular.c **** 
+  68:../listaCircular.c ****    // Hacer que lista apunte al nodo anterior al de valor v
+  69:../listaCircular.c ****    do {
+  70:../listaCircular.c ****       if((*lista)->siguiente->ID_evento != v) *lista = (*lista)->siguiente;
+ 2171              		.loc 1 70 0
+ 2172 0158 18301BE5 		ldr	r3, [fp, #-24]
+ 2173 015c 003093E5 		ldr	r3, [r3, #0]
+ 2174 0160 0C3093E5 		ldr	r3, [r3, #12]
+ 2175 0164 002093E5 		ldr	r2, [r3, #0]
+ 2176 0168 1C301BE5 		ldr	r3, [fp, #-28]
+ 2177 016c 030052E1 		cmp	r2, r3
+ 2178 0170 0400000A 		beq	.L6
+ 2179              		.loc 1 70 0 is_stmt 0 discriminator 1
+ 2180 0174 18301BE5 		ldr	r3, [fp, #-24]
+ 2181 0178 003093E5 		ldr	r3, [r3, #0]
+ 2182 017c 0C2093E5 		ldr	r2, [r3, #12]
+ 2183 0180 18301BE5 		ldr	r3, [fp, #-24]
+ 2184 0184 002083E5 		str	r2, [r3, #0]
+ 2185              	.L6:
+  71:../listaCircular.c ****    } while((*lista)->siguiente->ID_evento != v && *lista != nodo);
+ 2186              		.loc 1 71 0 is_stmt 1
+ 2187 0188 18301BE5 		ldr	r3, [fp, #-24]
+ 2188 018c 003093E5 		ldr	r3, [r3, #0]
+ 2189 0190 0C3093E5 		ldr	r3, [r3, #12]
+ 2190 0194 002093E5 		ldr	r2, [r3, #0]
+ 2191 0198 1C301BE5 		ldr	r3, [fp, #-28]
+ 2192 019c 030052E1 		cmp	r2, r3
+ 2193 01a0 0400000A 		beq	.L7
+ 2194              		.loc 1 71 0 is_stmt 0 discriminator 1
+ 2195 01a4 18301BE5 		ldr	r3, [fp, #-24]
+ 2196 01a8 002093E5 		ldr	r2, [r3, #0]
+ 2197 01ac 10301BE5 		ldr	r3, [fp, #-16]
+ 2198 01b0 030052E1 		cmp	r2, r3
+ 2199 01b4 E7FFFF1A 		bne	.L8
+ 2200              	.L7:
+  72:../listaCircular.c ****    // Si existe un nodo con el valor v:
+  73:../listaCircular.c ****    if((*lista)->siguiente->ID_evento == v) {
+ 2201              		.loc 1 73 0 is_stmt 1
+ 2202 01b8 18301BE5 		ldr	r3, [fp, #-24]
+ 2203 01bc 003093E5 		ldr	r3, [r3, #0]
+ 2204 01c0 0C3093E5 		ldr	r3, [r3, #12]
+ 2205 01c4 002093E5 		ldr	r2, [r3, #0]
+ 2206 01c8 1C301BE5 		ldr	r3, [fp, #-28]
+ 2207 01cc 030052E1 		cmp	r2, r3
+ 2208 01d0 1900001A 		bne	.L5
+  74:../listaCircular.c ****       // Y si la lista sólo tiene un nodo
+  75:../listaCircular.c ****       if(*lista == (*lista)->siguiente) {
+ 2209              		.loc 1 75 0
+ 2210 01d4 18301BE5 		ldr	r3, [fp, #-24]
+ 2211 01d8 002093E5 		ldr	r2, [r3, #0]
+ 2212 01dc 18301BE5 		ldr	r3, [fp, #-24]
+ 2213 01e0 003093E5 		ldr	r3, [r3, #0]
+ 2214 01e4 0C3093E5 		ldr	r3, [r3, #12]
+ 2215 01e8 030052E1 		cmp	r2, r3
+ 2216 01ec 0700001A 		bne	.L10
+  76:../listaCircular.c ****          // Borrar toda la lista
+  77:../listaCircular.c ****          free(*lista);
+ 2217              		.loc 1 77 0
+ 2218 01f0 18301BE5 		ldr	r3, [fp, #-24]
+ 2219 01f4 003093E5 		ldr	r3, [r3, #0]
+ 2220 01f8 0300A0E1 		mov	r0, r3
+ 2221 01fc FEFFFFEB 		bl	free
+  78:../listaCircular.c ****          *lista = NULL;
+ 2222              		.loc 1 78 0
+ 2223 0200 18301BE5 		ldr	r3, [fp, #-24]
+ 2224 0204 0020A0E3 		mov	r2, #0
+ 2225 0208 002083E5 		str	r2, [r3, #0]
+ 2226 020c 0A0000EA 		b	.L5
+ 2227              	.L10:
+  79:../listaCircular.c ****       }
+  80:../listaCircular.c ****       else {
+  81:../listaCircular.c ****          // Si la lista tiene más de un nodo, borrar el nodo  de valor v
+  82:../listaCircular.c ****          nodo = (*lista)->siguiente;
+ 2228              		.loc 1 82 0
+ 2229 0210 18301BE5 		ldr	r3, [fp, #-24]
+ 2230 0214 003093E5 		ldr	r3, [r3, #0]
+ 2231 0218 0C3093E5 		ldr	r3, [r3, #12]
+ 2232 021c 10300BE5 		str	r3, [fp, #-16]
+  83:../listaCircular.c ****          (*lista)->siguiente = nodo->siguiente;
+ 2233              		.loc 1 83 0
+ 2234 0220 18301BE5 		ldr	r3, [fp, #-24]
+ 2235 0224 003093E5 		ldr	r3, [r3, #0]
+ 2236 0228 10201BE5 		ldr	r2, [fp, #-16]
+ 2237 022c 0C2092E5 		ldr	r2, [r2, #12]
+ 2238 0230 0C2083E5 		str	r2, [r3, #12]
+  84:../listaCircular.c ****          free(nodo);
+ 2239              		.loc 1 84 0
+ 2240 0234 10001BE5 		ldr	r0, [fp, #-16]
+ 2241 0238 FEFFFFEB 		bl	free
+ 2242              	.L5:
+  85:../listaCircular.c ****       }
+  86:../listaCircular.c ****    }
+  87:../listaCircular.c **** }
+ 2243              		.loc 1 87 0
+ 2244 023c 0CD04BE2 		sub	sp, fp, #12
+ 2245 0240 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2246 0244 1EFF2FE1 		bx	lr
+ 2247              		.cfi_endproc
+ 2248              	.LFE2:
+ 2250              		.align	2
+ 2251              		.global	BorrarLista
+ 2253              	BorrarLista:
+ 2254              	.LFB3:
+  88:../listaCircular.c **** 
+  89:../listaCircular.c **** void BorrarLista(Lista *lista) {
+ 2255              		.loc 1 89 0
+ 2256              		.cfi_startproc
+ 2257              		@ Function supports interworking.
+ 2258              		@ args = 0, pretend = 0, frame = 16
+ 2259              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2260 0248 0DC0A0E1 		mov	ip, sp
+ 2261              	.LCFI6:
+ 2262              		.cfi_def_cfa_register 12
+ 2263 024c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2264 0250 04B04CE2 		sub	fp, ip, #4
+ 2265              		.cfi_offset 14, -8
+ 2266              		.cfi_offset 13, -12
+ 2267              		.cfi_offset 11, -16
+ 2268              	.LCFI7:
+ 2269              		.cfi_def_cfa 11, 4
+ 2270 0254 10D04DE2 		sub	sp, sp, #16
+ 2271 0258 18000BE5 		str	r0, [fp, #-24]
+  90:../listaCircular.c ****    pNodo nodo;
+  91:../listaCircular.c **** 
+  92:../listaCircular.c ****    // Mientras la lista tenga más de un nodo
+  93:../listaCircular.c ****    while((*lista)->siguiente != *lista) {
+ 2272              		.loc 1 93 0
+ 2273 025c 0A0000EA 		b	.L12
+ 2274              	.L13:
+  94:../listaCircular.c ****       // Borrar el nodo siguiente al apuntado por lista
+  95:../listaCircular.c ****       nodo = (*lista)->siguiente;
+ 2275              		.loc 1 95 0
+ 2276 0260 18301BE5 		ldr	r3, [fp, #-24]
+ 2277 0264 003093E5 		ldr	r3, [r3, #0]
+ 2278 0268 0C3093E5 		ldr	r3, [r3, #12]
+ 2279 026c 10300BE5 		str	r3, [fp, #-16]
+  96:../listaCircular.c ****       (*lista)->siguiente = nodo->siguiente;
+ 2280              		.loc 1 96 0
+ 2281 0270 18301BE5 		ldr	r3, [fp, #-24]
+ 2282 0274 003093E5 		ldr	r3, [r3, #0]
+ 2283 0278 10201BE5 		ldr	r2, [fp, #-16]
+ 2284 027c 0C2092E5 		ldr	r2, [r2, #12]
+ 2285 0280 0C2083E5 		str	r2, [r3, #12]
+  97:../listaCircular.c ****       free(nodo);
+ 2286              		.loc 1 97 0
+ 2287 0284 10001BE5 		ldr	r0, [fp, #-16]
+ 2288 0288 FEFFFFEB 		bl	free
+ 2289              	.L12:
+  93:../listaCircular.c ****    while((*lista)->siguiente != *lista) {
+ 2290              		.loc 1 93 0 discriminator 1
+ 2291 028c 18301BE5 		ldr	r3, [fp, #-24]
+ 2292 0290 003093E5 		ldr	r3, [r3, #0]
+ 2293 0294 0C2093E5 		ldr	r2, [r3, #12]
+ 2294 0298 18301BE5 		ldr	r3, [fp, #-24]
+ 2295 029c 003093E5 		ldr	r3, [r3, #0]
+ 2296 02a0 030052E1 		cmp	r2, r3
+ 2297 02a4 EDFFFF1A 		bne	.L13
+  98:../listaCircular.c ****    }
+  99:../listaCircular.c ****    // Y borrar el último nodo
+ 100:../listaCircular.c ****    free(*lista);
+ 2298              		.loc 1 100 0
+ 2299 02a8 18301BE5 		ldr	r3, [fp, #-24]
+ 2300 02ac 003093E5 		ldr	r3, [r3, #0]
+ 2301 02b0 0300A0E1 		mov	r0, r3
+ 2302 02b4 FEFFFFEB 		bl	free
+ 101:../listaCircular.c ****    *lista = NULL;
+ 2303              		.loc 1 101 0
+ 2304 02b8 18301BE5 		ldr	r3, [fp, #-24]
+ 2305 02bc 0020A0E3 		mov	r2, #0
+ 2306 02c0 002083E5 		str	r2, [r3, #0]
+ 102:../listaCircular.c **** }
+ 2307              		.loc 1 102 0
+ 2308 02c4 0CD04BE2 		sub	sp, fp, #12
+ 2309 02c8 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2310 02cc 1EFF2FE1 		bx	lr
+ 2311              		.cfi_endproc
+ 2312              	.LFE3:
+ 2314              		.align	2
+ 2315              		.global	MostrarLista
+ 2317              	MostrarLista:
+ 2318              	.LFB4:
+ 103:../listaCircular.c **** 
+ 104:../listaCircular.c **** void MostrarLista(Lista lista) {
+ 2319              		.loc 1 104 0
+ 2320              		.cfi_startproc
+ 2321              		@ Function supports interworking.
+ 2322              		@ args = 0, pretend = 0, frame = 16
+ 2323              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2324 02d0 0DC0A0E1 		mov	ip, sp
+ 2325              	.LCFI8:
+ 2326              		.cfi_def_cfa_register 12
+ 2327 02d4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2328 02d8 04B04CE2 		sub	fp, ip, #4
+ 2329              		.cfi_offset 14, -8
+ 2330              		.cfi_offset 13, -12
+ 2331              		.cfi_offset 11, -16
+ 2332              	.LCFI9:
+ 2333              		.cfi_def_cfa 11, 4
+ 2334 02dc 10D04DE2 		sub	sp, sp, #16
+ 2335 02e0 18000BE5 		str	r0, [fp, #-24]
+ 105:../listaCircular.c ****    pNodo nodo = lista;
+ 2336              		.loc 1 105 0
+ 2337 02e4 18301BE5 		ldr	r3, [fp, #-24]
+ 2338 02e8 10300BE5 		str	r3, [fp, #-16]
+ 2339              	.L15:
+ 2340              	.LBB2:
+ 106:../listaCircular.c **** 
+ 107:../listaCircular.c ****    do {
+ 108:../listaCircular.c **** 	  int valor = ((lista)->ID_evento);
+ 2341              		.loc 1 108 0 discriminator 1
+ 2342 02ec 18301BE5 		ldr	r3, [fp, #-24]
+ 2343 02f0 003093E5 		ldr	r3, [r3, #0]
+ 2344 02f4 14300BE5 		str	r3, [fp, #-20]
+ 109:../listaCircular.c **** 	  D8Led_symbol(valor);
+ 2345              		.loc 1 109 0 discriminator 1
+ 2346 02f8 14001BE5 		ldr	r0, [fp, #-20]
+ 2347 02fc FEFFFFEB 		bl	D8Led_symbol
+ 110:../listaCircular.c ****       Delay(20000);
+ 2348              		.loc 1 110 0 discriminator 1
+ 2349 0300 28009FE5 		ldr	r0, .L16
+ 2350 0304 FEFFFFEB 		bl	Delay
+ 111:../listaCircular.c ****       nodo = nodo->siguiente;
+ 2351              		.loc 1 111 0 discriminator 1
+ 2352 0308 10301BE5 		ldr	r3, [fp, #-16]
+ 2353 030c 0C3093E5 		ldr	r3, [r3, #12]
+ 2354 0310 10300BE5 		str	r3, [fp, #-16]
+ 2355              	.LBE2:
+ 112:../listaCircular.c ****    } while(nodo != lista);
+ 2356              		.loc 1 112 0 discriminator 1
+ 2357 0314 10201BE5 		ldr	r2, [fp, #-16]
+ 2358 0318 18301BE5 		ldr	r3, [fp, #-24]
+ 2359 031c 030052E1 		cmp	r2, r3
+ 2360 0320 F1FFFF1A 		bne	.L15
+ 113:../listaCircular.c **** }
+ 2361              		.loc 1 113 0
+ 2362 0324 0CD04BE2 		sub	sp, fp, #12
+ 2363 0328 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2364 032c 1EFF2FE1 		bx	lr
+ 2365              	.L17:
+ 2366              		.align	2
+ 2367              	.L16:
+ 2368 0330 204E0000 		.word	20000
+ 2369              		.cfi_endproc
+ 2370              	.LFE4:
+ 2372              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 listaCircular.c
+C:\Users\a680669\AppData\Local\Temp\ccuKhY6e.s:2006   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccuKhY6e.s:2009   .text:00000000 iniciarLista
+C:\Users\a680669\AppData\Local\Temp\ccuKhY6e.s:2074   .text:00000090 Insertar
+C:\Users\a680669\AppData\Local\Temp\ccuKhY6e.s:2317   .text:000002d0 MostrarLista
+C:\Users\a680669\AppData\Local\Temp\ccuKhY6e.s:2146   .text:00000134 Borrar
+C:\Users\a680669\AppData\Local\Temp\ccuKhY6e.s:2253   .text:00000248 BorrarLista
+C:\Users\a680669\AppData\Local\Temp\ccuKhY6e.s:2368   .text:00000330 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+malloc
+free
+D8Led_symbol
+Delay

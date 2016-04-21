@@ -1,0 +1,154 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"main.c"
+  21              	.Ltext0:
+  22              		.file 1 "../main.c"
+ 3685              		.align	2
+ 3686              		.global	Main
+ 3688              	Main:
+ 3689              	.LFB0:
+   1:../main.c     **** /*********************************************************************************************
+   2:../main.c     **** * Fichero:	main.c
+   3:../main.c     **** * Autor:
+   4:../main.c     **** * Descrip:	punto de entrada de C
+   5:../main.c     **** * Version:  <P4-ARM.timer-leds>
+   6:../main.c     **** *********************************************************************************************/
+   7:../main.c     **** 
+   8:../main.c     **** /*--- ficheros de cabecera ---*/
+   9:../main.c     **** #include "44blib.h"
+  10:../main.c     **** #include "44b.h"
+  11:../main.c     **** #include "stdio.h"
+  12:../main.c     **** #include "gestorSudoku.h"
+  13:../main.c     **** #include "gestorPantalla.h"
+  14:../main.c     **** #include <inttypes.h>
+  15:../main.c     **** #include "timer2.h"
+  16:../main.c     **** #include "timer4.h"
+  17:../main.c     **** 
+  18:../main.c     **** enum {pantallaJuego = 0, pantallaConfirmacionFinal = 1, pantallaVolverAJugar = 2,
+  19:../main.c     **** 	pantallaInstrucciones = 3};
+  20:../main.c     **** 
+  21:../main.c     **** typedef uint16_t CELDA;
+  22:../main.c     **** 
+  23:../main.c     **** /*--- variables globales ---*/
+  24:../main.c     **** /*--- funciones externas ---*/
+  25:../main.c     **** extern void Eint4567_init();
+  26:../main.c     **** extern void D8Led_init();
+  27:../main.c     **** extern void init_excep();
+  28:../main.c     **** //extern void D8Led_symbol(int value);
+  29:../main.c     **** 
+  30:../main.c     **** /*--- declaracion de funciones ---*/
+  31:../main.c     **** void Main(void);
+  32:../main.c     **** 
+  33:../main.c     **** /*--- codigo de funciones ---*/
+  34:../main.c     **** void Main(void)
+  35:../main.c     **** {
+ 3690              		.loc 1 35 0
+ 3691              		.cfi_startproc
+ 3692              		@ Function supports interworking.
+ 3693              		@ args = 0, pretend = 0, frame = 0
+ 3694              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3695 0000 0DC0A0E1 		mov	ip, sp
+ 3696              	.LCFI0:
+ 3697              		.cfi_def_cfa_register 12
+ 3698 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3699 0008 04B04CE2 		sub	fp, ip, #4
+ 3700              		.cfi_offset 14, -8
+ 3701              		.cfi_offset 13, -12
+ 3702              		.cfi_offset 11, -16
+ 3703              	.LCFI1:
+ 3704              		.cfi_def_cfa 11, 4
+  36:../main.c     **** 	/* Inicializa controladores */
+  37:../main.c     **** 	sys_init();       			// Inicializacion de la placa, interrupciones y puertos.
+ 3705              		.loc 1 37 0
+ 3706 000c FEFFFFEB 		bl	sys_init
+  38:../main.c     **** 	Eint4567_init();			// Inicializamos los pulsadores. Cada vez que se pulse se verá reflejado en el 
+ 3707              		.loc 1 38 0
+ 3708 0010 FEFFFFEB 		bl	Eint4567_init
+  39:../main.c     **** 	D8Led_init(); 				// Inicializamos el 8led.
+ 3709              		.loc 1 39 0
+ 3710 0014 FEFFFFEB 		bl	D8Led_init
+  40:../main.c     **** 	init_excep();
+ 3711              		.loc 1 40 0
+ 3712 0018 FEFFFFEB 		bl	init_excep
+  41:../main.c     **** 	setPantalla(pantallaInstrucciones);				// Mostrar la pantalla de instrucciones
+ 3713              		.loc 1 41 0
+ 3714 001c 0300A0E3 		mov	r0, #3
+ 3715 0020 FEFFFFEB 		bl	setPantalla
+  42:../main.c     **** 	actualizarPantalla();		// Actualizar la pantalla
+ 3716              		.loc 1 42 0
+ 3717 0024 FEFFFFEB 		bl	actualizarPantalla
+ 3718 0028 000000EA 		b	.L4
+ 3719              	.L5:
+  43:../main.c     **** 	while(1) {
+  44:../main.c     **** 		if(hayQueActualizarTiempo()) {
+  45:../main.c     **** 			desactivarActualizacion();
+  46:../main.c     **** 			actualizarTiempoTotalEnPantalla();
+  47:../main.c     **** 		}
+  48:../main.c     **** 		//Comprueba si debe pintar por pantalla
+  49:../main.c     **** 		if(hayQueRefrescar()){
+  50:../main.c     **** 			//Si es asi, desactiva la peticion de pintar, y muestra por
+  51:../main.c     **** 			//pantalla el sudoku actualizado.
+  52:../main.c     **** 			refrescarPantalla(0);
+  53:../main.c     **** 			actualizarPantalla();
+  54:../main.c     **** 		}
+  55:../main.c     **** 	}
+ 3720              		.loc 1 55 0
+ 3721 002c 0000A0E1 		mov	r0, r0	@ nop
+ 3722              	.L4:
+  44:../main.c     **** 		if(hayQueActualizarTiempo()) {
+ 3723              		.loc 1 44 0
+ 3724 0030 FEFFFFEB 		bl	hayQueActualizarTiempo
+ 3725 0034 0030A0E1 		mov	r3, r0
+ 3726 0038 000053E3 		cmp	r3, #0
+ 3727 003c 0100000A 		beq	.L2
+  45:../main.c     **** 			desactivarActualizacion();
+ 3728              		.loc 1 45 0
+ 3729 0040 FEFFFFEB 		bl	desactivarActualizacion
+  46:../main.c     **** 			actualizarTiempoTotalEnPantalla();
+ 3730              		.loc 1 46 0
+ 3731 0044 FEFFFFEB 		bl	actualizarTiempoTotalEnPantalla
+ 3732              	.L2:
+  49:../main.c     **** 		if(hayQueRefrescar()){
+ 3733              		.loc 1 49 0
+ 3734 0048 FEFFFFEB 		bl	hayQueRefrescar
+ 3735 004c 0030A0E1 		mov	r3, r0
+ 3736 0050 000053E3 		cmp	r3, #0
+ 3737 0054 F4FFFF0A 		beq	.L5
+  52:../main.c     **** 			refrescarPantalla(0);
+ 3738              		.loc 1 52 0
+ 3739 0058 0000A0E3 		mov	r0, #0
+ 3740 005c FEFFFFEB 		bl	refrescarPantalla
+  53:../main.c     **** 			actualizarPantalla();
+ 3741              		.loc 1 53 0
+ 3742 0060 FEFFFFEB 		bl	actualizarPantalla
+ 3743              		.loc 1 55 0
+ 3744 0064 F1FFFFEA 		b	.L4
+ 3745              		.cfi_endproc
+ 3746              	.LFE0:
+ 3748              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+C:\Users\a680669\AppData\Local\Temp\ccBucOg6.s:3685   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccBucOg6.s:3688   .text:00000000 Main
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+sys_init
+Eint4567_init
+D8Led_init
+init_excep
+setPantalla
+actualizarPantalla
+hayQueActualizarTiempo
+desactivarActualizacion
+actualizarTiempoTotalEnPantalla
+hayQueRefrescar
+refrescarPantalla

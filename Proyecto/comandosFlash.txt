@@ -1,0 +1,6 @@
+C:/"Program Files"/EclipseARM/sourcery-g++-lite-arm-2011.03/bin/arm-none-eabi-objcopy -O binary C:/Users/a680669/workspace/Practica3/Debug/Practica3.elf C:/Users/a680669/workspace/Practica3/common/Pratica3.bin
+
+C:/"Program Files"/EclipseARM/openocd-0.7.0/bin/openocd-0.7.0.exe -f test/arm-fdi-ucm.cfg -c "program C:/Users/a680669/workspace/Practica3/common/Pratica3.bin 0x00000000"
+
+
+C:/"Program Files"/EclipseARM/openocd-0.7.0/bin/openocd-0.7.0.exe -f test/arm-fdi-ucm.cfg -c "program C:/Users/a680669/workspace/Practica3/common/backup_flash.bin 0x00000000"

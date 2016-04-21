@@ -1,0 +1,75 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"mainLCD.c"
+  21              	.Ltext0:
+  22              		.file 1 "../mainLCD.c"
+ 1874              		.align	2
+ 1875              		.global	Main
+ 1877              	Main:
+ 1878              	.LFB0:
+   1:../mainLCD.c  **** /*********************************************************************************************
+   2:../mainLCD.c  **** * Fichero:	main.c
+   3:../mainLCD.c  **** * Autor:	
+   4:../mainLCD.c  **** * Descrip:	codigo de entrada de C
+   5:../mainLCD.c  **** * Version:	<P6-ARM>	
+   6:../mainLCD.c  **** *********************************************************************************************/
+   7:../mainLCD.c  **** 
+   8:../mainLCD.c  **** /*--- ficheros de cabecera ---*/
+   9:../mainLCD.c  **** #include "44blib.h"
+  10:../mainLCD.c  **** #include "44b.h"
+  11:../mainLCD.c  **** 
+  12:../mainLCD.c  **** /*--- declaracion de funciones ---*/
+  13:../mainLCD.c  **** void main(void);
+  14:../mainLCD.c  **** 
+  15:../mainLCD.c  **** /*--- funciones externas ---*/
+  16:../mainLCD.c  **** extern void Lcd_Test();
+  17:../mainLCD.c  **** 
+  18:../mainLCD.c  **** /*--- codigo de la funcion ---*/
+  19:../mainLCD.c  **** void Main(void)
+  20:../mainLCD.c  **** {
+ 1879              		.loc 1 20 0
+ 1880              		.cfi_startproc
+ 1881              		@ Function supports interworking.
+ 1882              		@ args = 0, pretend = 0, frame = 0
+ 1883              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1884 0000 0DC0A0E1 		mov	ip, sp
+ 1885              	.LCFI0:
+ 1886              		.cfi_def_cfa_register 12
+ 1887 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 1888 0008 04B04CE2 		sub	fp, ip, #4
+ 1889              		.cfi_offset 14, -8
+ 1890              		.cfi_offset 13, -12
+ 1891              		.cfi_offset 11, -16
+ 1892              	.LCFI1:
+ 1893              		.cfi_def_cfa 11, 4
+  21:../mainLCD.c  ****     sys_init();        /* inicializacion de la placa, interrupciones, puertos y UART */
+ 1894              		.loc 1 21 0
+ 1895 000c FEFFFFEB 		bl	sys_init
+  22:../mainLCD.c  **** 	
+  23:../mainLCD.c  **** 	Lcd_Test();        /* inicializacion LCD y visualizacion texto y rectangulos     */
+ 1896              		.loc 1 23 0
+ 1897 0010 FEFFFFEB 		bl	Lcd_Test
+ 1898              	.L2:
+  24:../mainLCD.c  **** 	while(1);
+ 1899              		.loc 1 24 0 discriminator 1
+ 1900 0014 FEFFFFEA 		b	.L2
+ 1901              		.cfi_endproc
+ 1902              	.LFE0:
+ 1904              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 mainLCD.c
+C:\Users\a680669\AppData\Local\Temp\cccJXJC1.s:1874   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\cccJXJC1.s:1877   .text:00000000 Main
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+sys_init
+Lcd_Test

@@ -1,0 +1,2940 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"lcd.c"
+  21              	.Ltext0:
+  22              		.file 1 "../lcd.c"
+ 2132              		.align	2
+ 2133              		.global	Lcd_Init
+ 2135              	Lcd_Init:
+ 2136              	.LFB0:
+   1:../lcd.c      **** /*********************************************************************************************
+   2:../lcd.c      **** * Fichero:	lcd.c
+   3:../lcd.c      **** * Autor:	
+   4:../lcd.c      **** * Descrip:	funciones de visualizacion y control LCD
+   5:../lcd.c      **** * Version:	<P6-ARM>
+   6:../lcd.c      **** *********************************************************************************************/
+   7:../lcd.c      **** 
+   8:../lcd.c      **** /*--- ficheros de cabecera ---*/
+   9:../lcd.c      **** #include "def.h"
+  10:../lcd.c      **** #include "44b.h"
+  11:../lcd.c      **** #include "44blib.h"
+  12:../lcd.c      **** #include "lcd.h"
+  13:../lcd.c      **** #include "bmp.h"
+  14:../lcd.c      **** 
+  15:../lcd.c      **** /*--- definicion de macros ---*/
+  16:../lcd.c      **** #define DMA_Byte  (0)
+  17:../lcd.c      **** #define DMA_HW    (1)
+  18:../lcd.c      **** #define DMA_Word  (2)
+  19:../lcd.c      **** #define DW 		  DMA_Byte		//configura  ZDMA0 como media palabras
+  20:../lcd.c      **** 
+  21:../lcd.c      **** /*--- variables externas ---*/
+  22:../lcd.c      **** extern INT8U g_auc_Ascii8x16[];
+  23:../lcd.c      **** extern STRU_BITMAP Stru_Bitmap_gbMouse;
+  24:../lcd.c      **** 
+  25:../lcd.c      **** /*--- codigo de la funcion ---*/
+  26:../lcd.c      **** void Lcd_Init(void)
+  27:../lcd.c      **** {       
+ 2137              		.loc 1 27 0
+ 2138              		.cfi_startproc
+ 2139              		@ Function supports interworking.
+ 2140              		@ args = 0, pretend = 0, frame = 0
+ 2141              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2142 0000 0DC0A0E1 		mov	ip, sp
+ 2143              	.LCFI0:
+ 2144              		.cfi_def_cfa_register 12
+ 2145 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2146 0008 04B04CE2 		sub	fp, ip, #4
+ 2147              		.cfi_offset 14, -8
+ 2148              		.cfi_offset 13, -12
+ 2149              		.cfi_offset 11, -16
+ 2150              	.LCFI1:
+ 2151              		.cfi_def_cfa 11, 4
+  28:../lcd.c      **** 	rDITHMODE=0x1223a;
+ 2152              		.loc 1 28 0
+ 2153 000c FC309FE5 		ldr	r3, .L2
+ 2154 0010 FC209FE5 		ldr	r2, .L2+4
+ 2155 0014 002083E5 		str	r2, [r3, #0]
+  29:../lcd.c      **** 	rDP1_2 =0x5a5a;      
+ 2156              		.loc 1 29 0
+ 2157 0018 F8309FE5 		ldr	r3, .L2+8
+ 2158 001c F8209FE5 		ldr	r2, .L2+12
+ 2159 0020 002083E5 		str	r2, [r3, #0]
+  30:../lcd.c      **** 	rDP4_7 =0x366cd9b;
+ 2160              		.loc 1 30 0
+ 2161 0024 F4309FE5 		ldr	r3, .L2+16
+ 2162 0028 F4209FE5 		ldr	r2, .L2+20
+ 2163 002c 002083E5 		str	r2, [r3, #0]
+  31:../lcd.c      **** 	rDP3_5 =0xda5a7;
+ 2164              		.loc 1 31 0
+ 2165 0030 F0309FE5 		ldr	r3, .L2+24
+ 2166 0034 F0209FE5 		ldr	r2, .L2+28
+ 2167 0038 002083E5 		str	r2, [r3, #0]
+  32:../lcd.c      **** 	rDP2_3 =0xad7;
+ 2168              		.loc 1 32 0
+ 2169 003c EC309FE5 		ldr	r3, .L2+32
+ 2170 0040 EC209FE5 		ldr	r2, .L2+36
+ 2171 0044 002083E5 		str	r2, [r3, #0]
+  33:../lcd.c      **** 	rDP5_7 =0xfeda5b7;
+ 2172              		.loc 1 33 0
+ 2173 0048 E8309FE5 		ldr	r3, .L2+40
+ 2174 004c E8209FE5 		ldr	r2, .L2+44
+ 2175 0050 002083E5 		str	r2, [r3, #0]
+  34:../lcd.c      **** 	rDP3_4 =0xebd7;
+ 2176              		.loc 1 34 0
+ 2177 0054 E4309FE5 		ldr	r3, .L2+48
+ 2178 0058 E4209FE5 		ldr	r2, .L2+52
+ 2179 005c 002083E5 		str	r2, [r3, #0]
+  35:../lcd.c      **** 	rDP4_5 =0xebfd7;
+ 2180              		.loc 1 35 0
+ 2181 0060 E0309FE5 		ldr	r3, .L2+56
+ 2182 0064 E0209FE5 		ldr	r2, .L2+60
+ 2183 0068 002083E5 		str	r2, [r3, #0]
+  36:../lcd.c      **** 	rDP6_7 =0x7efdfbf;
+ 2184              		.loc 1 36 0
+ 2185 006c DC309FE5 		ldr	r3, .L2+64
+ 2186 0070 DC209FE5 		ldr	r2, .L2+68
+ 2187 0074 002083E5 		str	r2, [r3, #0]
+  37:../lcd.c      **** 
+  38:../lcd.c      **** 	rLCDCON1=(0)|(1<<5)|(MVAL_USED<<7)|(0x0<<8)|(0x0<<10)|(CLKVAL_GREY16<<12);
+ 2188              		.loc 1 38 0
+ 2189 0078 1F36A0E3 		mov	r3, #32505856
+ 2190 007c D4209FE5 		ldr	r2, .L2+72
+ 2191 0080 002083E5 		str	r2, [r3, #0]
+  39:../lcd.c      **** 	rLCDCON2=(LINEVAL)|(HOZVAL<<10)|(10<<21); 
+ 2192              		.loc 1 39 0
+ 2193 0084 D0309FE5 		ldr	r3, .L2+76
+ 2194 0088 D0209FE5 		ldr	r2, .L2+80
+ 2195 008c 002083E5 		str	r2, [r3, #0]
+  40:../lcd.c      **** 	rLCDSADDR1= (0x2<<27) | ( ((LCD_ACTIVE_BUFFER>>22)<<21 ) | M5D(LCD_ACTIVE_BUFFER>>1));
+ 2196              		.loc 1 40 0
+ 2197 0090 CC309FE5 		ldr	r3, .L2+84
+ 2198 0094 CC209FE5 		ldr	r2, .L2+88
+ 2199 0098 002083E5 		str	r2, [r3, #0]
+  41:../lcd.c      ****  	rLCDSADDR2= M5D(((LCD_ACTIVE_BUFFER+(SCR_XSIZE*LCD_YSIZE/2))>>1)) | (MVAL<<21);
+ 2200              		.loc 1 41 0
+ 2201 009c C8309FE5 		ldr	r3, .L2+92
+ 2202 00a0 C8209FE5 		ldr	r2, .L2+96
+ 2203 00a4 002083E5 		str	r2, [r3, #0]
+  42:../lcd.c      **** 	rLCDSADDR3= (LCD_XSIZE/4) | ( ((SCR_XSIZE-LCD_XSIZE)/4)<<9 );
+ 2204              		.loc 1 42 0
+ 2205 00a8 C4309FE5 		ldr	r3, .L2+100
+ 2206 00ac 5020A0E3 		mov	r2, #80
+ 2207 00b0 002083E5 		str	r2, [r3, #0]
+  43:../lcd.c      **** 	// enable,4B_SNGL_SCAN,WDLY=8clk,WLH=8clk,
+  44:../lcd.c      **** 	rLCDCON1=(1)|(1<<5)|(MVAL_USED<<7)|(0x3<<8)|(0x3<<10)|(CLKVAL_GREY16<<12);
+ 2208              		.loc 1 44 0
+ 2209 00b4 1F36A0E3 		mov	r3, #32505856
+ 2210 00b8 B8209FE5 		ldr	r2, .L2+104
+ 2211 00bc 002083E5 		str	r2, [r3, #0]
+  45:../lcd.c      **** 	rBLUELUT=0xfa40;
+ 2212              		.loc 1 45 0
+ 2213 00c0 B4309FE5 		ldr	r3, .L2+108
+ 2214 00c4 B4209FE5 		ldr	r2, .L2+112
+ 2215 00c8 002083E5 		str	r2, [r3, #0]
+  46:../lcd.c      **** 	//Enable LCD Logic and EL back-light.
+  47:../lcd.c      **** 	rPDATE=rPDATE&0x0e;
+ 2216              		.loc 1 47 0
+ 2217 00cc B0309FE5 		ldr	r3, .L2+116
+ 2218 00d0 AC209FE5 		ldr	r2, .L2+116
+ 2219 00d4 002092E5 		ldr	r2, [r2, #0]
+ 2220 00d8 0E2002E2 		and	r2, r2, #14
+ 2221 00dc 002083E5 		str	r2, [r3, #0]
+  48:../lcd.c      **** 	
+  49:../lcd.c      **** 	//DMA ISR
+  50:../lcd.c      **** 	rINTMSK &= ~(BIT_GLOBAL|BIT_ZDMA0);
+ 2222              		.loc 1 50 0
+ 2223 00e0 A0209FE5 		ldr	r2, .L2+120
+ 2224 00e4 9C309FE5 		ldr	r3, .L2+120
+ 2225 00e8 003093E5 		ldr	r3, [r3, #0]
+ 2226 00ec 0133C3E3 		bic	r3, r3, #67108864
+ 2227 00f0 0237C3E3 		bic	r3, r3, #524288
+ 2228 00f4 003082E5 		str	r3, [r2, #0]
+  51:../lcd.c      ****     pISR_ZDMA0=(int)Zdma0Done;
+ 2229              		.loc 1 51 0
+ 2230 00f8 8C309FE5 		ldr	r3, .L2+124
+ 2231 00fc 8C209FE5 		ldr	r2, .L2+128
+ 2232 0100 002083E5 		str	r2, [r3, #0]
+  52:../lcd.c      **** }
+ 2233              		.loc 1 52 0
+ 2234 0104 0CD04BE2 		sub	sp, fp, #12
+ 2235 0108 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2236 010c 1EFF2FE1 		bx	lr
+ 2237              	.L3:
+ 2238              		.align	2
+ 2239              	.L2:
+ 2240 0110 4400F001 		.word	32505924
+ 2241 0114 3A220100 		.word	74298
+ 2242 0118 2000F001 		.word	32505888
+ 2243 011c 5A5A0000 		.word	23130
+ 2244 0120 2400F001 		.word	32505892
+ 2245 0124 9BCD6603 		.word	57068955
+ 2246 0128 2800F001 		.word	32505896
+ 2247 012c A7A50D00 		.word	894375
+ 2248 0130 2C00F001 		.word	32505900
+ 2249 0134 D70A0000 		.word	2775
+ 2250 0138 3000F001 		.word	32505904
+ 2251 013c B7A5ED0F 		.word	267232695
+ 2252 0140 3400F001 		.word	32505908
+ 2253 0144 D7EB0000 		.word	60375
+ 2254 0148 3800F001 		.word	32505912
+ 2255 014c D7BF0E00 		.word	966615
+ 2256 0150 3C00F001 		.word	32505916
+ 2257 0154 BFDFEF07 		.word	133160895
+ 2258 0158 20C00000 		.word	49184
+ 2259 015c 0400F001 		.word	32505860
+ 2260 0160 EF3C4101 		.word	21052655
+ 2261 0164 0800F001 		.word	32505864
+ 2262 0168 00001816 		.word	370671616
+ 2263 016c 0C00F001 		.word	32505868
+ 2264 0170 004BB801 		.word	28855040
+ 2265 0174 1000F001 		.word	32505872
+ 2266 0178 21CF0000 		.word	53025
+ 2267 017c 1C00F001 		.word	32505884
+ 2268 0180 40FA0000 		.word	64064
+ 2269 0184 2C00D201 		.word	30539820
+ 2270 0188 0C00E001 		.word	31457292
+ 2271 018c 6CFF7F0C 		.word	209715052
+ 2272 0190 00000000 		.word	Zdma0Done
+ 2273              		.cfi_endproc
+ 2274              	.LFE0:
+ 2276              		.align	2
+ 2277              		.global	Lcd_Active_Clr
+ 2279              	Lcd_Active_Clr:
+ 2280              	.LFB1:
+  53:../lcd.c      **** 
+  54:../lcd.c      **** /*********************************************************************************************
+  55:../lcd.c      **** * name:		Lcd_Active_Clr()
+  56:../lcd.c      **** * func:		clear LCD screen
+  57:../lcd.c      **** * para:		none 
+  58:../lcd.c      **** * ret:		none
+  59:../lcd.c      **** * modify:
+  60:../lcd.c      **** * comment:		
+  61:../lcd.c      **** *********************************************************************************************/
+  62:../lcd.c      **** void Lcd_Active_Clr(void)
+  63:../lcd.c      **** {
+ 2281              		.loc 1 63 0
+ 2282              		.cfi_startproc
+ 2283              		@ Function supports interworking.
+ 2284              		@ args = 0, pretend = 0, frame = 8
+ 2285              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2286 0194 0DC0A0E1 		mov	ip, sp
+ 2287              	.LCFI2:
+ 2288              		.cfi_def_cfa_register 12
+ 2289 0198 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2290 019c 04B04CE2 		sub	fp, ip, #4
+ 2291              		.cfi_offset 14, -8
+ 2292              		.cfi_offset 13, -12
+ 2293              		.cfi_offset 11, -16
+ 2294              	.LCFI3:
+ 2295              		.cfi_def_cfa 11, 4
+ 2296 01a0 08D04DE2 		sub	sp, sp, #8
+  64:../lcd.c      **** 	INT32U i;
+  65:../lcd.c      **** 	INT32U *pDisp = (INT32U *)LCD_ACTIVE_BUFFER;
+ 2297              		.loc 1 65 0
+ 2298 01a4 C336A0E3 		mov	r3, #204472320
+ 2299 01a8 14300BE5 		str	r3, [fp, #-20]
+  66:../lcd.c      **** 	
+  67:../lcd.c      **** 	for( i = 0; i < (SCR_XSIZE*SCR_YSIZE/2/4); i++ )
+ 2300              		.loc 1 67 0
+ 2301 01ac 0030A0E3 		mov	r3, #0
+ 2302 01b0 10300BE5 		str	r3, [fp, #-16]
+ 2303 01b4 080000EA 		b	.L5
+ 2304              	.L6:
+  68:../lcd.c      **** 	{
+  69:../lcd.c      **** 		*pDisp++ = WHITE;
+ 2305              		.loc 1 69 0 discriminator 2
+ 2306 01b8 14301BE5 		ldr	r3, [fp, #-20]
+ 2307 01bc 0020A0E3 		mov	r2, #0
+ 2308 01c0 002083E5 		str	r2, [r3, #0]
+ 2309 01c4 14301BE5 		ldr	r3, [fp, #-20]
+ 2310 01c8 043083E2 		add	r3, r3, #4
+ 2311 01cc 14300BE5 		str	r3, [fp, #-20]
+  67:../lcd.c      **** 	for( i = 0; i < (SCR_XSIZE*SCR_YSIZE/2/4); i++ )
+ 2312              		.loc 1 67 0 discriminator 2
+ 2313 01d0 10301BE5 		ldr	r3, [fp, #-16]
+ 2314 01d4 013083E2 		add	r3, r3, #1
+ 2315 01d8 10300BE5 		str	r3, [fp, #-16]
+ 2316              	.L5:
+  67:../lcd.c      **** 	for( i = 0; i < (SCR_XSIZE*SCR_YSIZE/2/4); i++ )
+ 2317              		.loc 1 67 0 is_stmt 0 discriminator 1
+ 2318 01dc 10201BE5 		ldr	r2, [fp, #-16]
+ 2319 01e0 10309FE5 		ldr	r3, .L7
+ 2320 01e4 030052E1 		cmp	r2, r3
+ 2321 01e8 F2FFFF9A 		bls	.L6
+  70:../lcd.c      **** 	}
+  71:../lcd.c      **** }
+ 2322              		.loc 1 71 0 is_stmt 1
+ 2323 01ec 0CD04BE2 		sub	sp, fp, #12
+ 2324 01f0 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2325 01f4 1EFF2FE1 		bx	lr
+ 2326              	.L8:
+ 2327              		.align	2
+ 2328              	.L7:
+ 2329 01f8 7F250000 		.word	9599
+ 2330              		.cfi_endproc
+ 2331              	.LFE1:
+ 2333              		.align	2
+ 2334              		.global	LCD_GetPixel
+ 2336              	LCD_GetPixel:
+ 2337              	.LFB2:
+  72:../lcd.c      **** 
+  73:../lcd.c      **** /*********************************************************************************************
+  74:../lcd.c      **** * name:		Lcd_GetPixel()
+  75:../lcd.c      **** * func:		Get appointed point's color value
+  76:../lcd.c      **** * para:		usX,usY -- pot's X-Y coordinate 
+  77:../lcd.c      **** * ret:		pot's color value
+  78:../lcd.c      **** * modify:
+  79:../lcd.c      **** * comment:		
+  80:../lcd.c      **** *********************************************************************************************/
+  81:../lcd.c      **** INT8U LCD_GetPixel(INT16U usX, INT16U usY)
+  82:../lcd.c      **** {
+ 2338              		.loc 1 82 0
+ 2339              		.cfi_startproc
+ 2340              		@ Function supports interworking.
+ 2341              		@ args = 0, pretend = 0, frame = 16
+ 2342              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2343 01fc 0DC0A0E1 		mov	ip, sp
+ 2344              	.LCFI4:
+ 2345              		.cfi_def_cfa_register 12
+ 2346 0200 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2347 0204 04B04CE2 		sub	fp, ip, #4
+ 2348              		.cfi_offset 14, -8
+ 2349              		.cfi_offset 13, -12
+ 2350              		.cfi_offset 11, -16
+ 2351              	.LCFI5:
+ 2352              		.cfi_def_cfa 11, 4
+ 2353 0208 10D04DE2 		sub	sp, sp, #16
+ 2354 020c 0020A0E1 		mov	r2, r0
+ 2355 0210 0130A0E1 		mov	r3, r1
+ 2356 0214 B6214BE1 		strh	r2, [fp, #-22]	@ movhi
+ 2357 0218 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+  83:../lcd.c      **** 	INT8U ucColor;
+  84:../lcd.c      **** 
+  85:../lcd.c      **** 	ucColor = *((INT8U*)(LCD_VIRTUAL_BUFFER + usY*SCR_XSIZE/2 + usX/8*4 + 3 - (usX%8)/2));
+ 2358              		.loc 1 85 0
+ 2359 021c B8215BE1 		ldrh	r2, [fp, #-24]
+ 2360 0220 0230A0E1 		mov	r3, r2
+ 2361 0224 0331A0E1 		mov	r3, r3, asl #2
+ 2362 0228 023083E0 		add	r3, r3, r2
+ 2363 022c 0333A0E1 		mov	r3, r3, asl #6
+ 2364 0230 A32FA0E1 		mov	r2, r3, lsr #31
+ 2365 0234 033082E0 		add	r3, r2, r3
+ 2366 0238 C330A0E1 		mov	r3, r3, asr #1
+ 2367 023c C33683E2 		add	r3, r3, #204472320
+ 2368 0240 963C83E2 		add	r3, r3, #38400
+ 2369 0244 B6215BE1 		ldrh	r2, [fp, #-22]
+ 2370 0248 A221A0E1 		mov	r2, r2, lsr #3
+ 2371 024c 0228A0E1 		mov	r2, r2, asl #16
+ 2372 0250 2228A0E1 		mov	r2, r2, lsr #16
+ 2373 0254 0221A0E1 		mov	r2, r2, asl #2
+ 2374 0258 023083E0 		add	r3, r3, r2
+ 2375 025c 032083E2 		add	r2, r3, #3
+ 2376 0260 B6315BE1 		ldrh	r3, [fp, #-22]	@ movhi
+ 2377 0264 073003E2 		and	r3, r3, #7
+ 2378 0268 0338A0E1 		mov	r3, r3, asl #16
+ 2379 026c 2338A0E1 		mov	r3, r3, lsr #16
+ 2380 0270 A330A0E1 		mov	r3, r3, lsr #1
+ 2381 0274 0338A0E1 		mov	r3, r3, asl #16
+ 2382 0278 2338A0E1 		mov	r3, r3, lsr #16
+ 2383 027c 023063E0 		rsb	r3, r3, r2
+ 2384 0280 0030D3E5 		ldrb	r3, [r3, #0]
+ 2385 0284 0D304BE5 		strb	r3, [fp, #-13]
+  86:../lcd.c      **** 	ucColor = (ucColor >> ((1-(usX%2))*4)) & 0x0f;
+ 2386              		.loc 1 86 0
+ 2387 0288 0D205BE5 		ldrb	r2, [fp, #-13]	@ zero_extendqisi2
+ 2388 028c B6315BE1 		ldrh	r3, [fp, #-22]
+ 2389 0290 013003E2 		and	r3, r3, #1
+ 2390 0294 000053E3 		cmp	r3, #0
+ 2391 0298 0100001A 		bne	.L10
+ 2392              		.loc 1 86 0 is_stmt 0 discriminator 1
+ 2393 029c 0430A0E3 		mov	r3, #4
+ 2394 02a0 000000EA 		b	.L11
+ 2395              	.L10:
+ 2396              		.loc 1 86 0 discriminator 2
+ 2397 02a4 0030A0E3 		mov	r3, #0
+ 2398              	.L11:
+ 2399              		.loc 1 86 0 discriminator 3
+ 2400 02a8 5233A0E1 		mov	r3, r2, asr r3
+ 2401 02ac FF3003E2 		and	r3, r3, #255
+ 2402 02b0 0F3003E2 		and	r3, r3, #15
+ 2403 02b4 0D304BE5 		strb	r3, [fp, #-13]
+  87:../lcd.c      **** 	return ucColor;
+ 2404              		.loc 1 87 0 is_stmt 1 discriminator 3
+ 2405 02b8 0D305BE5 		ldrb	r3, [fp, #-13]	@ zero_extendqisi2
+  88:../lcd.c      **** }
+ 2406              		.loc 1 88 0 discriminator 3
+ 2407 02bc 0300A0E1 		mov	r0, r3
+ 2408 02c0 0CD04BE2 		sub	sp, fp, #12
+ 2409 02c4 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2410 02c8 1EFF2FE1 		bx	lr
+ 2411              		.cfi_endproc
+ 2412              	.LFE2:
+ 2414              		.align	2
+ 2415              		.global	Lcd_Clr
+ 2417              	Lcd_Clr:
+ 2418              	.LFB3:
+  89:../lcd.c      **** 
+  90:../lcd.c      **** /*********************************************************************************************
+  91:../lcd.c      **** * name:		Lcd_Active_Clr()
+  92:../lcd.c      **** * func:		clear virtual screen
+  93:../lcd.c      **** * para:		none 
+  94:../lcd.c      **** * ret:		none
+  95:../lcd.c      **** * modify:
+  96:../lcd.c      **** * comment:		
+  97:../lcd.c      **** *********************************************************************************************/
+  98:../lcd.c      **** void Lcd_Clr(void)
+  99:../lcd.c      **** {
+ 2419              		.loc 1 99 0
+ 2420              		.cfi_startproc
+ 2421              		@ Function supports interworking.
+ 2422              		@ args = 0, pretend = 0, frame = 8
+ 2423              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2424 02cc 0DC0A0E1 		mov	ip, sp
+ 2425              	.LCFI6:
+ 2426              		.cfi_def_cfa_register 12
+ 2427 02d0 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2428 02d4 04B04CE2 		sub	fp, ip, #4
+ 2429              		.cfi_offset 14, -8
+ 2430              		.cfi_offset 13, -12
+ 2431              		.cfi_offset 11, -16
+ 2432              	.LCFI7:
+ 2433              		.cfi_def_cfa 11, 4
+ 2434 02d8 08D04DE2 		sub	sp, sp, #8
+ 100:../lcd.c      **** 	INT32U i;
+ 101:../lcd.c      **** 	INT32U *pDisp = (INT32U *)LCD_VIRTUAL_BUFFER;
+ 2435              		.loc 1 101 0
+ 2436 02dc 4C309FE5 		ldr	r3, .L15
+ 2437 02e0 14300BE5 		str	r3, [fp, #-20]
+ 102:../lcd.c      **** 	
+ 103:../lcd.c      **** 	for( i = 0; i < (SCR_XSIZE*SCR_YSIZE/2/4); i++ )
+ 2438              		.loc 1 103 0
+ 2439 02e4 0030A0E3 		mov	r3, #0
+ 2440 02e8 10300BE5 		str	r3, [fp, #-16]
+ 2441 02ec 080000EA 		b	.L13
+ 2442              	.L14:
+ 104:../lcd.c      **** 	{
+ 105:../lcd.c      **** 		*pDisp++ = WHITE;
+ 2443              		.loc 1 105 0 discriminator 2
+ 2444 02f0 14301BE5 		ldr	r3, [fp, #-20]
+ 2445 02f4 0020A0E3 		mov	r2, #0
+ 2446 02f8 002083E5 		str	r2, [r3, #0]
+ 2447 02fc 14301BE5 		ldr	r3, [fp, #-20]
+ 2448 0300 043083E2 		add	r3, r3, #4
+ 2449 0304 14300BE5 		str	r3, [fp, #-20]
+ 103:../lcd.c      **** 	for( i = 0; i < (SCR_XSIZE*SCR_YSIZE/2/4); i++ )
+ 2450              		.loc 1 103 0 discriminator 2
+ 2451 0308 10301BE5 		ldr	r3, [fp, #-16]
+ 2452 030c 013083E2 		add	r3, r3, #1
+ 2453 0310 10300BE5 		str	r3, [fp, #-16]
+ 2454              	.L13:
+ 103:../lcd.c      **** 	for( i = 0; i < (SCR_XSIZE*SCR_YSIZE/2/4); i++ )
+ 2455              		.loc 1 103 0 is_stmt 0 discriminator 1
+ 2456 0314 10201BE5 		ldr	r2, [fp, #-16]
+ 2457 0318 14309FE5 		ldr	r3, .L15+4
+ 2458 031c 030052E1 		cmp	r2, r3
+ 2459 0320 F2FFFF9A 		bls	.L14
+ 106:../lcd.c      **** 	}
+ 107:../lcd.c      **** }
+ 2460              		.loc 1 107 0 is_stmt 1
+ 2461 0324 0CD04BE2 		sub	sp, fp, #12
+ 2462 0328 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2463 032c 1EFF2FE1 		bx	lr
+ 2464              	.L16:
+ 2465              		.align	2
+ 2466              	.L15:
+ 2467 0330 0096300C 		.word	204510720
+ 2468 0334 7F250000 		.word	9599
+ 2469              		.cfi_endproc
+ 2470              	.LFE3:
+ 2472              		.align	2
+ 2473              		.global	LcdClrRect
+ 2475              	LcdClrRect:
+ 2476              	.LFB4:
+ 108:../lcd.c      **** 
+ 109:../lcd.c      **** /*********************************************************************************************
+ 110:../lcd.c      **** * name:		LcdClrRect()
+ 111:../lcd.c      **** * func:		fill appointed area with appointed color
+ 112:../lcd.c      **** * para:		usLeft,usTop,usRight,usBottom -- area's rectangle acme coordinate
+ 113:../lcd.c      **** *			ucColor -- appointed color value
+ 114:../lcd.c      **** * ret:		none
+ 115:../lcd.c      **** * modify:
+ 116:../lcd.c      **** * comment:	also as clear screen function 
+ 117:../lcd.c      **** *********************************************************************************************/
+ 118:../lcd.c      **** void LcdClrRect(INT16 usLeft, INT16 usTop, INT16 usRight, INT16 usBottom, INT8U ucColor)
+ 119:../lcd.c      **** {
+ 2477              		.loc 1 119 0
+ 2478              		.cfi_startproc
+ 2479              		@ Function supports interworking.
+ 2480              		@ args = 4, pretend = 0, frame = 24
+ 2481              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2482 0338 0DC0A0E1 		mov	ip, sp
+ 2483              	.LCFI8:
+ 2484              		.cfi_def_cfa_register 12
+ 2485 033c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2486 0340 04B04CE2 		sub	fp, ip, #4
+ 2487              		.cfi_offset 14, -8
+ 2488              		.cfi_offset 13, -12
+ 2489              		.cfi_offset 11, -16
+ 2490              	.LCFI9:
+ 2491              		.cfi_def_cfa 11, 4
+ 2492 0344 18D04DE2 		sub	sp, sp, #24
+ 2493 0348 BE014BE1 		strh	r0, [fp, #-30]	@ movhi
+ 2494 034c B0124BE1 		strh	r1, [fp, #-32]	@ movhi
+ 2495 0350 B2224BE1 		strh	r2, [fp, #-34]	@ movhi
+ 2496 0354 B4324BE1 		strh	r3, [fp, #-36]	@ movhi
+ 120:../lcd.c      **** 	INT16 i,k,l,m;
+ 121:../lcd.c      **** 	
+ 122:../lcd.c      **** 	INT32U ulColor = (ucColor << 28) | (ucColor << 24) | (ucColor << 20) | (ucColor << 16) | 
+ 2497              		.loc 1 122 0
+ 2498 0358 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2499 035c 032EA0E1 		mov	r2, r3, asl #28
+ 2500 0360 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2501 0364 033CA0E1 		mov	r3, r3, asl #24
+ 2502 0368 032082E1 		orr	r2, r2, r3
+ 2503 036c 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2504 0370 033AA0E1 		mov	r3, r3, asl #20
+ 2505 0374 032082E1 		orr	r2, r2, r3
+ 2506 0378 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2507 037c 0338A0E1 		mov	r3, r3, asl #16
+ 2508 0380 032082E1 		orr	r2, r2, r3
+ 123:../lcd.c      **** 				     (ucColor << 12) | (ucColor << 8) | (ucColor << 4) | ucColor;
+ 2509              		.loc 1 123 0
+ 2510 0384 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2511 0388 0336A0E1 		mov	r3, r3, asl #12
+ 122:../lcd.c      **** 	INT32U ulColor = (ucColor << 28) | (ucColor << 24) | (ucColor << 20) | (ucColor << 16) | 
+ 2512              		.loc 1 122 0
+ 2513 038c 032082E1 		orr	r2, r2, r3
+ 2514              		.loc 1 123 0
+ 2515 0390 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2516 0394 0334A0E1 		mov	r3, r3, asl #8
+ 2517 0398 032082E1 		orr	r2, r2, r3
+ 2518 039c 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2519 03a0 0332A0E1 		mov	r3, r3, asl #4
+ 2520 03a4 032082E1 		orr	r2, r2, r3
+ 2521 03a8 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2522 03ac 033082E1 		orr	r3, r2, r3
+ 122:../lcd.c      **** 	INT32U ulColor = (ucColor << 28) | (ucColor << 24) | (ucColor << 20) | (ucColor << 16) | 
+ 2523              		.loc 1 122 0
+ 2524 03b0 18300BE5 		str	r3, [fp, #-24]
+ 124:../lcd.c      **** 
+ 125:../lcd.c      **** 	i = k = l = m = 0;	
+ 2525              		.loc 1 125 0
+ 2526 03b4 0030A0E3 		mov	r3, #0
+ 2527 03b8 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2528 03bc B4315BE1 		ldrh	r3, [fp, #-20]	@ movhi
+ 2529 03c0 B2314BE1 		strh	r3, [fp, #-18]	@ movhi
+ 2530 03c4 B2315BE1 		ldrh	r3, [fp, #-18]	@ movhi
+ 2531 03c8 B0314BE1 		strh	r3, [fp, #-16]	@ movhi
+ 2532 03cc B0315BE1 		ldrh	r3, [fp, #-16]	@ movhi
+ 2533 03d0 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 126:../lcd.c      **** 	if( (usRight-usLeft) <= 8 )
+ 2534              		.loc 1 126 0
+ 2535 03d4 F2225BE1 		ldrsh	r2, [fp, #-34]
+ 2536 03d8 FE315BE1 		ldrsh	r3, [fp, #-30]
+ 2537 03dc 023063E0 		rsb	r3, r3, r2
+ 2538 03e0 080053E3 		cmp	r3, #8
+ 2539 03e4 5F0000CA 		bgt	.L18
+ 127:../lcd.c      **** 	{
+ 128:../lcd.c      **** 		for( i=usTop; i<=usBottom; i++)
+ 2540              		.loc 1 128 0
+ 2541 03e8 B0325BE1 		ldrh	r3, [fp, #-32]	@ movhi
+ 2542 03ec BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 2543 03f0 570000EA 		b	.L19
+ 2544              	.L22:
+ 129:../lcd.c      **** 		{
+ 130:../lcd.c      **** 			for( m=usLeft; m<=usRight; m++)
+ 2545              		.loc 1 130 0
+ 2546 03f4 BE315BE1 		ldrh	r3, [fp, #-30]	@ movhi
+ 2547 03f8 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2548 03fc 4D0000EA 		b	.L20
+ 2549              	.L21:
+ 131:../lcd.c      **** 			{
+ 132:../lcd.c      **** 				LCD_PutPixel(m, i, ucColor);
+ 2550              		.loc 1 132 0 discriminator 2
+ 2551 0400 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2552 0404 0230A0E1 		mov	r3, r2
+ 2553 0408 0331A0E1 		mov	r3, r3, asl #2
+ 2554 040c 023083E0 		add	r3, r3, r2
+ 2555 0410 0333A0E1 		mov	r3, r3, asl #6
+ 2556 0414 A32FA0E1 		mov	r2, r3, lsr #31
+ 2557 0418 033082E0 		add	r3, r2, r3
+ 2558 041c C330A0E1 		mov	r3, r3, asr #1
+ 2559 0420 C32683E2 		add	r2, r3, #204472320
+ 2560 0424 962C82E2 		add	r2, r2, #38400
+ 2561 0428 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 2562 042c 071083E2 		add	r1, r3, #7
+ 2563 0430 000053E3 		cmp	r3, #0
+ 2564 0434 0130A0B1 		movlt	r3, r1
+ 2565 0438 C331A0E1 		mov	r3, r3, asr #3
+ 2566 043c 0338A0E1 		mov	r3, r3, asl #16
+ 2567 0440 2338A0E1 		mov	r3, r3, lsr #16
+ 2568 0444 0338A0E1 		mov	r3, r3, asl #16
+ 2569 0448 4338A0E1 		mov	r3, r3, asr #16
+ 2570 044c 0331A0E1 		mov	r3, r3, asl #2
+ 2571 0450 033082E0 		add	r3, r2, r3
+ 2572 0454 0310A0E1 		mov	r1, r3
+ 2573 0458 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2574 045c 0230A0E1 		mov	r3, r2
+ 2575 0460 0331A0E1 		mov	r3, r3, asl #2
+ 2576 0464 023083E0 		add	r3, r3, r2
+ 2577 0468 0333A0E1 		mov	r3, r3, asl #6
+ 2578 046c A32FA0E1 		mov	r2, r3, lsr #31
+ 2579 0470 033082E0 		add	r3, r2, r3
+ 2580 0474 C330A0E1 		mov	r3, r3, asr #1
+ 2581 0478 C32683E2 		add	r2, r3, #204472320
+ 2582 047c 962C82E2 		add	r2, r2, #38400
+ 2583 0480 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 2584 0484 070083E2 		add	r0, r3, #7
+ 2585 0488 000053E3 		cmp	r3, #0
+ 2586 048c 0030A0B1 		movlt	r3, r0
+ 2587 0490 C331A0E1 		mov	r3, r3, asr #3
+ 2588 0494 0338A0E1 		mov	r3, r3, asl #16
+ 2589 0498 2338A0E1 		mov	r3, r3, lsr #16
+ 2590 049c 0338A0E1 		mov	r3, r3, asl #16
+ 2591 04a0 4338A0E1 		mov	r3, r3, asr #16
+ 2592 04a4 0331A0E1 		mov	r3, r3, asl #2
+ 2593 04a8 033082E0 		add	r3, r2, r3
+ 2594 04ac 000093E5 		ldr	r0, [r3, #0]
+ 2595 04b0 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2596 04b4 C23FA0E1 		mov	r3, r2, asr #31
+ 2597 04b8 A33EA0E1 		mov	r3, r3, lsr #29
+ 2598 04bc 032082E0 		add	r2, r2, r3
+ 2599 04c0 072002E2 		and	r2, r2, #7
+ 2600 04c4 023063E0 		rsb	r3, r3, r2
+ 2601 04c8 0338A0E1 		mov	r3, r3, asl #16
+ 2602 04cc 2338A0E1 		mov	r3, r3, lsr #16
+ 2603 04d0 0338A0E1 		mov	r3, r3, asl #16
+ 2604 04d4 4338A0E1 		mov	r3, r3, asr #16
+ 2605 04d8 0331A0E1 		mov	r3, r3, asl #2
+ 2606 04dc 0F22A0E3 		mov	r2, #-268435456
+ 2607 04e0 3233A0E1 		mov	r3, r2, lsr r3
+ 2608 04e4 0330E0E1 		mvn	r3, r3
+ 2609 04e8 030000E0 		and	r0, r0, r3
+ 2610 04ec 04C0DBE5 		ldrb	ip, [fp, #4]	@ zero_extendqisi2
+ 2611 04f0 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2612 04f4 C23FA0E1 		mov	r3, r2, asr #31
+ 2613 04f8 A33EA0E1 		mov	r3, r3, lsr #29
+ 2614 04fc 032082E0 		add	r2, r2, r3
+ 2615 0500 072002E2 		and	r2, r2, #7
+ 2616 0504 023063E0 		rsb	r3, r3, r2
+ 2617 0508 0338A0E1 		mov	r3, r3, asl #16
+ 2618 050c 2338A0E1 		mov	r3, r3, lsr #16
+ 2619 0510 0338A0E1 		mov	r3, r3, asl #16
+ 2620 0514 4338A0E1 		mov	r3, r3, asr #16
+ 2621 0518 073063E2 		rsb	r3, r3, #7
+ 2622 051c 0331A0E1 		mov	r3, r3, asl #2
+ 2623 0520 1C33A0E1 		mov	r3, ip, asl r3
+ 2624 0524 033080E1 		orr	r3, r0, r3
+ 2625 0528 003081E5 		str	r3, [r1, #0]
+ 130:../lcd.c      **** 			for( m=usLeft; m<=usRight; m++)
+ 2626              		.loc 1 130 0 discriminator 2
+ 2627 052c B4315BE1 		ldrh	r3, [fp, #-20]	@ movhi
+ 2628 0530 013083E2 		add	r3, r3, #1
+ 2629 0534 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2630              	.L20:
+ 130:../lcd.c      **** 			for( m=usLeft; m<=usRight; m++)
+ 2631              		.loc 1 130 0 is_stmt 0 discriminator 1
+ 2632 0538 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2633 053c F2325BE1 		ldrsh	r3, [fp, #-34]
+ 2634 0540 030052E1 		cmp	r2, r3
+ 2635 0544 ADFFFFDA 		ble	.L21
+ 128:../lcd.c      **** 		for( i=usTop; i<=usBottom; i++)
+ 2636              		.loc 1 128 0 is_stmt 1
+ 2637 0548 BE305BE1 		ldrh	r3, [fp, #-14]	@ movhi
+ 2638 054c 013083E2 		add	r3, r3, #1
+ 2639 0550 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 2640              	.L19:
+ 128:../lcd.c      **** 		for( i=usTop; i<=usBottom; i++)
+ 2641              		.loc 1 128 0 is_stmt 0 discriminator 1
+ 2642 0554 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2643 0558 F4325BE1 		ldrsh	r3, [fp, #-36]
+ 2644 055c 030052E1 		cmp	r2, r3
+ 2645 0560 A3FFFFDA 		ble	.L22
+ 133:../lcd.c      **** 			}
+ 134:../lcd.c      **** 		}	
+ 135:../lcd.c      **** 		return;
+ 2646              		.loc 1 135 0 is_stmt 1
+ 2647 0564 040100EA 		b	.L17
+ 2648              	.L18:
+ 136:../lcd.c      **** 	}
+ 137:../lcd.c      **** 
+ 138:../lcd.c      **** 	/* check borderline */
+ 139:../lcd.c      **** 	if( 0 == (usLeft%8) )
+ 2649              		.loc 1 139 0
+ 2650 0568 BE315BE1 		ldrh	r3, [fp, #-30]
+ 2651 056c 073003E2 		and	r3, r3, #7
+ 2652 0570 0338A0E1 		mov	r3, r3, asl #16
+ 2653 0574 2338A0E1 		mov	r3, r3, lsr #16
+ 2654 0578 000053E3 		cmp	r3, #0
+ 2655 057c 0200001A 		bne	.L24
+ 140:../lcd.c      **** 		k=usLeft;
+ 2656              		.loc 1 140 0
+ 2657 0580 BE315BE1 		ldrh	r3, [fp, #-30]	@ movhi
+ 2658 0584 B0314BE1 		strh	r3, [fp, #-16]	@ movhi
+ 2659 0588 0F0000EA 		b	.L25
+ 2660              	.L24:
+ 141:../lcd.c      **** 	else
+ 142:../lcd.c      **** 	{
+ 143:../lcd.c      **** 		k=(usLeft/8)*8+8;
+ 2661              		.loc 1 143 0
+ 2662 058c FE315BE1 		ldrsh	r3, [fp, #-30]
+ 2663 0590 072083E2 		add	r2, r3, #7
+ 2664 0594 000053E3 		cmp	r3, #0
+ 2665 0598 0230A0B1 		movlt	r3, r2
+ 2666 059c C331A0E1 		mov	r3, r3, asr #3
+ 2667 05a0 0338A0E1 		mov	r3, r3, asl #16
+ 2668 05a4 2338A0E1 		mov	r3, r3, lsr #16
+ 2669 05a8 0338A0E1 		mov	r3, r3, asl #16
+ 2670 05ac 4338A0E1 		mov	r3, r3, asr #16
+ 2671 05b0 013083E2 		add	r3, r3, #1
+ 2672 05b4 0338A0E1 		mov	r3, r3, asl #16
+ 2673 05b8 2338A0E1 		mov	r3, r3, lsr #16
+ 2674 05bc 8331A0E1 		mov	r3, r3, asl #3
+ 2675 05c0 0338A0E1 		mov	r3, r3, asl #16
+ 2676 05c4 2338A0E1 		mov	r3, r3, lsr #16
+ 2677 05c8 B0314BE1 		strh	r3, [fp, #-16]	@ movhi
+ 2678              	.L25:
+ 144:../lcd.c      **** 	}
+ 145:../lcd.c      **** 	if( 0 == (usRight%8) )
+ 2679              		.loc 1 145 0
+ 2680 05cc B2325BE1 		ldrh	r3, [fp, #-34]
+ 2681 05d0 073003E2 		and	r3, r3, #7
+ 2682 05d4 0338A0E1 		mov	r3, r3, asl #16
+ 2683 05d8 2338A0E1 		mov	r3, r3, lsr #16
+ 2684 05dc 000053E3 		cmp	r3, #0
+ 2685 05e0 0200001A 		bne	.L26
+ 146:../lcd.c      **** 		l= usRight;
+ 2686              		.loc 1 146 0
+ 2687 05e4 B2325BE1 		ldrh	r3, [fp, #-34]	@ movhi
+ 2688 05e8 B2314BE1 		strh	r3, [fp, #-18]	@ movhi
+ 2689 05ec 0C0000EA 		b	.L27
+ 2690              	.L26:
+ 147:../lcd.c      **** 	else
+ 148:../lcd.c      **** 	{
+ 149:../lcd.c      **** 		l=(usRight/8)*8;
+ 2691              		.loc 1 149 0
+ 2692 05f0 F2325BE1 		ldrsh	r3, [fp, #-34]
+ 2693 05f4 072083E2 		add	r2, r3, #7
+ 2694 05f8 000053E3 		cmp	r3, #0
+ 2695 05fc 0230A0B1 		movlt	r3, r2
+ 2696 0600 C331A0E1 		mov	r3, r3, asr #3
+ 2697 0604 0338A0E1 		mov	r3, r3, asl #16
+ 2698 0608 2338A0E1 		mov	r3, r3, lsr #16
+ 2699 060c 0338A0E1 		mov	r3, r3, asl #16
+ 2700 0610 2338A0E1 		mov	r3, r3, lsr #16
+ 2701 0614 8331A0E1 		mov	r3, r3, asl #3
+ 2702 0618 0338A0E1 		mov	r3, r3, asl #16
+ 2703 061c 2338A0E1 		mov	r3, r3, lsr #16
+ 2704 0620 B2314BE1 		strh	r3, [fp, #-18]	@ movhi
+ 2705              	.L27:
+ 150:../lcd.c      **** 	}
+ 151:../lcd.c      **** 
+ 152:../lcd.c      **** 	for( i=usTop; i<=usBottom; i++ )
+ 2706              		.loc 1 152 0
+ 2707 0624 B0325BE1 		ldrh	r3, [fp, #-32]	@ movhi
+ 2708 0628 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 2709 062c CE0000EA 		b	.L28
+ 2710              	.L35:
+ 153:../lcd.c      **** 	{
+ 154:../lcd.c      **** 		for( m=usLeft; m<=(k-1); m++ )
+ 2711              		.loc 1 154 0
+ 2712 0630 BE315BE1 		ldrh	r3, [fp, #-30]	@ movhi
+ 2713 0634 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2714 0638 4D0000EA 		b	.L29
+ 2715              	.L30:
+ 155:../lcd.c      **** 		{
+ 156:../lcd.c      **** 			LCD_PutPixel(m, i, ucColor);
+ 2716              		.loc 1 156 0 discriminator 2
+ 2717 063c FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2718 0640 0230A0E1 		mov	r3, r2
+ 2719 0644 0331A0E1 		mov	r3, r3, asl #2
+ 2720 0648 023083E0 		add	r3, r3, r2
+ 2721 064c 0333A0E1 		mov	r3, r3, asl #6
+ 2722 0650 A32FA0E1 		mov	r2, r3, lsr #31
+ 2723 0654 033082E0 		add	r3, r2, r3
+ 2724 0658 C330A0E1 		mov	r3, r3, asr #1
+ 2725 065c C32683E2 		add	r2, r3, #204472320
+ 2726 0660 962C82E2 		add	r2, r2, #38400
+ 2727 0664 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 2728 0668 071083E2 		add	r1, r3, #7
+ 2729 066c 000053E3 		cmp	r3, #0
+ 2730 0670 0130A0B1 		movlt	r3, r1
+ 2731 0674 C331A0E1 		mov	r3, r3, asr #3
+ 2732 0678 0338A0E1 		mov	r3, r3, asl #16
+ 2733 067c 2338A0E1 		mov	r3, r3, lsr #16
+ 2734 0680 0338A0E1 		mov	r3, r3, asl #16
+ 2735 0684 4338A0E1 		mov	r3, r3, asr #16
+ 2736 0688 0331A0E1 		mov	r3, r3, asl #2
+ 2737 068c 033082E0 		add	r3, r2, r3
+ 2738 0690 0310A0E1 		mov	r1, r3
+ 2739 0694 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2740 0698 0230A0E1 		mov	r3, r2
+ 2741 069c 0331A0E1 		mov	r3, r3, asl #2
+ 2742 06a0 023083E0 		add	r3, r3, r2
+ 2743 06a4 0333A0E1 		mov	r3, r3, asl #6
+ 2744 06a8 A32FA0E1 		mov	r2, r3, lsr #31
+ 2745 06ac 033082E0 		add	r3, r2, r3
+ 2746 06b0 C330A0E1 		mov	r3, r3, asr #1
+ 2747 06b4 C32683E2 		add	r2, r3, #204472320
+ 2748 06b8 962C82E2 		add	r2, r2, #38400
+ 2749 06bc F4315BE1 		ldrsh	r3, [fp, #-20]
+ 2750 06c0 070083E2 		add	r0, r3, #7
+ 2751 06c4 000053E3 		cmp	r3, #0
+ 2752 06c8 0030A0B1 		movlt	r3, r0
+ 2753 06cc C331A0E1 		mov	r3, r3, asr #3
+ 2754 06d0 0338A0E1 		mov	r3, r3, asl #16
+ 2755 06d4 2338A0E1 		mov	r3, r3, lsr #16
+ 2756 06d8 0338A0E1 		mov	r3, r3, asl #16
+ 2757 06dc 4338A0E1 		mov	r3, r3, asr #16
+ 2758 06e0 0331A0E1 		mov	r3, r3, asl #2
+ 2759 06e4 033082E0 		add	r3, r2, r3
+ 2760 06e8 000093E5 		ldr	r0, [r3, #0]
+ 2761 06ec F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2762 06f0 C23FA0E1 		mov	r3, r2, asr #31
+ 2763 06f4 A33EA0E1 		mov	r3, r3, lsr #29
+ 2764 06f8 032082E0 		add	r2, r2, r3
+ 2765 06fc 072002E2 		and	r2, r2, #7
+ 2766 0700 023063E0 		rsb	r3, r3, r2
+ 2767 0704 0338A0E1 		mov	r3, r3, asl #16
+ 2768 0708 2338A0E1 		mov	r3, r3, lsr #16
+ 2769 070c 0338A0E1 		mov	r3, r3, asl #16
+ 2770 0710 4338A0E1 		mov	r3, r3, asr #16
+ 2771 0714 0331A0E1 		mov	r3, r3, asl #2
+ 2772 0718 0F22A0E3 		mov	r2, #-268435456
+ 2773 071c 3233A0E1 		mov	r3, r2, lsr r3
+ 2774 0720 0330E0E1 		mvn	r3, r3
+ 2775 0724 030000E0 		and	r0, r0, r3
+ 2776 0728 04C0DBE5 		ldrb	ip, [fp, #4]	@ zero_extendqisi2
+ 2777 072c F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2778 0730 C23FA0E1 		mov	r3, r2, asr #31
+ 2779 0734 A33EA0E1 		mov	r3, r3, lsr #29
+ 2780 0738 032082E0 		add	r2, r2, r3
+ 2781 073c 072002E2 		and	r2, r2, #7
+ 2782 0740 023063E0 		rsb	r3, r3, r2
+ 2783 0744 0338A0E1 		mov	r3, r3, asl #16
+ 2784 0748 2338A0E1 		mov	r3, r3, lsr #16
+ 2785 074c 0338A0E1 		mov	r3, r3, asl #16
+ 2786 0750 4338A0E1 		mov	r3, r3, asr #16
+ 2787 0754 073063E2 		rsb	r3, r3, #7
+ 2788 0758 0331A0E1 		mov	r3, r3, asl #2
+ 2789 075c 1C33A0E1 		mov	r3, ip, asl r3
+ 2790 0760 033080E1 		orr	r3, r0, r3
+ 2791 0764 003081E5 		str	r3, [r1, #0]
+ 154:../lcd.c      **** 		for( m=usLeft; m<=(k-1); m++ )
+ 2792              		.loc 1 154 0 discriminator 2
+ 2793 0768 B4315BE1 		ldrh	r3, [fp, #-20]	@ movhi
+ 2794 076c 013083E2 		add	r3, r3, #1
+ 2795 0770 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2796              	.L29:
+ 154:../lcd.c      **** 		for( m=usLeft; m<=(k-1); m++ )
+ 2797              		.loc 1 154 0 is_stmt 0 discriminator 1
+ 2798 0774 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2799 0778 F0315BE1 		ldrsh	r3, [fp, #-16]
+ 2800 077c 013043E2 		sub	r3, r3, #1
+ 2801 0780 030052E1 		cmp	r2, r3
+ 2802 0784 ACFFFFDA 		ble	.L30
+ 157:../lcd.c      **** 		}
+ 158:../lcd.c      **** 		for( m=k; m<l; m+=8 )
+ 2803              		.loc 1 158 0 is_stmt 1
+ 2804 0788 B0315BE1 		ldrh	r3, [fp, #-16]	@ movhi
+ 2805 078c B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2806 0790 190000EA 		b	.L31
+ 2807              	.L32:
+ 159:../lcd.c      **** 		{
+ 160:../lcd.c      **** 			(*(INT32U*)(LCD_VIRTUAL_BUFFER + i * SCR_XSIZE / 2 + m / 2)) = ulColor;
+ 2808              		.loc 1 160 0 discriminator 2
+ 2809 0794 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2810 0798 0230A0E1 		mov	r3, r2
+ 2811 079c 0331A0E1 		mov	r3, r3, asl #2
+ 2812 07a0 023083E0 		add	r3, r3, r2
+ 2813 07a4 0333A0E1 		mov	r3, r3, asl #6
+ 2814 07a8 A32FA0E1 		mov	r2, r3, lsr #31
+ 2815 07ac 033082E0 		add	r3, r2, r3
+ 2816 07b0 C330A0E1 		mov	r3, r3, asr #1
+ 2817 07b4 C33683E2 		add	r3, r3, #204472320
+ 2818 07b8 963C83E2 		add	r3, r3, #38400
+ 2819 07bc F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2820 07c0 A21FA0E1 		mov	r1, r2, lsr #31
+ 2821 07c4 022081E0 		add	r2, r1, r2
+ 2822 07c8 C220A0E1 		mov	r2, r2, asr #1
+ 2823 07cc 0228A0E1 		mov	r2, r2, asl #16
+ 2824 07d0 2228A0E1 		mov	r2, r2, lsr #16
+ 2825 07d4 0228A0E1 		mov	r2, r2, asl #16
+ 2826 07d8 4228A0E1 		mov	r2, r2, asr #16
+ 2827 07dc 023083E0 		add	r3, r3, r2
+ 2828 07e0 18201BE5 		ldr	r2, [fp, #-24]
+ 2829 07e4 002083E5 		str	r2, [r3, #0]
+ 158:../lcd.c      **** 		for( m=k; m<l; m+=8 )
+ 2830              		.loc 1 158 0 discriminator 2
+ 2831 07e8 B4315BE1 		ldrh	r3, [fp, #-20]
+ 2832 07ec 083083E2 		add	r3, r3, #8
+ 2833 07f0 0338A0E1 		mov	r3, r3, asl #16
+ 2834 07f4 2338A0E1 		mov	r3, r3, lsr #16
+ 2835 07f8 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2836              	.L31:
+ 158:../lcd.c      **** 		for( m=k; m<l; m+=8 )
+ 2837              		.loc 1 158 0 is_stmt 0 discriminator 1
+ 2838 07fc F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2839 0800 F2315BE1 		ldrsh	r3, [fp, #-18]
+ 2840 0804 030052E1 		cmp	r2, r3
+ 2841 0808 E1FFFFBA 		blt	.L32
+ 161:../lcd.c      **** 		}
+ 162:../lcd.c      **** 		for( m=l; m<=usRight; m++ )
+ 2842              		.loc 1 162 0 is_stmt 1
+ 2843 080c B2315BE1 		ldrh	r3, [fp, #-18]	@ movhi
+ 2844 0810 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2845 0814 4D0000EA 		b	.L33
+ 2846              	.L34:
+ 163:../lcd.c      **** 		{
+ 164:../lcd.c      **** 			LCD_PutPixel(m, i, ucColor);
+ 2847              		.loc 1 164 0 discriminator 2
+ 2848 0818 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2849 081c 0230A0E1 		mov	r3, r2
+ 2850 0820 0331A0E1 		mov	r3, r3, asl #2
+ 2851 0824 023083E0 		add	r3, r3, r2
+ 2852 0828 0333A0E1 		mov	r3, r3, asl #6
+ 2853 082c A32FA0E1 		mov	r2, r3, lsr #31
+ 2854 0830 033082E0 		add	r3, r2, r3
+ 2855 0834 C330A0E1 		mov	r3, r3, asr #1
+ 2856 0838 C32683E2 		add	r2, r3, #204472320
+ 2857 083c 962C82E2 		add	r2, r2, #38400
+ 2858 0840 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 2859 0844 071083E2 		add	r1, r3, #7
+ 2860 0848 000053E3 		cmp	r3, #0
+ 2861 084c 0130A0B1 		movlt	r3, r1
+ 2862 0850 C331A0E1 		mov	r3, r3, asr #3
+ 2863 0854 0338A0E1 		mov	r3, r3, asl #16
+ 2864 0858 2338A0E1 		mov	r3, r3, lsr #16
+ 2865 085c 0338A0E1 		mov	r3, r3, asl #16
+ 2866 0860 4338A0E1 		mov	r3, r3, asr #16
+ 2867 0864 0331A0E1 		mov	r3, r3, asl #2
+ 2868 0868 033082E0 		add	r3, r2, r3
+ 2869 086c 0310A0E1 		mov	r1, r3
+ 2870 0870 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2871 0874 0230A0E1 		mov	r3, r2
+ 2872 0878 0331A0E1 		mov	r3, r3, asl #2
+ 2873 087c 023083E0 		add	r3, r3, r2
+ 2874 0880 0333A0E1 		mov	r3, r3, asl #6
+ 2875 0884 A32FA0E1 		mov	r2, r3, lsr #31
+ 2876 0888 033082E0 		add	r3, r2, r3
+ 2877 088c C330A0E1 		mov	r3, r3, asr #1
+ 2878 0890 C32683E2 		add	r2, r3, #204472320
+ 2879 0894 962C82E2 		add	r2, r2, #38400
+ 2880 0898 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 2881 089c 070083E2 		add	r0, r3, #7
+ 2882 08a0 000053E3 		cmp	r3, #0
+ 2883 08a4 0030A0B1 		movlt	r3, r0
+ 2884 08a8 C331A0E1 		mov	r3, r3, asr #3
+ 2885 08ac 0338A0E1 		mov	r3, r3, asl #16
+ 2886 08b0 2338A0E1 		mov	r3, r3, lsr #16
+ 2887 08b4 0338A0E1 		mov	r3, r3, asl #16
+ 2888 08b8 4338A0E1 		mov	r3, r3, asr #16
+ 2889 08bc 0331A0E1 		mov	r3, r3, asl #2
+ 2890 08c0 033082E0 		add	r3, r2, r3
+ 2891 08c4 000093E5 		ldr	r0, [r3, #0]
+ 2892 08c8 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2893 08cc C23FA0E1 		mov	r3, r2, asr #31
+ 2894 08d0 A33EA0E1 		mov	r3, r3, lsr #29
+ 2895 08d4 032082E0 		add	r2, r2, r3
+ 2896 08d8 072002E2 		and	r2, r2, #7
+ 2897 08dc 023063E0 		rsb	r3, r3, r2
+ 2898 08e0 0338A0E1 		mov	r3, r3, asl #16
+ 2899 08e4 2338A0E1 		mov	r3, r3, lsr #16
+ 2900 08e8 0338A0E1 		mov	r3, r3, asl #16
+ 2901 08ec 4338A0E1 		mov	r3, r3, asr #16
+ 2902 08f0 0331A0E1 		mov	r3, r3, asl #2
+ 2903 08f4 0F22A0E3 		mov	r2, #-268435456
+ 2904 08f8 3233A0E1 		mov	r3, r2, lsr r3
+ 2905 08fc 0330E0E1 		mvn	r3, r3
+ 2906 0900 030000E0 		and	r0, r0, r3
+ 2907 0904 04C0DBE5 		ldrb	ip, [fp, #4]	@ zero_extendqisi2
+ 2908 0908 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2909 090c C23FA0E1 		mov	r3, r2, asr #31
+ 2910 0910 A33EA0E1 		mov	r3, r3, lsr #29
+ 2911 0914 032082E0 		add	r2, r2, r3
+ 2912 0918 072002E2 		and	r2, r2, #7
+ 2913 091c 023063E0 		rsb	r3, r3, r2
+ 2914 0920 0338A0E1 		mov	r3, r3, asl #16
+ 2915 0924 2338A0E1 		mov	r3, r3, lsr #16
+ 2916 0928 0338A0E1 		mov	r3, r3, asl #16
+ 2917 092c 4338A0E1 		mov	r3, r3, asr #16
+ 2918 0930 073063E2 		rsb	r3, r3, #7
+ 2919 0934 0331A0E1 		mov	r3, r3, asl #2
+ 2920 0938 1C33A0E1 		mov	r3, ip, asl r3
+ 2921 093c 033080E1 		orr	r3, r0, r3
+ 2922 0940 003081E5 		str	r3, [r1, #0]
+ 162:../lcd.c      **** 		for( m=l; m<=usRight; m++ )
+ 2923              		.loc 1 162 0 discriminator 2
+ 2924 0944 B4315BE1 		ldrh	r3, [fp, #-20]	@ movhi
+ 2925 0948 013083E2 		add	r3, r3, #1
+ 2926 094c B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 2927              	.L33:
+ 162:../lcd.c      **** 		for( m=l; m<=usRight; m++ )
+ 2928              		.loc 1 162 0 is_stmt 0 discriminator 1
+ 2929 0950 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2930 0954 F2325BE1 		ldrsh	r3, [fp, #-34]
+ 2931 0958 030052E1 		cmp	r2, r3
+ 2932 095c ADFFFFDA 		ble	.L34
+ 152:../lcd.c      **** 	for( i=usTop; i<=usBottom; i++ )
+ 2933              		.loc 1 152 0 is_stmt 1
+ 2934 0960 BE305BE1 		ldrh	r3, [fp, #-14]	@ movhi
+ 2935 0964 013083E2 		add	r3, r3, #1
+ 2936 0968 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 2937              	.L28:
+ 152:../lcd.c      **** 	for( i=usTop; i<=usBottom; i++ )
+ 2938              		.loc 1 152 0 is_stmt 0 discriminator 1
+ 2939 096c FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2940 0970 F4325BE1 		ldrsh	r3, [fp, #-36]
+ 2941 0974 030052E1 		cmp	r2, r3
+ 2942 0978 2CFFFFDA 		ble	.L35
+ 2943              	.L17:
+ 165:../lcd.c      **** 		}
+ 166:../lcd.c      **** 	}
+ 167:../lcd.c      **** }
+ 2944              		.loc 1 167 0 is_stmt 1
+ 2945 097c 0CD04BE2 		sub	sp, fp, #12
+ 2946 0980 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2947 0984 1EFF2FE1 		bx	lr
+ 2948              		.cfi_endproc
+ 2949              	.LFE4:
+ 2951              		.align	2
+ 2952              		.global	Lcd_Draw_Box
+ 2954              	Lcd_Draw_Box:
+ 2955              	.LFB5:
+ 168:../lcd.c      **** 
+ 169:../lcd.c      **** /*********************************************************************************************
+ 170:../lcd.c      **** * name:		Lcd_Draw_Box()
+ 171:../lcd.c      **** * func:		Draw rectangle with appointed color
+ 172:../lcd.c      **** * para:		usLeft,usTop,usRight,usBottom -- rectangle's acme coordinate
+ 173:../lcd.c      **** *			ucColor -- appointed color value
+ 174:../lcd.c      **** * ret:		none
+ 175:../lcd.c      **** * modify:
+ 176:../lcd.c      **** * comment:		
+ 177:../lcd.c      **** *********************************************************************************************/
+ 178:../lcd.c      **** void Lcd_Draw_Box(INT16 usLeft, INT16 usTop, INT16 usRight, INT16 usBottom, INT8U ucColor)
+ 179:../lcd.c      **** {
+ 2956              		.loc 1 179 0
+ 2957              		.cfi_startproc
+ 2958              		@ Function supports interworking.
+ 2959              		@ args = 4, pretend = 0, frame = 8
+ 2960              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2961 0988 0DC0A0E1 		mov	ip, sp
+ 2962              	.LCFI10:
+ 2963              		.cfi_def_cfa_register 12
+ 2964 098c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2965 0990 04B04CE2 		sub	fp, ip, #4
+ 2966              		.cfi_offset 14, -8
+ 2967              		.cfi_offset 13, -12
+ 2968              		.cfi_offset 11, -16
+ 2969              	.LCFI11:
+ 2970              		.cfi_def_cfa 11, 4
+ 2971 0994 10D04DE2 		sub	sp, sp, #16
+ 2972 0998 BE004BE1 		strh	r0, [fp, #-14]	@ movhi
+ 2973 099c B0114BE1 		strh	r1, [fp, #-16]	@ movhi
+ 2974 09a0 B2214BE1 		strh	r2, [fp, #-18]	@ movhi
+ 2975 09a4 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 180:../lcd.c      **** 	Lcd_Draw_HLine(usLeft, usRight,  usTop,    ucColor, 1);
+ 2976              		.loc 1 180 0
+ 2977 09a8 FE005BE1 		ldrsh	r0, [fp, #-14]
+ 2978 09ac F2115BE1 		ldrsh	r1, [fp, #-18]
+ 2979 09b0 F0215BE1 		ldrsh	r2, [fp, #-16]
+ 2980 09b4 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2981 09b8 01C0A0E3 		mov	ip, #1
+ 2982 09bc 00C08DE5 		str	ip, [sp, #0]
+ 2983 09c0 FEFFFFEB 		bl	Lcd_Draw_HLine
+ 181:../lcd.c      **** 	Lcd_Draw_HLine(usLeft, usRight,  usBottom, ucColor, 1);
+ 2984              		.loc 1 181 0
+ 2985 09c4 FE005BE1 		ldrsh	r0, [fp, #-14]
+ 2986 09c8 F2115BE1 		ldrsh	r1, [fp, #-18]
+ 2987 09cc F4215BE1 		ldrsh	r2, [fp, #-20]
+ 2988 09d0 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2989 09d4 01C0A0E3 		mov	ip, #1
+ 2990 09d8 00C08DE5 		str	ip, [sp, #0]
+ 2991 09dc FEFFFFEB 		bl	Lcd_Draw_HLine
+ 182:../lcd.c      **** 	Lcd_Draw_VLine(usTop,  usBottom, usLeft,   ucColor, 1);
+ 2992              		.loc 1 182 0
+ 2993 09e0 F0015BE1 		ldrsh	r0, [fp, #-16]
+ 2994 09e4 F4115BE1 		ldrsh	r1, [fp, #-20]
+ 2995 09e8 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 2996 09ec 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 2997 09f0 01C0A0E3 		mov	ip, #1
+ 2998 09f4 00C08DE5 		str	ip, [sp, #0]
+ 2999 09f8 FEFFFFEB 		bl	Lcd_Draw_VLine
+ 183:../lcd.c      **** 	Lcd_Draw_VLine(usTop,  usBottom, usRight,  ucColor, 1);
+ 3000              		.loc 1 183 0
+ 3001 09fc F0015BE1 		ldrsh	r0, [fp, #-16]
+ 3002 0a00 F4115BE1 		ldrsh	r1, [fp, #-20]
+ 3003 0a04 F2215BE1 		ldrsh	r2, [fp, #-18]
+ 3004 0a08 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 3005 0a0c 01C0A0E3 		mov	ip, #1
+ 3006 0a10 00C08DE5 		str	ip, [sp, #0]
+ 3007 0a14 FEFFFFEB 		bl	Lcd_Draw_VLine
+ 184:../lcd.c      **** }
+ 3008              		.loc 1 184 0
+ 3009 0a18 0CD04BE2 		sub	sp, fp, #12
+ 3010 0a1c 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 3011 0a20 1EFF2FE1 		bx	lr
+ 3012              		.cfi_endproc
+ 3013              	.LFE5:
+ 3015              		.global	__aeabi_idiv
+ 3016              		.align	2
+ 3017              		.global	Lcd_Draw_Line
+ 3019              	Lcd_Draw_Line:
+ 3020              	.LFB6:
+ 185:../lcd.c      **** 
+ 186:../lcd.c      **** /*********************************************************************************************
+ 187:../lcd.c      **** * name:		Lcd_Draw_Line()
+ 188:../lcd.c      **** * func:		Draw line with appointed color
+ 189:../lcd.c      **** * para:		usX0,usY0 -- line's start point coordinate
+ 190:../lcd.c      **** *			usX1,usY1 -- line's end point coordinate
+ 191:../lcd.c      **** *			ucColor -- appointed color value
+ 192:../lcd.c      **** *			usWidth -- line's width
+ 193:../lcd.c      **** * ret:		none
+ 194:../lcd.c      **** * modify:
+ 195:../lcd.c      **** * comment:		
+ 196:../lcd.c      **** *********************************************************************************************/
+ 197:../lcd.c      **** void Lcd_Draw_Line(INT16 usX0, INT16 usY0, INT16 usX1, INT16 usY1, INT8U ucColor, INT16U usWidth)
+ 198:../lcd.c      **** {
+ 3021              		.loc 1 198 0
+ 3022              		.cfi_startproc
+ 3023              		@ Function supports interworking.
+ 3024              		@ args = 8, pretend = 0, frame = 32
+ 3025              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3026 0a24 0DC0A0E1 		mov	ip, sp
+ 3027              	.LCFI12:
+ 3028              		.cfi_def_cfa_register 12
+ 3029 0a28 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3030 0a2c 04B04CE2 		sub	fp, ip, #4
+ 3031              		.cfi_offset 14, -8
+ 3032              		.cfi_offset 13, -12
+ 3033              		.cfi_offset 11, -16
+ 3034              	.LCFI13:
+ 3035              		.cfi_def_cfa 11, 4
+ 3036 0a30 28D04DE2 		sub	sp, sp, #40
+ 3037 0a34 B6024BE1 		strh	r0, [fp, #-38]	@ movhi
+ 3038 0a38 B8124BE1 		strh	r1, [fp, #-40]	@ movhi
+ 3039 0a3c BA224BE1 		strh	r2, [fp, #-42]	@ movhi
+ 3040 0a40 BC324BE1 		strh	r3, [fp, #-44]	@ movhi
+ 199:../lcd.c      **** 	INT16 usDx;
+ 200:../lcd.c      **** 	INT16 usDy;
+ 201:../lcd.c      **** 	INT16 y_sign;
+ 202:../lcd.c      **** 	INT16 x_sign;
+ 203:../lcd.c      **** 	INT16 decision;
+ 204:../lcd.c      **** 	INT16 wCurx, wCury, wNextx, wNexty, wpy, wpx;
+ 205:../lcd.c      **** 
+ 206:../lcd.c      **** 	if( usY0 == usY1 )
+ 3041              		.loc 1 206 0
+ 3042 0a44 F8225BE1 		ldrsh	r2, [fp, #-40]
+ 3043 0a48 FC325BE1 		ldrsh	r3, [fp, #-44]
+ 3044 0a4c 030052E1 		cmp	r2, r3
+ 3045 0a50 0700001A 		bne	.L38
+ 207:../lcd.c      **** 	{
+ 208:../lcd.c      **** 		Lcd_Draw_HLine (usX0, usX1, usY0, ucColor, usWidth);
+ 3046              		.loc 1 208 0
+ 3047 0a54 F6025BE1 		ldrsh	r0, [fp, #-38]
+ 3048 0a58 FA125BE1 		ldrsh	r1, [fp, #-42]
+ 3049 0a5c F8225BE1 		ldrsh	r2, [fp, #-40]
+ 3050 0a60 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 3051 0a64 B8C0DBE1 		ldrh	ip, [fp, #8]
+ 3052 0a68 00C08DE5 		str	ip, [sp, #0]
+ 3053 0a6c FEFFFFEB 		bl	Lcd_Draw_HLine
+ 209:../lcd.c      **** 		return;
+ 3054              		.loc 1 209 0
+ 3055 0a70 3E0200EA 		b	.L37
+ 3056              	.L38:
+ 210:../lcd.c      **** 	}
+ 211:../lcd.c      **** 	if( usX0 == usX1 )
+ 3057              		.loc 1 211 0
+ 3058 0a74 F6225BE1 		ldrsh	r2, [fp, #-38]
+ 3059 0a78 FA325BE1 		ldrsh	r3, [fp, #-42]
+ 3060 0a7c 030052E1 		cmp	r2, r3
+ 3061 0a80 0700001A 		bne	.L40
+ 212:../lcd.c      **** 	{
+ 213:../lcd.c      **** 		Lcd_Draw_VLine (usY0, usY1, usX0, ucColor, usWidth);
+ 3062              		.loc 1 213 0
+ 3063 0a84 F8025BE1 		ldrsh	r0, [fp, #-40]
+ 3064 0a88 FC125BE1 		ldrsh	r1, [fp, #-44]
+ 3065 0a8c F6225BE1 		ldrsh	r2, [fp, #-38]
+ 3066 0a90 0430DBE5 		ldrb	r3, [fp, #4]	@ zero_extendqisi2
+ 3067 0a94 B8C0DBE1 		ldrh	ip, [fp, #8]
+ 3068 0a98 00C08DE5 		str	ip, [sp, #0]
+ 3069 0a9c FEFFFFEB 		bl	Lcd_Draw_VLine
+ 214:../lcd.c      **** 		return;
+ 3070              		.loc 1 214 0
+ 3071 0aa0 320200EA 		b	.L37
+ 3072              	.L40:
+ 215:../lcd.c      **** 	}
+ 216:../lcd.c      **** 	usDx = abs(usX0 - usX1);
+ 3073              		.loc 1 216 0
+ 3074 0aa4 F6225BE1 		ldrsh	r2, [fp, #-38]
+ 3075 0aa8 FA325BE1 		ldrsh	r3, [fp, #-42]
+ 3076 0aac 023063E0 		rsb	r3, r3, r2
+ 3077 0ab0 000053E3 		cmp	r3, #0
+ 3078 0ab4 003063B2 		rsblt	r3, r3, #0
+ 3079 0ab8 BC314BE1 		strh	r3, [fp, #-28]	@ movhi
+ 217:../lcd.c      **** 	usDy = abs(usY0 - usY1);
+ 3080              		.loc 1 217 0
+ 3081 0abc F8225BE1 		ldrsh	r2, [fp, #-40]
+ 3082 0ac0 FC325BE1 		ldrsh	r3, [fp, #-44]
+ 3083 0ac4 023063E0 		rsb	r3, r3, r2
+ 3084 0ac8 000053E3 		cmp	r3, #0
+ 3085 0acc 003063B2 		rsblt	r3, r3, #0
+ 3086 0ad0 BE314BE1 		strh	r3, [fp, #-30]	@ movhi
+ 218:../lcd.c      **** 	if( ((usDx >= usDy && (usX0 > usX1)) ||
+ 3087              		.loc 1 218 0
+ 3088 0ad4 FC215BE1 		ldrsh	r2, [fp, #-28]
+ 3089 0ad8 FE315BE1 		ldrsh	r3, [fp, #-30]
+ 3090 0adc 030052E1 		cmp	r2, r3
+ 3091 0ae0 030000BA 		blt	.L41
+ 3092              		.loc 1 218 0 is_stmt 0 discriminator 1
+ 3093 0ae4 F6225BE1 		ldrsh	r2, [fp, #-38]
+ 3094 0ae8 FA325BE1 		ldrsh	r3, [fp, #-42]
+ 3095 0aec 030052E1 		cmp	r2, r3
+ 3096 0af0 070000CA 		bgt	.L42
+ 3097              	.L41:
+ 3098              		.loc 1 218 0 discriminator 2
+ 3099 0af4 FE215BE1 		ldrsh	r2, [fp, #-30]
+ 3100 0af8 FC315BE1 		ldrsh	r3, [fp, #-28]
+ 3101 0afc 030052E1 		cmp	r2, r3
+ 3102 0b00 1B0000DA 		ble	.L43
+ 219:../lcd.c      ****         ((usDy > usDx) && (usY0 > usY1))) )
+ 3103              		.loc 1 219 0 is_stmt 1
+ 3104 0b04 F8225BE1 		ldrsh	r2, [fp, #-40]
+ 3105 0b08 FC325BE1 		ldrsh	r3, [fp, #-44]
+ 3106 0b0c 030052E1 		cmp	r2, r3
+ 3107 0b10 170000DA 		ble	.L43
+ 3108              	.L42:
+ 220:../lcd.c      ****     {
+ 221:../lcd.c      ****         GUISWAP(usX1, usX0);
+ 3109              		.loc 1 221 0
+ 3110 0b14 BA225BE1 		ldrh	r2, [fp, #-42]	@ movhi
+ 3111 0b18 B6325BE1 		ldrh	r3, [fp, #-38]	@ movhi
+ 3112 0b1c 033022E0 		eor	r3, r2, r3
+ 3113 0b20 BA324BE1 		strh	r3, [fp, #-42]	@ movhi
+ 3114 0b24 B6225BE1 		ldrh	r2, [fp, #-38]	@ movhi
+ 3115 0b28 BA325BE1 		ldrh	r3, [fp, #-42]	@ movhi
+ 3116 0b2c 033022E0 		eor	r3, r2, r3
+ 3117 0b30 B6324BE1 		strh	r3, [fp, #-38]	@ movhi
+ 3118 0b34 BA225BE1 		ldrh	r2, [fp, #-42]	@ movhi
+ 3119 0b38 B6325BE1 		ldrh	r3, [fp, #-38]	@ movhi
+ 3120 0b3c 033022E0 		eor	r3, r2, r3
+ 3121 0b40 BA324BE1 		strh	r3, [fp, #-42]	@ movhi
+ 222:../lcd.c      ****         GUISWAP(usY1, usY0);
+ 3122              		.loc 1 222 0
+ 3123 0b44 BC225BE1 		ldrh	r2, [fp, #-44]	@ movhi
+ 3124 0b48 B8325BE1 		ldrh	r3, [fp, #-40]	@ movhi
+ 3125 0b4c 033022E0 		eor	r3, r2, r3
+ 3126 0b50 BC324BE1 		strh	r3, [fp, #-44]	@ movhi
+ 3127 0b54 B8225BE1 		ldrh	r2, [fp, #-40]	@ movhi
+ 3128 0b58 BC325BE1 		ldrh	r3, [fp, #-44]	@ movhi
+ 3129 0b5c 033022E0 		eor	r3, r2, r3
+ 3130 0b60 B8324BE1 		strh	r3, [fp, #-40]	@ movhi
+ 3131 0b64 BC225BE1 		ldrh	r2, [fp, #-44]	@ movhi
+ 3132 0b68 B8325BE1 		ldrh	r3, [fp, #-40]	@ movhi
+ 3133 0b6c 033022E0 		eor	r3, r2, r3
+ 3134 0b70 BC324BE1 		strh	r3, [fp, #-44]	@ movhi
+ 3135              	.L43:
+ 223:../lcd.c      ****     }
+ 224:../lcd.c      ****     y_sign = (usY1 - usY0) / usDy;
+ 3136              		.loc 1 224 0
+ 3137 0b74 FC225BE1 		ldrsh	r2, [fp, #-44]
+ 3138 0b78 F8325BE1 		ldrsh	r3, [fp, #-40]
+ 3139 0b7c 022063E0 		rsb	r2, r3, r2
+ 3140 0b80 FE315BE1 		ldrsh	r3, [fp, #-30]
+ 3141 0b84 0200A0E1 		mov	r0, r2
+ 3142 0b88 0310A0E1 		mov	r1, r3
+ 3143 0b8c FEFFFFEB 		bl	__aeabi_idiv
+ 3144 0b90 0030A0E1 		mov	r3, r0
+ 3145 0b94 B0324BE1 		strh	r3, [fp, #-32]	@ movhi
+ 225:../lcd.c      ****     x_sign = (usX1 - usX0) / usDx;
+ 3146              		.loc 1 225 0
+ 3147 0b98 FA225BE1 		ldrsh	r2, [fp, #-42]
+ 3148 0b9c F6325BE1 		ldrsh	r3, [fp, #-38]
+ 3149 0ba0 022063E0 		rsb	r2, r3, r2
+ 3150 0ba4 FC315BE1 		ldrsh	r3, [fp, #-28]
+ 3151 0ba8 0200A0E1 		mov	r0, r2
+ 3152 0bac 0310A0E1 		mov	r1, r3
+ 3153 0bb0 FEFFFFEB 		bl	__aeabi_idiv
+ 3154 0bb4 0030A0E1 		mov	r3, r0
+ 3155 0bb8 B2324BE1 		strh	r3, [fp, #-34]	@ movhi
+ 226:../lcd.c      **** 
+ 227:../lcd.c      ****     if( usDx >= usDy )
+ 3156              		.loc 1 227 0
+ 3157 0bbc FC215BE1 		ldrsh	r2, [fp, #-28]
+ 3158 0bc0 FE315BE1 		ldrsh	r3, [fp, #-30]
+ 3159 0bc4 030052E1 		cmp	r2, r3
+ 3160 0bc8 F40000BA 		blt	.L44
+ 228:../lcd.c      ****     {
+ 229:../lcd.c      ****         for( wCurx = usX0, wCury = usY0, wNextx = usX1,
+ 3161              		.loc 1 229 0
+ 3162 0bcc B6325BE1 		ldrh	r3, [fp, #-38]	@ movhi
+ 3163 0bd0 B0314BE1 		strh	r3, [fp, #-16]	@ movhi
+ 3164 0bd4 B8325BE1 		ldrh	r3, [fp, #-40]	@ movhi
+ 3165 0bd8 B2314BE1 		strh	r3, [fp, #-18]	@ movhi
+ 3166 0bdc BA325BE1 		ldrh	r3, [fp, #-42]	@ movhi
+ 3167 0be0 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 230:../lcd.c      ****              wNexty = usY1, decision = (usDx >> 1);
+ 3168              		.loc 1 230 0
+ 3169 0be4 BC325BE1 		ldrh	r3, [fp, #-44]	@ movhi
+ 3170 0be8 B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 3171 0bec FC315BE1 		ldrsh	r3, [fp, #-28]
+ 3172 0bf0 C330A0E1 		mov	r3, r3, asr #1
+ 3173 0bf4 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 229:../lcd.c      ****         for( wCurx = usX0, wCury = usY0, wNextx = usX1,
+ 3174              		.loc 1 229 0
+ 3175 0bf8 E30000EA 		b	.L45
+ 3176              	.L51:
+ 231:../lcd.c      ****              wCurx <= wNextx; wCurx++, wNextx--, decision += usDy )
+ 232:../lcd.c      ****         {
+ 233:../lcd.c      ****             if( decision >= usDx )
+ 3177              		.loc 1 233 0
+ 3178 0bfc FE205BE1 		ldrsh	r2, [fp, #-14]
+ 3179 0c00 FC315BE1 		ldrsh	r3, [fp, #-28]
+ 3180 0c04 030052E1 		cmp	r2, r3
+ 3181 0c08 110000BA 		blt	.L46
+ 234:../lcd.c      ****             {
+ 235:../lcd.c      ****                 decision -= usDx;
+ 3182              		.loc 1 235 0
+ 3183 0c0c BE205BE1 		ldrh	r2, [fp, #-14]
+ 3184 0c10 BC315BE1 		ldrh	r3, [fp, #-28]
+ 3185 0c14 023063E0 		rsb	r3, r3, r2
+ 3186 0c18 0338A0E1 		mov	r3, r3, asl #16
+ 3187 0c1c 2338A0E1 		mov	r3, r3, lsr #16
+ 3188 0c20 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 236:../lcd.c      ****                 wCury += y_sign;
+ 3189              		.loc 1 236 0
+ 3190 0c24 B2215BE1 		ldrh	r2, [fp, #-18]
+ 3191 0c28 B0325BE1 		ldrh	r3, [fp, #-32]
+ 3192 0c2c 033082E0 		add	r3, r2, r3
+ 3193 0c30 0338A0E1 		mov	r3, r3, asl #16
+ 3194 0c34 2338A0E1 		mov	r3, r3, lsr #16
+ 3195 0c38 B2314BE1 		strh	r3, [fp, #-18]	@ movhi
+ 237:../lcd.c      ****                 wNexty -= y_sign;
+ 3196              		.loc 1 237 0
+ 3197 0c3c B6215BE1 		ldrh	r2, [fp, #-22]
+ 3198 0c40 B0325BE1 		ldrh	r3, [fp, #-32]
+ 3199 0c44 023063E0 		rsb	r3, r3, r2
+ 3200 0c48 0338A0E1 		mov	r3, r3, asl #16
+ 3201 0c4c 2338A0E1 		mov	r3, r3, lsr #16
+ 3202 0c50 B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 3203              	.L46:
+ 238:../lcd.c      ****             }
+ 239:../lcd.c      ****             for( wpy = wCury - usWidth / 2;
+ 3204              		.loc 1 239 0
+ 3205 0c54 B2215BE1 		ldrh	r2, [fp, #-18]
+ 3206 0c58 B830DBE1 		ldrh	r3, [fp, #8]
+ 3207 0c5c A330A0E1 		mov	r3, r3, lsr #1
+ 3208 0c60 0338A0E1 		mov	r3, r3, asl #16
+ 3209 0c64 2338A0E1 		mov	r3, r3, lsr #16
+ 3210 0c68 023063E0 		rsb	r3, r3, r2
+ 3211 0c6c 0338A0E1 		mov	r3, r3, asl #16
+ 3212 0c70 2338A0E1 		mov	r3, r3, lsr #16
+ 3213 0c74 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 3214 0c78 4D0000EA 		b	.L47
+ 3215              	.L48:
+ 240:../lcd.c      ****                  wpy <= wCury + usWidth / 2; wpy++ )
+ 241:../lcd.c      ****             {
+ 242:../lcd.c      ****                 LCD_PutPixel(wCurx, wpy, ucColor);
+ 3216              		.loc 1 242 0
+ 3217 0c7c F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3218 0c80 0230A0E1 		mov	r3, r2
+ 3219 0c84 0331A0E1 		mov	r3, r3, asl #2
+ 3220 0c88 023083E0 		add	r3, r3, r2
+ 3221 0c8c 0333A0E1 		mov	r3, r3, asl #6
+ 3222 0c90 A32FA0E1 		mov	r2, r3, lsr #31
+ 3223 0c94 033082E0 		add	r3, r2, r3
+ 3224 0c98 C330A0E1 		mov	r3, r3, asr #1
+ 3225 0c9c C32683E2 		add	r2, r3, #204472320
+ 3226 0ca0 962C82E2 		add	r2, r2, #38400
+ 3227 0ca4 F0315BE1 		ldrsh	r3, [fp, #-16]
+ 3228 0ca8 071083E2 		add	r1, r3, #7
+ 3229 0cac 000053E3 		cmp	r3, #0
+ 3230 0cb0 0130A0B1 		movlt	r3, r1
+ 3231 0cb4 C331A0E1 		mov	r3, r3, asr #3
+ 3232 0cb8 0338A0E1 		mov	r3, r3, asl #16
+ 3233 0cbc 2338A0E1 		mov	r3, r3, lsr #16
+ 3234 0cc0 0338A0E1 		mov	r3, r3, asl #16
+ 3235 0cc4 4338A0E1 		mov	r3, r3, asr #16
+ 3236 0cc8 0331A0E1 		mov	r3, r3, asl #2
+ 3237 0ccc 033082E0 		add	r3, r2, r3
+ 3238 0cd0 0310A0E1 		mov	r1, r3
+ 3239 0cd4 F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3240 0cd8 0230A0E1 		mov	r3, r2
+ 3241 0cdc 0331A0E1 		mov	r3, r3, asl #2
+ 3242 0ce0 023083E0 		add	r3, r3, r2
+ 3243 0ce4 0333A0E1 		mov	r3, r3, asl #6
+ 3244 0ce8 A32FA0E1 		mov	r2, r3, lsr #31
+ 3245 0cec 033082E0 		add	r3, r2, r3
+ 3246 0cf0 C330A0E1 		mov	r3, r3, asr #1
+ 3247 0cf4 C32683E2 		add	r2, r3, #204472320
+ 3248 0cf8 962C82E2 		add	r2, r2, #38400
+ 3249 0cfc F0315BE1 		ldrsh	r3, [fp, #-16]
+ 3250 0d00 070083E2 		add	r0, r3, #7
+ 3251 0d04 000053E3 		cmp	r3, #0
+ 3252 0d08 0030A0B1 		movlt	r3, r0
+ 3253 0d0c C331A0E1 		mov	r3, r3, asr #3
+ 3254 0d10 0338A0E1 		mov	r3, r3, asl #16
+ 3255 0d14 2338A0E1 		mov	r3, r3, lsr #16
+ 3256 0d18 0338A0E1 		mov	r3, r3, asl #16
+ 3257 0d1c 4338A0E1 		mov	r3, r3, asr #16
+ 3258 0d20 0331A0E1 		mov	r3, r3, asl #2
+ 3259 0d24 033082E0 		add	r3, r2, r3
+ 3260 0d28 000093E5 		ldr	r0, [r3, #0]
+ 3261 0d2c F0215BE1 		ldrsh	r2, [fp, #-16]
+ 3262 0d30 C23FA0E1 		mov	r3, r2, asr #31
+ 3263 0d34 A33EA0E1 		mov	r3, r3, lsr #29
+ 3264 0d38 032082E0 		add	r2, r2, r3
+ 3265 0d3c 072002E2 		and	r2, r2, #7
+ 3266 0d40 023063E0 		rsb	r3, r3, r2
+ 3267 0d44 0338A0E1 		mov	r3, r3, asl #16
+ 3268 0d48 2338A0E1 		mov	r3, r3, lsr #16
+ 3269 0d4c 0338A0E1 		mov	r3, r3, asl #16
+ 3270 0d50 4338A0E1 		mov	r3, r3, asr #16
+ 3271 0d54 0331A0E1 		mov	r3, r3, asl #2
+ 3272 0d58 0F22A0E3 		mov	r2, #-268435456
+ 3273 0d5c 3233A0E1 		mov	r3, r2, lsr r3
+ 3274 0d60 0330E0E1 		mvn	r3, r3
+ 3275 0d64 030000E0 		and	r0, r0, r3
+ 3276 0d68 04C0DBE5 		ldrb	ip, [fp, #4]	@ zero_extendqisi2
+ 3277 0d6c F0215BE1 		ldrsh	r2, [fp, #-16]
+ 3278 0d70 C23FA0E1 		mov	r3, r2, asr #31
+ 3279 0d74 A33EA0E1 		mov	r3, r3, lsr #29
+ 3280 0d78 032082E0 		add	r2, r2, r3
+ 3281 0d7c 072002E2 		and	r2, r2, #7
+ 3282 0d80 023063E0 		rsb	r3, r3, r2
+ 3283 0d84 0338A0E1 		mov	r3, r3, asl #16
+ 3284 0d88 2338A0E1 		mov	r3, r3, lsr #16
+ 3285 0d8c 0338A0E1 		mov	r3, r3, asl #16
+ 3286 0d90 4338A0E1 		mov	r3, r3, asr #16
+ 3287 0d94 073063E2 		rsb	r3, r3, #7
+ 3288 0d98 0331A0E1 		mov	r3, r3, asl #2
+ 3289 0d9c 1C33A0E1 		mov	r3, ip, asl r3
+ 3290 0da0 033080E1 		orr	r3, r0, r3
+ 3291 0da4 003081E5 		str	r3, [r1, #0]
+ 240:../lcd.c      ****                  wpy <= wCury + usWidth / 2; wpy++ )
+ 3292              		.loc 1 240 0
+ 3293 0da8 B8315BE1 		ldrh	r3, [fp, #-24]	@ movhi
+ 3294 0dac 013083E2 		add	r3, r3, #1
+ 3295 0db0 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 3296              	.L47:
+ 240:../lcd.c      ****                  wpy <= wCury + usWidth / 2; wpy++ )
+ 3297              		.loc 1 240 0 is_stmt 0 discriminator 1
+ 3298 0db4 F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3299 0db8 F2115BE1 		ldrsh	r1, [fp, #-18]
+ 3300 0dbc B830DBE1 		ldrh	r3, [fp, #8]
+ 3301 0dc0 A330A0E1 		mov	r3, r3, lsr #1
+ 3302 0dc4 0338A0E1 		mov	r3, r3, asl #16
+ 3303 0dc8 2338A0E1 		mov	r3, r3, lsr #16
+ 3304 0dcc 033081E0 		add	r3, r1, r3
+ 239:../lcd.c      ****             for( wpy = wCury - usWidth / 2;
+ 3305              		.loc 1 239 0 is_stmt 1 discriminator 1
+ 3306 0dd0 030052E1 		cmp	r2, r3
+ 3307 0dd4 A8FFFFDA 		ble	.L48
+ 243:../lcd.c      ****             }
+ 244:../lcd.c      **** 
+ 245:../lcd.c      ****             for( wpy = wNexty - usWidth / 2;
+ 3308              		.loc 1 245 0
+ 3309 0dd8 B6215BE1 		ldrh	r2, [fp, #-22]
+ 3310 0ddc B830DBE1 		ldrh	r3, [fp, #8]
+ 3311 0de0 A330A0E1 		mov	r3, r3, lsr #1
+ 3312 0de4 0338A0E1 		mov	r3, r3, asl #16
+ 3313 0de8 2338A0E1 		mov	r3, r3, lsr #16
+ 3314 0dec 023063E0 		rsb	r3, r3, r2
+ 3315 0df0 0338A0E1 		mov	r3, r3, asl #16
+ 3316 0df4 2338A0E1 		mov	r3, r3, lsr #16
+ 3317 0df8 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 3318 0dfc 4D0000EA 		b	.L49
+ 3319              	.L50:
+ 246:../lcd.c      ****                  wpy <= wNexty + usWidth / 2; wpy++ )
+ 247:../lcd.c      ****             {
+ 248:../lcd.c      ****                 LCD_PutPixel(wNextx, wpy, ucColor);
+ 3320              		.loc 1 248 0
+ 3321 0e00 F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3322 0e04 0230A0E1 		mov	r3, r2
+ 3323 0e08 0331A0E1 		mov	r3, r3, asl #2
+ 3324 0e0c 023083E0 		add	r3, r3, r2
+ 3325 0e10 0333A0E1 		mov	r3, r3, asl #6
+ 3326 0e14 A32FA0E1 		mov	r2, r3, lsr #31
+ 3327 0e18 033082E0 		add	r3, r2, r3
+ 3328 0e1c C330A0E1 		mov	r3, r3, asr #1
+ 3329 0e20 C32683E2 		add	r2, r3, #204472320
+ 3330 0e24 962C82E2 		add	r2, r2, #38400
+ 3331 0e28 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 3332 0e2c 071083E2 		add	r1, r3, #7
+ 3333 0e30 000053E3 		cmp	r3, #0
+ 3334 0e34 0130A0B1 		movlt	r3, r1
+ 3335 0e38 C331A0E1 		mov	r3, r3, asr #3
+ 3336 0e3c 0338A0E1 		mov	r3, r3, asl #16
+ 3337 0e40 2338A0E1 		mov	r3, r3, lsr #16
+ 3338 0e44 0338A0E1 		mov	r3, r3, asl #16
+ 3339 0e48 4338A0E1 		mov	r3, r3, asr #16
+ 3340 0e4c 0331A0E1 		mov	r3, r3, asl #2
+ 3341 0e50 033082E0 		add	r3, r2, r3
+ 3342 0e54 0310A0E1 		mov	r1, r3
+ 3343 0e58 F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3344 0e5c 0230A0E1 		mov	r3, r2
+ 3345 0e60 0331A0E1 		mov	r3, r3, asl #2
+ 3346 0e64 023083E0 		add	r3, r3, r2
+ 3347 0e68 0333A0E1 		mov	r3, r3, asl #6
+ 3348 0e6c A32FA0E1 		mov	r2, r3, lsr #31
+ 3349 0e70 033082E0 		add	r3, r2, r3
+ 3350 0e74 C330A0E1 		mov	r3, r3, asr #1
+ 3351 0e78 C32683E2 		add	r2, r3, #204472320
+ 3352 0e7c 962C82E2 		add	r2, r2, #38400
+ 3353 0e80 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 3354 0e84 070083E2 		add	r0, r3, #7
+ 3355 0e88 000053E3 		cmp	r3, #0
+ 3356 0e8c 0030A0B1 		movlt	r3, r0
+ 3357 0e90 C331A0E1 		mov	r3, r3, asr #3
+ 3358 0e94 0338A0E1 		mov	r3, r3, asl #16
+ 3359 0e98 2338A0E1 		mov	r3, r3, lsr #16
+ 3360 0e9c 0338A0E1 		mov	r3, r3, asl #16
+ 3361 0ea0 4338A0E1 		mov	r3, r3, asr #16
+ 3362 0ea4 0331A0E1 		mov	r3, r3, asl #2
+ 3363 0ea8 033082E0 		add	r3, r2, r3
+ 3364 0eac 000093E5 		ldr	r0, [r3, #0]
+ 3365 0eb0 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 3366 0eb4 C23FA0E1 		mov	r3, r2, asr #31
+ 3367 0eb8 A33EA0E1 		mov	r3, r3, lsr #29
+ 3368 0ebc 032082E0 		add	r2, r2, r3
+ 3369 0ec0 072002E2 		and	r2, r2, #7
+ 3370 0ec4 023063E0 		rsb	r3, r3, r2
+ 3371 0ec8 0338A0E1 		mov	r3, r3, asl #16
+ 3372 0ecc 2338A0E1 		mov	r3, r3, lsr #16
+ 3373 0ed0 0338A0E1 		mov	r3, r3, asl #16
+ 3374 0ed4 4338A0E1 		mov	r3, r3, asr #16
+ 3375 0ed8 0331A0E1 		mov	r3, r3, asl #2
+ 3376 0edc 0F22A0E3 		mov	r2, #-268435456
+ 3377 0ee0 3233A0E1 		mov	r3, r2, lsr r3
+ 3378 0ee4 0330E0E1 		mvn	r3, r3
+ 3379 0ee8 030000E0 		and	r0, r0, r3
+ 3380 0eec 04C0DBE5 		ldrb	ip, [fp, #4]	@ zero_extendqisi2
+ 3381 0ef0 F4215BE1 		ldrsh	r2, [fp, #-20]
+ 3382 0ef4 C23FA0E1 		mov	r3, r2, asr #31
+ 3383 0ef8 A33EA0E1 		mov	r3, r3, lsr #29
+ 3384 0efc 032082E0 		add	r2, r2, r3
+ 3385 0f00 072002E2 		and	r2, r2, #7
+ 3386 0f04 023063E0 		rsb	r3, r3, r2
+ 3387 0f08 0338A0E1 		mov	r3, r3, asl #16
+ 3388 0f0c 2338A0E1 		mov	r3, r3, lsr #16
+ 3389 0f10 0338A0E1 		mov	r3, r3, asl #16
+ 3390 0f14 4338A0E1 		mov	r3, r3, asr #16
+ 3391 0f18 073063E2 		rsb	r3, r3, #7
+ 3392 0f1c 0331A0E1 		mov	r3, r3, asl #2
+ 3393 0f20 1C33A0E1 		mov	r3, ip, asl r3
+ 3394 0f24 033080E1 		orr	r3, r0, r3
+ 3395 0f28 003081E5 		str	r3, [r1, #0]
+ 246:../lcd.c      ****                  wpy <= wNexty + usWidth / 2; wpy++ )
+ 3396              		.loc 1 246 0
+ 3397 0f2c B8315BE1 		ldrh	r3, [fp, #-24]	@ movhi
+ 3398 0f30 013083E2 		add	r3, r3, #1
+ 3399 0f34 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 3400              	.L49:
+ 246:../lcd.c      ****                  wpy <= wNexty + usWidth / 2; wpy++ )
+ 3401              		.loc 1 246 0 is_stmt 0 discriminator 1
+ 3402 0f38 F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3403 0f3c F6115BE1 		ldrsh	r1, [fp, #-22]
+ 3404 0f40 B830DBE1 		ldrh	r3, [fp, #8]
+ 3405 0f44 A330A0E1 		mov	r3, r3, lsr #1
+ 3406 0f48 0338A0E1 		mov	r3, r3, asl #16
+ 3407 0f4c 2338A0E1 		mov	r3, r3, lsr #16
+ 3408 0f50 033081E0 		add	r3, r1, r3
+ 245:../lcd.c      ****             for( wpy = wNexty - usWidth / 2;
+ 3409              		.loc 1 245 0 is_stmt 1 discriminator 1
+ 3410 0f54 030052E1 		cmp	r2, r3
+ 3411 0f58 A8FFFFDA 		ble	.L50
+ 231:../lcd.c      ****              wCurx <= wNextx; wCurx++, wNextx--, decision += usDy )
+ 3412              		.loc 1 231 0
+ 3413 0f5c B0315BE1 		ldrh	r3, [fp, #-16]	@ movhi
+ 3414 0f60 013083E2 		add	r3, r3, #1
+ 3415 0f64 B0314BE1 		strh	r3, [fp, #-16]	@ movhi
+ 3416 0f68 B4315BE1 		ldrh	r3, [fp, #-20]	@ movhi
+ 3417 0f6c 013043E2 		sub	r3, r3, #1
+ 3418 0f70 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 3419 0f74 BE205BE1 		ldrh	r2, [fp, #-14]
+ 3420 0f78 BE315BE1 		ldrh	r3, [fp, #-30]
+ 3421 0f7c 033082E0 		add	r3, r2, r3
+ 3422 0f80 0338A0E1 		mov	r3, r3, asl #16
+ 3423 0f84 2338A0E1 		mov	r3, r3, lsr #16
+ 3424 0f88 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 3425              	.L45:
+ 229:../lcd.c      ****         for( wCurx = usX0, wCury = usY0, wNextx = usX1,
+ 3426              		.loc 1 229 0 discriminator 1
+ 3427 0f8c F0215BE1 		ldrsh	r2, [fp, #-16]
+ 3428 0f90 F4315BE1 		ldrsh	r3, [fp, #-20]
+ 3429 0f94 030052E1 		cmp	r2, r3
+ 3430 0f98 17FFFFDA 		ble	.L51
+ 229:../lcd.c      ****         for( wCurx = usX0, wCury = usY0, wNextx = usX1,
+ 3431              		.loc 1 229 0 is_stmt 0
+ 3432 0f9c F30000EA 		b	.L37
+ 3433              	.L44:
+ 249:../lcd.c      ****             }
+ 250:../lcd.c      ****         }
+ 251:../lcd.c      ****     }
+ 252:../lcd.c      ****     else
+ 253:../lcd.c      ****     {
+ 254:../lcd.c      ****         for( wCurx = usX0, wCury = usY0, wNextx = usX1,
+ 3434              		.loc 1 254 0 is_stmt 1
+ 3435 0fa0 B6325BE1 		ldrh	r3, [fp, #-38]	@ movhi
+ 3436 0fa4 B0314BE1 		strh	r3, [fp, #-16]	@ movhi
+ 3437 0fa8 B8325BE1 		ldrh	r3, [fp, #-40]	@ movhi
+ 3438 0fac B2314BE1 		strh	r3, [fp, #-18]	@ movhi
+ 3439 0fb0 BA325BE1 		ldrh	r3, [fp, #-42]	@ movhi
+ 3440 0fb4 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 255:../lcd.c      ****              wNexty = usY1, decision = (usDy >> 1);
+ 3441              		.loc 1 255 0
+ 3442 0fb8 BC325BE1 		ldrh	r3, [fp, #-44]	@ movhi
+ 3443 0fbc B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 3444 0fc0 FE315BE1 		ldrsh	r3, [fp, #-30]
+ 3445 0fc4 C330A0E1 		mov	r3, r3, asr #1
+ 3446 0fc8 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 254:../lcd.c      ****         for( wCurx = usX0, wCury = usY0, wNextx = usX1,
+ 3447              		.loc 1 254 0
+ 3448 0fcc E30000EA 		b	.L52
+ 3449              	.L58:
+ 256:../lcd.c      ****              wCury <= wNexty; wCury++, wNexty--, decision += usDx )
+ 257:../lcd.c      ****         {
+ 258:../lcd.c      ****             if( decision >= usDy )
+ 3450              		.loc 1 258 0
+ 3451 0fd0 FE205BE1 		ldrsh	r2, [fp, #-14]
+ 3452 0fd4 FE315BE1 		ldrsh	r3, [fp, #-30]
+ 3453 0fd8 030052E1 		cmp	r2, r3
+ 3454 0fdc 110000BA 		blt	.L53
+ 259:../lcd.c      ****             {
+ 260:../lcd.c      ****                 decision -= usDy;
+ 3455              		.loc 1 260 0
+ 3456 0fe0 BE205BE1 		ldrh	r2, [fp, #-14]
+ 3457 0fe4 BE315BE1 		ldrh	r3, [fp, #-30]
+ 3458 0fe8 023063E0 		rsb	r3, r3, r2
+ 3459 0fec 0338A0E1 		mov	r3, r3, asl #16
+ 3460 0ff0 2338A0E1 		mov	r3, r3, lsr #16
+ 3461 0ff4 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 261:../lcd.c      ****                 wCurx += x_sign;
+ 3462              		.loc 1 261 0
+ 3463 0ff8 B0215BE1 		ldrh	r2, [fp, #-16]
+ 3464 0ffc B2325BE1 		ldrh	r3, [fp, #-34]
+ 3465 1000 033082E0 		add	r3, r2, r3
+ 3466 1004 0338A0E1 		mov	r3, r3, asl #16
+ 3467 1008 2338A0E1 		mov	r3, r3, lsr #16
+ 3468 100c B0314BE1 		strh	r3, [fp, #-16]	@ movhi
+ 262:../lcd.c      ****                 wNextx -= x_sign;
+ 3469              		.loc 1 262 0
+ 3470 1010 B4215BE1 		ldrh	r2, [fp, #-20]
+ 3471 1014 B2325BE1 		ldrh	r3, [fp, #-34]
+ 3472 1018 023063E0 		rsb	r3, r3, r2
+ 3473 101c 0338A0E1 		mov	r3, r3, asl #16
+ 3474 1020 2338A0E1 		mov	r3, r3, lsr #16
+ 3475 1024 B4314BE1 		strh	r3, [fp, #-20]	@ movhi
+ 3476              	.L53:
+ 263:../lcd.c      ****             }
+ 264:../lcd.c      ****             for( wpx = wCurx - usWidth / 2;
+ 3477              		.loc 1 264 0
+ 3478 1028 B0215BE1 		ldrh	r2, [fp, #-16]
+ 3479 102c B830DBE1 		ldrh	r3, [fp, #8]
+ 3480 1030 A330A0E1 		mov	r3, r3, lsr #1
+ 3481 1034 0338A0E1 		mov	r3, r3, asl #16
+ 3482 1038 2338A0E1 		mov	r3, r3, lsr #16
+ 3483 103c 023063E0 		rsb	r3, r3, r2
+ 3484 1040 0338A0E1 		mov	r3, r3, asl #16
+ 3485 1044 2338A0E1 		mov	r3, r3, lsr #16
+ 3486 1048 BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 3487 104c 4D0000EA 		b	.L54
+ 3488              	.L55:
+ 265:../lcd.c      ****                  wpx <= wCurx + usWidth / 2; wpx++ )
+ 266:../lcd.c      ****             {
+ 267:../lcd.c      ****                 LCD_PutPixel(wpx, wCury, ucColor);
+ 3489              		.loc 1 267 0
+ 3490 1050 F2215BE1 		ldrsh	r2, [fp, #-18]
+ 3491 1054 0230A0E1 		mov	r3, r2
+ 3492 1058 0331A0E1 		mov	r3, r3, asl #2
+ 3493 105c 023083E0 		add	r3, r3, r2
+ 3494 1060 0333A0E1 		mov	r3, r3, asl #6
+ 3495 1064 A32FA0E1 		mov	r2, r3, lsr #31
+ 3496 1068 033082E0 		add	r3, r2, r3
+ 3497 106c C330A0E1 		mov	r3, r3, asr #1
+ 3498 1070 C32683E2 		add	r2, r3, #204472320
+ 3499 1074 962C82E2 		add	r2, r2, #38400
+ 3500 1078 FA315BE1 		ldrsh	r3, [fp, #-26]
+ 3501 107c 071083E2 		add	r1, r3, #7
+ 3502 1080 000053E3 		cmp	r3, #0
+ 3503 1084 0130A0B1 		movlt	r3, r1
+ 3504 1088 C331A0E1 		mov	r3, r3, asr #3
+ 3505 108c 0338A0E1 		mov	r3, r3, asl #16
+ 3506 1090 2338A0E1 		mov	r3, r3, lsr #16
+ 3507 1094 0338A0E1 		mov	r3, r3, asl #16
+ 3508 1098 4338A0E1 		mov	r3, r3, asr #16
+ 3509 109c 0331A0E1 		mov	r3, r3, asl #2
+ 3510 10a0 033082E0 		add	r3, r2, r3
+ 3511 10a4 0310A0E1 		mov	r1, r3
+ 3512 10a8 F2215BE1 		ldrsh	r2, [fp, #-18]
+ 3513 10ac 0230A0E1 		mov	r3, r2
+ 3514 10b0 0331A0E1 		mov	r3, r3, asl #2
+ 3515 10b4 023083E0 		add	r3, r3, r2
+ 3516 10b8 0333A0E1 		mov	r3, r3, asl #6
+ 3517 10bc A32FA0E1 		mov	r2, r3, lsr #31
+ 3518 10c0 033082E0 		add	r3, r2, r3
+ 3519 10c4 C330A0E1 		mov	r3, r3, asr #1
+ 3520 10c8 C32683E2 		add	r2, r3, #204472320
+ 3521 10cc 962C82E2 		add	r2, r2, #38400
+ 3522 10d0 FA315BE1 		ldrsh	r3, [fp, #-26]
+ 3523 10d4 070083E2 		add	r0, r3, #7
+ 3524 10d8 000053E3 		cmp	r3, #0
+ 3525 10dc 0030A0B1 		movlt	r3, r0
+ 3526 10e0 C331A0E1 		mov	r3, r3, asr #3
+ 3527 10e4 0338A0E1 		mov	r3, r3, asl #16
+ 3528 10e8 2338A0E1 		mov	r3, r3, lsr #16
+ 3529 10ec 0338A0E1 		mov	r3, r3, asl #16
+ 3530 10f0 4338A0E1 		mov	r3, r3, asr #16
+ 3531 10f4 0331A0E1 		mov	r3, r3, asl #2
+ 3532 10f8 033082E0 		add	r3, r2, r3
+ 3533 10fc 000093E5 		ldr	r0, [r3, #0]
+ 3534 1100 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3535 1104 C23FA0E1 		mov	r3, r2, asr #31
+ 3536 1108 A33EA0E1 		mov	r3, r3, lsr #29
+ 3537 110c 032082E0 		add	r2, r2, r3
+ 3538 1110 072002E2 		and	r2, r2, #7
+ 3539 1114 023063E0 		rsb	r3, r3, r2
+ 3540 1118 0338A0E1 		mov	r3, r3, asl #16
+ 3541 111c 2338A0E1 		mov	r3, r3, lsr #16
+ 3542 1120 0338A0E1 		mov	r3, r3, asl #16
+ 3543 1124 4338A0E1 		mov	r3, r3, asr #16
+ 3544 1128 0331A0E1 		mov	r3, r3, asl #2
+ 3545 112c 0F22A0E3 		mov	r2, #-268435456
+ 3546 1130 3233A0E1 		mov	r3, r2, lsr r3
+ 3547 1134 0330E0E1 		mvn	r3, r3
+ 3548 1138 030000E0 		and	r0, r0, r3
+ 3549 113c 04C0DBE5 		ldrb	ip, [fp, #4]	@ zero_extendqisi2
+ 3550 1140 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3551 1144 C23FA0E1 		mov	r3, r2, asr #31
+ 3552 1148 A33EA0E1 		mov	r3, r3, lsr #29
+ 3553 114c 032082E0 		add	r2, r2, r3
+ 3554 1150 072002E2 		and	r2, r2, #7
+ 3555 1154 023063E0 		rsb	r3, r3, r2
+ 3556 1158 0338A0E1 		mov	r3, r3, asl #16
+ 3557 115c 2338A0E1 		mov	r3, r3, lsr #16
+ 3558 1160 0338A0E1 		mov	r3, r3, asl #16
+ 3559 1164 4338A0E1 		mov	r3, r3, asr #16
+ 3560 1168 073063E2 		rsb	r3, r3, #7
+ 3561 116c 0331A0E1 		mov	r3, r3, asl #2
+ 3562 1170 1C33A0E1 		mov	r3, ip, asl r3
+ 3563 1174 033080E1 		orr	r3, r0, r3
+ 3564 1178 003081E5 		str	r3, [r1, #0]
+ 265:../lcd.c      ****                  wpx <= wCurx + usWidth / 2; wpx++ )
+ 3565              		.loc 1 265 0
+ 3566 117c BA315BE1 		ldrh	r3, [fp, #-26]	@ movhi
+ 3567 1180 013083E2 		add	r3, r3, #1
+ 3568 1184 BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 3569              	.L54:
+ 265:../lcd.c      ****                  wpx <= wCurx + usWidth / 2; wpx++ )
+ 3570              		.loc 1 265 0 is_stmt 0 discriminator 1
+ 3571 1188 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3572 118c F0115BE1 		ldrsh	r1, [fp, #-16]
+ 3573 1190 B830DBE1 		ldrh	r3, [fp, #8]
+ 3574 1194 A330A0E1 		mov	r3, r3, lsr #1
+ 3575 1198 0338A0E1 		mov	r3, r3, asl #16
+ 3576 119c 2338A0E1 		mov	r3, r3, lsr #16
+ 3577 11a0 033081E0 		add	r3, r1, r3
+ 264:../lcd.c      ****             for( wpx = wCurx - usWidth / 2;
+ 3578              		.loc 1 264 0 is_stmt 1 discriminator 1
+ 3579 11a4 030052E1 		cmp	r2, r3
+ 3580 11a8 A8FFFFDA 		ble	.L55
+ 268:../lcd.c      ****             }
+ 269:../lcd.c      **** 
+ 270:../lcd.c      ****             for( wpx = wNextx - usWidth / 2;
+ 3581              		.loc 1 270 0
+ 3582 11ac B4215BE1 		ldrh	r2, [fp, #-20]
+ 3583 11b0 B830DBE1 		ldrh	r3, [fp, #8]
+ 3584 11b4 A330A0E1 		mov	r3, r3, lsr #1
+ 3585 11b8 0338A0E1 		mov	r3, r3, asl #16
+ 3586 11bc 2338A0E1 		mov	r3, r3, lsr #16
+ 3587 11c0 023063E0 		rsb	r3, r3, r2
+ 3588 11c4 0338A0E1 		mov	r3, r3, asl #16
+ 3589 11c8 2338A0E1 		mov	r3, r3, lsr #16
+ 3590 11cc BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 3591 11d0 4D0000EA 		b	.L56
+ 3592              	.L57:
+ 271:../lcd.c      ****                  wpx <= wNextx + usWidth / 2; wpx++ )
+ 272:../lcd.c      ****             {
+ 273:../lcd.c      ****                 LCD_PutPixel(wpx, wNexty, ucColor);
+ 3593              		.loc 1 273 0
+ 3594 11d4 F6215BE1 		ldrsh	r2, [fp, #-22]
+ 3595 11d8 0230A0E1 		mov	r3, r2
+ 3596 11dc 0331A0E1 		mov	r3, r3, asl #2
+ 3597 11e0 023083E0 		add	r3, r3, r2
+ 3598 11e4 0333A0E1 		mov	r3, r3, asl #6
+ 3599 11e8 A32FA0E1 		mov	r2, r3, lsr #31
+ 3600 11ec 033082E0 		add	r3, r2, r3
+ 3601 11f0 C330A0E1 		mov	r3, r3, asr #1
+ 3602 11f4 C32683E2 		add	r2, r3, #204472320
+ 3603 11f8 962C82E2 		add	r2, r2, #38400
+ 3604 11fc FA315BE1 		ldrsh	r3, [fp, #-26]
+ 3605 1200 071083E2 		add	r1, r3, #7
+ 3606 1204 000053E3 		cmp	r3, #0
+ 3607 1208 0130A0B1 		movlt	r3, r1
+ 3608 120c C331A0E1 		mov	r3, r3, asr #3
+ 3609 1210 0338A0E1 		mov	r3, r3, asl #16
+ 3610 1214 2338A0E1 		mov	r3, r3, lsr #16
+ 3611 1218 0338A0E1 		mov	r3, r3, asl #16
+ 3612 121c 4338A0E1 		mov	r3, r3, asr #16
+ 3613 1220 0331A0E1 		mov	r3, r3, asl #2
+ 3614 1224 033082E0 		add	r3, r2, r3
+ 3615 1228 0310A0E1 		mov	r1, r3
+ 3616 122c F6215BE1 		ldrsh	r2, [fp, #-22]
+ 3617 1230 0230A0E1 		mov	r3, r2
+ 3618 1234 0331A0E1 		mov	r3, r3, asl #2
+ 3619 1238 023083E0 		add	r3, r3, r2
+ 3620 123c 0333A0E1 		mov	r3, r3, asl #6
+ 3621 1240 A32FA0E1 		mov	r2, r3, lsr #31
+ 3622 1244 033082E0 		add	r3, r2, r3
+ 3623 1248 C330A0E1 		mov	r3, r3, asr #1
+ 3624 124c C32683E2 		add	r2, r3, #204472320
+ 3625 1250 962C82E2 		add	r2, r2, #38400
+ 3626 1254 FA315BE1 		ldrsh	r3, [fp, #-26]
+ 3627 1258 070083E2 		add	r0, r3, #7
+ 3628 125c 000053E3 		cmp	r3, #0
+ 3629 1260 0030A0B1 		movlt	r3, r0
+ 3630 1264 C331A0E1 		mov	r3, r3, asr #3
+ 3631 1268 0338A0E1 		mov	r3, r3, asl #16
+ 3632 126c 2338A0E1 		mov	r3, r3, lsr #16
+ 3633 1270 0338A0E1 		mov	r3, r3, asl #16
+ 3634 1274 4338A0E1 		mov	r3, r3, asr #16
+ 3635 1278 0331A0E1 		mov	r3, r3, asl #2
+ 3636 127c 033082E0 		add	r3, r2, r3
+ 3637 1280 000093E5 		ldr	r0, [r3, #0]
+ 3638 1284 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3639 1288 C23FA0E1 		mov	r3, r2, asr #31
+ 3640 128c A33EA0E1 		mov	r3, r3, lsr #29
+ 3641 1290 032082E0 		add	r2, r2, r3
+ 3642 1294 072002E2 		and	r2, r2, #7
+ 3643 1298 023063E0 		rsb	r3, r3, r2
+ 3644 129c 0338A0E1 		mov	r3, r3, asl #16
+ 3645 12a0 2338A0E1 		mov	r3, r3, lsr #16
+ 3646 12a4 0338A0E1 		mov	r3, r3, asl #16
+ 3647 12a8 4338A0E1 		mov	r3, r3, asr #16
+ 3648 12ac 0331A0E1 		mov	r3, r3, asl #2
+ 3649 12b0 0F22A0E3 		mov	r2, #-268435456
+ 3650 12b4 3233A0E1 		mov	r3, r2, lsr r3
+ 3651 12b8 0330E0E1 		mvn	r3, r3
+ 3652 12bc 030000E0 		and	r0, r0, r3
+ 3653 12c0 04C0DBE5 		ldrb	ip, [fp, #4]	@ zero_extendqisi2
+ 3654 12c4 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3655 12c8 C23FA0E1 		mov	r3, r2, asr #31
+ 3656 12cc A33EA0E1 		mov	r3, r3, lsr #29
+ 3657 12d0 032082E0 		add	r2, r2, r3
+ 3658 12d4 072002E2 		and	r2, r2, #7
+ 3659 12d8 023063E0 		rsb	r3, r3, r2
+ 3660 12dc 0338A0E1 		mov	r3, r3, asl #16
+ 3661 12e0 2338A0E1 		mov	r3, r3, lsr #16
+ 3662 12e4 0338A0E1 		mov	r3, r3, asl #16
+ 3663 12e8 4338A0E1 		mov	r3, r3, asr #16
+ 3664 12ec 073063E2 		rsb	r3, r3, #7
+ 3665 12f0 0331A0E1 		mov	r3, r3, asl #2
+ 3666 12f4 1C33A0E1 		mov	r3, ip, asl r3
+ 3667 12f8 033080E1 		orr	r3, r0, r3
+ 3668 12fc 003081E5 		str	r3, [r1, #0]
+ 271:../lcd.c      ****                  wpx <= wNextx + usWidth / 2; wpx++ )
+ 3669              		.loc 1 271 0
+ 3670 1300 BA315BE1 		ldrh	r3, [fp, #-26]	@ movhi
+ 3671 1304 013083E2 		add	r3, r3, #1
+ 3672 1308 BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 3673              	.L56:
+ 271:../lcd.c      ****                  wpx <= wNextx + usWidth / 2; wpx++ )
+ 3674              		.loc 1 271 0 is_stmt 0 discriminator 1
+ 3675 130c FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3676 1310 F4115BE1 		ldrsh	r1, [fp, #-20]
+ 3677 1314 B830DBE1 		ldrh	r3, [fp, #8]
+ 3678 1318 A330A0E1 		mov	r3, r3, lsr #1
+ 3679 131c 0338A0E1 		mov	r3, r3, asl #16
+ 3680 1320 2338A0E1 		mov	r3, r3, lsr #16
+ 3681 1324 033081E0 		add	r3, r1, r3
+ 270:../lcd.c      ****             for( wpx = wNextx - usWidth / 2;
+ 3682              		.loc 1 270 0 is_stmt 1 discriminator 1
+ 3683 1328 030052E1 		cmp	r2, r3
+ 3684 132c A8FFFFDA 		ble	.L57
+ 256:../lcd.c      ****              wCury <= wNexty; wCury++, wNexty--, decision += usDx )
+ 3685              		.loc 1 256 0
+ 3686 1330 B2315BE1 		ldrh	r3, [fp, #-18]	@ movhi
+ 3687 1334 013083E2 		add	r3, r3, #1
+ 3688 1338 B2314BE1 		strh	r3, [fp, #-18]	@ movhi
+ 3689 133c B6315BE1 		ldrh	r3, [fp, #-22]	@ movhi
+ 3690 1340 013043E2 		sub	r3, r3, #1
+ 3691 1344 B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 3692 1348 BE205BE1 		ldrh	r2, [fp, #-14]
+ 3693 134c BC315BE1 		ldrh	r3, [fp, #-28]
+ 3694 1350 033082E0 		add	r3, r2, r3
+ 3695 1354 0338A0E1 		mov	r3, r3, asl #16
+ 3696 1358 2338A0E1 		mov	r3, r3, lsr #16
+ 3697 135c BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 3698              	.L52:
+ 254:../lcd.c      ****         for( wCurx = usX0, wCury = usY0, wNextx = usX1,
+ 3699              		.loc 1 254 0 discriminator 1
+ 3700 1360 F2215BE1 		ldrsh	r2, [fp, #-18]
+ 3701 1364 F6315BE1 		ldrsh	r3, [fp, #-22]
+ 3702 1368 030052E1 		cmp	r2, r3
+ 3703 136c 17FFFFDA 		ble	.L58
+ 3704              	.L37:
+ 274:../lcd.c      ****             }
+ 275:../lcd.c      ****         }
+ 276:../lcd.c      ****     }
+ 277:../lcd.c      **** }
+ 3705              		.loc 1 277 0
+ 3706 1370 0CD04BE2 		sub	sp, fp, #12
+ 3707 1374 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 3708 1378 1EFF2FE1 		bx	lr
+ 3709              		.cfi_endproc
+ 3710              	.LFE6:
+ 3712              		.align	2
+ 3713              		.global	Lcd_Draw_HLine
+ 3715              	Lcd_Draw_HLine:
+ 3716              	.LFB7:
+ 278:../lcd.c      **** 
+ 279:../lcd.c      **** /*********************************************************************************************
+ 280:../lcd.c      **** * name:		Lcd_Draw_HLine()
+ 281:../lcd.c      **** * func:		Draw horizontal line with appointed color
+ 282:../lcd.c      **** * para:		usX0,usY0 -- line's start point coordinate
+ 283:../lcd.c      **** *			usX1 -- line's end point X-coordinate
+ 284:../lcd.c      **** *			ucColor -- appointed color value
+ 285:../lcd.c      **** *			usWidth -- line's width
+ 286:../lcd.c      **** * ret:		none
+ 287:../lcd.c      **** * modify:
+ 288:../lcd.c      **** * comment:		
+ 289:../lcd.c      **** *********************************************************************************************/
+ 290:../lcd.c      **** void Lcd_Draw_HLine(INT16 usX0, INT16 usX1, INT16 usY0, INT8U ucColor, INT16U usWidth)
+ 291:../lcd.c      **** {
+ 3717              		.loc 1 291 0
+ 3718              		.cfi_startproc
+ 3719              		@ Function supports interworking.
+ 3720              		@ args = 4, pretend = 0, frame = 16
+ 3721              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3722 137c 0DC0A0E1 		mov	ip, sp
+ 3723              	.LCFI14:
+ 3724              		.cfi_def_cfa_register 12
+ 3725 1380 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3726 1384 04B04CE2 		sub	fp, ip, #4
+ 3727              		.cfi_offset 14, -8
+ 3728              		.cfi_offset 13, -12
+ 3729              		.cfi_offset 11, -16
+ 3730              	.LCFI15:
+ 3731              		.cfi_def_cfa 11, 4
+ 3732 1388 10D04DE2 		sub	sp, sp, #16
+ 3733 138c B6014BE1 		strh	r0, [fp, #-22]	@ movhi
+ 3734 1390 B8114BE1 		strh	r1, [fp, #-24]	@ movhi
+ 3735 1394 BA214BE1 		strh	r2, [fp, #-26]	@ movhi
+ 3736 1398 1B304BE5 		strb	r3, [fp, #-27]
+ 292:../lcd.c      **** 	INT16 usLen;
+ 293:../lcd.c      **** 
+ 294:../lcd.c      ****     if( usX1 < usX0 )
+ 3737              		.loc 1 294 0
+ 3738 139c F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3739 13a0 F6315BE1 		ldrsh	r3, [fp, #-22]
+ 3740 13a4 030052E1 		cmp	r2, r3
+ 3741 13a8 670000AA 		bge	.L65
+ 295:../lcd.c      ****     {
+ 296:../lcd.c      ****         GUISWAP (usX1, usX0);
+ 3742              		.loc 1 296 0
+ 3743 13ac B8215BE1 		ldrh	r2, [fp, #-24]	@ movhi
+ 3744 13b0 B6315BE1 		ldrh	r3, [fp, #-22]	@ movhi
+ 3745 13b4 033022E0 		eor	r3, r2, r3
+ 3746 13b8 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 3747 13bc B6215BE1 		ldrh	r2, [fp, #-22]	@ movhi
+ 3748 13c0 B8315BE1 		ldrh	r3, [fp, #-24]	@ movhi
+ 3749 13c4 033022E0 		eor	r3, r2, r3
+ 3750 13c8 B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 3751 13cc B8215BE1 		ldrh	r2, [fp, #-24]	@ movhi
+ 3752 13d0 B6315BE1 		ldrh	r3, [fp, #-22]	@ movhi
+ 3753 13d4 033022E0 		eor	r3, r2, r3
+ 3754 13d8 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 297:../lcd.c      ****     }
+ 298:../lcd.c      **** 
+ 299:../lcd.c      ****     while( (usWidth--) > 0 )
+ 3755              		.loc 1 299 0
+ 3756 13dc 5B0000EA 		b	.L61
+ 3757              	.L64:
+ 300:../lcd.c      ****     {
+ 301:../lcd.c      ****         usLen = usX1 - usX0 + 1;
+ 3758              		.loc 1 301 0
+ 3759 13e0 B8215BE1 		ldrh	r2, [fp, #-24]
+ 3760 13e4 B6315BE1 		ldrh	r3, [fp, #-22]
+ 3761 13e8 023063E0 		rsb	r3, r3, r2
+ 3762 13ec 0338A0E1 		mov	r3, r3, asl #16
+ 3763 13f0 2338A0E1 		mov	r3, r3, lsr #16
+ 3764 13f4 013083E2 		add	r3, r3, #1
+ 3765 13f8 0338A0E1 		mov	r3, r3, asl #16
+ 3766 13fc 2338A0E1 		mov	r3, r3, lsr #16
+ 3767 1400 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 302:../lcd.c      ****         while( (usLen--) > 0 )
+ 3768              		.loc 1 302 0
+ 3769 1404 420000EA 		b	.L62
+ 3770              	.L63:
+ 303:../lcd.c      ****         {
+ 304:../lcd.c      ****         	LCD_PutPixel(usX0 + usLen, usY0, ucColor);
+ 3771              		.loc 1 304 0
+ 3772 1408 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3773 140c 0230A0E1 		mov	r3, r2
+ 3774 1410 0331A0E1 		mov	r3, r3, asl #2
+ 3775 1414 023083E0 		add	r3, r3, r2
+ 3776 1418 0333A0E1 		mov	r3, r3, asl #6
+ 3777 141c A32FA0E1 		mov	r2, r3, lsr #31
+ 3778 1420 033082E0 		add	r3, r2, r3
+ 3779 1424 C330A0E1 		mov	r3, r3, asr #1
+ 3780 1428 C32683E2 		add	r2, r3, #204472320
+ 3781 142c 962C82E2 		add	r2, r2, #38400
+ 3782 1430 F6115BE1 		ldrsh	r1, [fp, #-22]
+ 3783 1434 FE305BE1 		ldrsh	r3, [fp, #-14]
+ 3784 1438 033081E0 		add	r3, r1, r3
+ 3785 143c 071083E2 		add	r1, r3, #7
+ 3786 1440 000053E3 		cmp	r3, #0
+ 3787 1444 0130A0B1 		movlt	r3, r1
+ 3788 1448 C331A0E1 		mov	r3, r3, asr #3
+ 3789 144c 0331A0E1 		mov	r3, r3, asl #2
+ 3790 1450 033082E0 		add	r3, r2, r3
+ 3791 1454 0310A0E1 		mov	r1, r3
+ 3792 1458 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3793 145c 0230A0E1 		mov	r3, r2
+ 3794 1460 0331A0E1 		mov	r3, r3, asl #2
+ 3795 1464 023083E0 		add	r3, r3, r2
+ 3796 1468 0333A0E1 		mov	r3, r3, asl #6
+ 3797 146c A32FA0E1 		mov	r2, r3, lsr #31
+ 3798 1470 033082E0 		add	r3, r2, r3
+ 3799 1474 C330A0E1 		mov	r3, r3, asr #1
+ 3800 1478 C32683E2 		add	r2, r3, #204472320
+ 3801 147c 962C82E2 		add	r2, r2, #38400
+ 3802 1480 F6015BE1 		ldrsh	r0, [fp, #-22]
+ 3803 1484 FE305BE1 		ldrsh	r3, [fp, #-14]
+ 3804 1488 033080E0 		add	r3, r0, r3
+ 3805 148c 070083E2 		add	r0, r3, #7
+ 3806 1490 000053E3 		cmp	r3, #0
+ 3807 1494 0030A0B1 		movlt	r3, r0
+ 3808 1498 C331A0E1 		mov	r3, r3, asr #3
+ 3809 149c 0331A0E1 		mov	r3, r3, asl #2
+ 3810 14a0 033082E0 		add	r3, r2, r3
+ 3811 14a4 000093E5 		ldr	r0, [r3, #0]
+ 3812 14a8 F6215BE1 		ldrsh	r2, [fp, #-22]
+ 3813 14ac FE305BE1 		ldrsh	r3, [fp, #-14]
+ 3814 14b0 032082E0 		add	r2, r2, r3
+ 3815 14b4 C23FA0E1 		mov	r3, r2, asr #31
+ 3816 14b8 A33EA0E1 		mov	r3, r3, lsr #29
+ 3817 14bc 032082E0 		add	r2, r2, r3
+ 3818 14c0 072002E2 		and	r2, r2, #7
+ 3819 14c4 023063E0 		rsb	r3, r3, r2
+ 3820 14c8 0331A0E1 		mov	r3, r3, asl #2
+ 3821 14cc 0F22A0E3 		mov	r2, #-268435456
+ 3822 14d0 3233A0E1 		mov	r3, r2, lsr r3
+ 3823 14d4 0330E0E1 		mvn	r3, r3
+ 3824 14d8 030000E0 		and	r0, r0, r3
+ 3825 14dc 1BC05BE5 		ldrb	ip, [fp, #-27]	@ zero_extendqisi2
+ 3826 14e0 F6215BE1 		ldrsh	r2, [fp, #-22]
+ 3827 14e4 FE305BE1 		ldrsh	r3, [fp, #-14]
+ 3828 14e8 032082E0 		add	r2, r2, r3
+ 3829 14ec C23FA0E1 		mov	r3, r2, asr #31
+ 3830 14f0 A33EA0E1 		mov	r3, r3, lsr #29
+ 3831 14f4 032082E0 		add	r2, r2, r3
+ 3832 14f8 072002E2 		and	r2, r2, #7
+ 3833 14fc 023063E0 		rsb	r3, r3, r2
+ 3834 1500 073063E2 		rsb	r3, r3, #7
+ 3835 1504 0331A0E1 		mov	r3, r3, asl #2
+ 3836 1508 1C33A0E1 		mov	r3, ip, asl r3
+ 3837 150c 033080E1 		orr	r3, r0, r3
+ 3838 1510 003081E5 		str	r3, [r1, #0]
+ 3839              	.L62:
+ 302:../lcd.c      ****         while( (usLen--) > 0 )
+ 3840              		.loc 1 302 0 discriminator 1
+ 3841 1514 FE305BE1 		ldrsh	r3, [fp, #-14]
+ 3842 1518 000053E3 		cmp	r3, #0
+ 3843 151c 0030A0D3 		movle	r3, #0
+ 3844 1520 0130A0C3 		movgt	r3, #1
+ 3845 1524 FF3003E2 		and	r3, r3, #255
+ 3846 1528 BE205BE1 		ldrh	r2, [fp, #-14]	@ movhi
+ 3847 152c 012042E2 		sub	r2, r2, #1
+ 3848 1530 BE204BE1 		strh	r2, [fp, #-14]	@ movhi
+ 3849 1534 000053E3 		cmp	r3, #0
+ 3850 1538 B2FFFF1A 		bne	.L63
+ 305:../lcd.c      ****         }
+ 306:../lcd.c      ****         usY0++;
+ 3851              		.loc 1 306 0
+ 3852 153c BA315BE1 		ldrh	r3, [fp, #-26]	@ movhi
+ 3853 1540 013083E2 		add	r3, r3, #1
+ 3854 1544 BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 3855 1548 000000EA 		b	.L61
+ 3856              	.L65:
+ 299:../lcd.c      ****     while( (usWidth--) > 0 )
+ 3857              		.loc 1 299 0
+ 3858 154c 0000A0E1 		mov	r0, r0	@ nop
+ 3859              	.L61:
+ 299:../lcd.c      ****     while( (usWidth--) > 0 )
+ 3860              		.loc 1 299 0 is_stmt 0 discriminator 1
+ 3861 1550 B430DBE1 		ldrh	r3, [fp, #4]
+ 3862 1554 000053E3 		cmp	r3, #0
+ 3863 1558 0030A003 		moveq	r3, #0
+ 3864 155c 0130A013 		movne	r3, #1
+ 3865 1560 FF3003E2 		and	r3, r3, #255
+ 3866 1564 B420DBE1 		ldrh	r2, [fp, #4]	@ movhi
+ 3867 1568 012042E2 		sub	r2, r2, #1
+ 3868 156c B420CBE1 		strh	r2, [fp, #4]	@ movhi
+ 3869 1570 000053E3 		cmp	r3, #0
+ 3870 1574 99FFFF1A 		bne	.L64
+ 307:../lcd.c      ****     }
+ 308:../lcd.c      **** }
+ 3871              		.loc 1 308 0 is_stmt 1
+ 3872 1578 0CD04BE2 		sub	sp, fp, #12
+ 3873 157c 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 3874 1580 1EFF2FE1 		bx	lr
+ 3875              		.cfi_endproc
+ 3876              	.LFE7:
+ 3878              		.align	2
+ 3879              		.global	Lcd_Draw_VLine
+ 3881              	Lcd_Draw_VLine:
+ 3882              	.LFB8:
+ 309:../lcd.c      **** 
+ 310:../lcd.c      **** /*********************************************************************************************
+ 311:../lcd.c      **** * name:		Lcd_Draw_VLine()
+ 312:../lcd.c      **** * func:		Draw vertical line with appointed color
+ 313:../lcd.c      **** * para:		usX0,usY0 -- line's start point coordinate
+ 314:../lcd.c      **** *			usY1 -- line's end point Y-coordinate
+ 315:../lcd.c      **** *			ucColor -- appointed color value
+ 316:../lcd.c      **** *			usWidth -- line's width
+ 317:../lcd.c      **** * ret:		none
+ 318:../lcd.c      **** * modify:
+ 319:../lcd.c      **** * comment:		
+ 320:../lcd.c      **** *********************************************************************************************/
+ 321:../lcd.c      **** void Lcd_Draw_VLine (INT16 usY0, INT16 usY1, INT16 usX0, INT8U ucColor, INT16U usWidth)
+ 322:../lcd.c      **** {
+ 3883              		.loc 1 322 0
+ 3884              		.cfi_startproc
+ 3885              		@ Function supports interworking.
+ 3886              		@ args = 4, pretend = 0, frame = 16
+ 3887              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3888 1584 0DC0A0E1 		mov	ip, sp
+ 3889              	.LCFI16:
+ 3890              		.cfi_def_cfa_register 12
+ 3891 1588 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3892 158c 04B04CE2 		sub	fp, ip, #4
+ 3893              		.cfi_offset 14, -8
+ 3894              		.cfi_offset 13, -12
+ 3895              		.cfi_offset 11, -16
+ 3896              	.LCFI17:
+ 3897              		.cfi_def_cfa 11, 4
+ 3898 1590 10D04DE2 		sub	sp, sp, #16
+ 3899 1594 B6014BE1 		strh	r0, [fp, #-22]	@ movhi
+ 3900 1598 B8114BE1 		strh	r1, [fp, #-24]	@ movhi
+ 3901 159c BA214BE1 		strh	r2, [fp, #-26]	@ movhi
+ 3902 15a0 1B304BE5 		strb	r3, [fp, #-27]
+ 323:../lcd.c      **** 	INT16 usLen;
+ 324:../lcd.c      **** 
+ 325:../lcd.c      ****     if( usY1 < usY0 )
+ 3903              		.loc 1 325 0
+ 3904 15a4 F8215BE1 		ldrsh	r2, [fp, #-24]
+ 3905 15a8 F6315BE1 		ldrsh	r3, [fp, #-22]
+ 3906 15ac 030052E1 		cmp	r2, r3
+ 3907 15b0 730000AA 		bge	.L72
+ 326:../lcd.c      ****     {
+ 327:../lcd.c      ****         GUISWAP (usY1, usY0);
+ 3908              		.loc 1 327 0
+ 3909 15b4 B8215BE1 		ldrh	r2, [fp, #-24]	@ movhi
+ 3910 15b8 B6315BE1 		ldrh	r3, [fp, #-22]	@ movhi
+ 3911 15bc 033022E0 		eor	r3, r2, r3
+ 3912 15c0 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 3913 15c4 B6215BE1 		ldrh	r2, [fp, #-22]	@ movhi
+ 3914 15c8 B8315BE1 		ldrh	r3, [fp, #-24]	@ movhi
+ 3915 15cc 033022E0 		eor	r3, r2, r3
+ 3916 15d0 B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 3917 15d4 B8215BE1 		ldrh	r2, [fp, #-24]	@ movhi
+ 3918 15d8 B6315BE1 		ldrh	r3, [fp, #-22]	@ movhi
+ 3919 15dc 033022E0 		eor	r3, r2, r3
+ 3920 15e0 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 328:../lcd.c      ****     }
+ 329:../lcd.c      **** 
+ 330:../lcd.c      ****     while( (usWidth--) > 0 )
+ 3921              		.loc 1 330 0
+ 3922 15e4 670000EA 		b	.L68
+ 3923              	.L71:
+ 331:../lcd.c      ****     {
+ 332:../lcd.c      ****         usLen = usY1 - usY0 + 1;
+ 3924              		.loc 1 332 0
+ 3925 15e8 B8215BE1 		ldrh	r2, [fp, #-24]
+ 3926 15ec B6315BE1 		ldrh	r3, [fp, #-22]
+ 3927 15f0 023063E0 		rsb	r3, r3, r2
+ 3928 15f4 0338A0E1 		mov	r3, r3, asl #16
+ 3929 15f8 2338A0E1 		mov	r3, r3, lsr #16
+ 3930 15fc 013083E2 		add	r3, r3, #1
+ 3931 1600 0338A0E1 		mov	r3, r3, asl #16
+ 3932 1604 2338A0E1 		mov	r3, r3, lsr #16
+ 3933 1608 BE304BE1 		strh	r3, [fp, #-14]	@ movhi
+ 333:../lcd.c      ****         while( (usLen--) > 0 )
+ 3934              		.loc 1 333 0
+ 3935 160c 4E0000EA 		b	.L69
+ 3936              	.L70:
+ 334:../lcd.c      ****         {
+ 335:../lcd.c      ****         	LCD_PutPixel(usX0, usY0 + usLen, ucColor);
+ 3937              		.loc 1 335 0
+ 3938 1610 F6215BE1 		ldrsh	r2, [fp, #-22]
+ 3939 1614 FE305BE1 		ldrsh	r3, [fp, #-14]
+ 3940 1618 032082E0 		add	r2, r2, r3
+ 3941 161c 0230A0E1 		mov	r3, r2
+ 3942 1620 0331A0E1 		mov	r3, r3, asl #2
+ 3943 1624 023083E0 		add	r3, r3, r2
+ 3944 1628 0333A0E1 		mov	r3, r3, asl #6
+ 3945 162c A32FA0E1 		mov	r2, r3, lsr #31
+ 3946 1630 033082E0 		add	r3, r2, r3
+ 3947 1634 C330A0E1 		mov	r3, r3, asr #1
+ 3948 1638 C32683E2 		add	r2, r3, #204472320
+ 3949 163c 962C82E2 		add	r2, r2, #38400
+ 3950 1640 FA315BE1 		ldrsh	r3, [fp, #-26]
+ 3951 1644 071083E2 		add	r1, r3, #7
+ 3952 1648 000053E3 		cmp	r3, #0
+ 3953 164c 0130A0B1 		movlt	r3, r1
+ 3954 1650 C331A0E1 		mov	r3, r3, asr #3
+ 3955 1654 0338A0E1 		mov	r3, r3, asl #16
+ 3956 1658 2338A0E1 		mov	r3, r3, lsr #16
+ 3957 165c 0338A0E1 		mov	r3, r3, asl #16
+ 3958 1660 4338A0E1 		mov	r3, r3, asr #16
+ 3959 1664 0331A0E1 		mov	r3, r3, asl #2
+ 3960 1668 033082E0 		add	r3, r2, r3
+ 3961 166c 0310A0E1 		mov	r1, r3
+ 3962 1670 F6215BE1 		ldrsh	r2, [fp, #-22]
+ 3963 1674 FE305BE1 		ldrsh	r3, [fp, #-14]
+ 3964 1678 032082E0 		add	r2, r2, r3
+ 3965 167c 0230A0E1 		mov	r3, r2
+ 3966 1680 0331A0E1 		mov	r3, r3, asl #2
+ 3967 1684 023083E0 		add	r3, r3, r2
+ 3968 1688 0333A0E1 		mov	r3, r3, asl #6
+ 3969 168c A32FA0E1 		mov	r2, r3, lsr #31
+ 3970 1690 033082E0 		add	r3, r2, r3
+ 3971 1694 C330A0E1 		mov	r3, r3, asr #1
+ 3972 1698 C32683E2 		add	r2, r3, #204472320
+ 3973 169c 962C82E2 		add	r2, r2, #38400
+ 3974 16a0 FA315BE1 		ldrsh	r3, [fp, #-26]
+ 3975 16a4 070083E2 		add	r0, r3, #7
+ 3976 16a8 000053E3 		cmp	r3, #0
+ 3977 16ac 0030A0B1 		movlt	r3, r0
+ 3978 16b0 C331A0E1 		mov	r3, r3, asr #3
+ 3979 16b4 0338A0E1 		mov	r3, r3, asl #16
+ 3980 16b8 2338A0E1 		mov	r3, r3, lsr #16
+ 3981 16bc 0338A0E1 		mov	r3, r3, asl #16
+ 3982 16c0 4338A0E1 		mov	r3, r3, asr #16
+ 3983 16c4 0331A0E1 		mov	r3, r3, asl #2
+ 3984 16c8 033082E0 		add	r3, r2, r3
+ 3985 16cc 000093E5 		ldr	r0, [r3, #0]
+ 3986 16d0 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 3987 16d4 C23FA0E1 		mov	r3, r2, asr #31
+ 3988 16d8 A33EA0E1 		mov	r3, r3, lsr #29
+ 3989 16dc 032082E0 		add	r2, r2, r3
+ 3990 16e0 072002E2 		and	r2, r2, #7
+ 3991 16e4 023063E0 		rsb	r3, r3, r2
+ 3992 16e8 0338A0E1 		mov	r3, r3, asl #16
+ 3993 16ec 2338A0E1 		mov	r3, r3, lsr #16
+ 3994 16f0 0338A0E1 		mov	r3, r3, asl #16
+ 3995 16f4 4338A0E1 		mov	r3, r3, asr #16
+ 3996 16f8 0331A0E1 		mov	r3, r3, asl #2
+ 3997 16fc 0F22A0E3 		mov	r2, #-268435456
+ 3998 1700 3233A0E1 		mov	r3, r2, lsr r3
+ 3999 1704 0330E0E1 		mvn	r3, r3
+ 4000 1708 030000E0 		and	r0, r0, r3
+ 4001 170c 1BC05BE5 		ldrb	ip, [fp, #-27]	@ zero_extendqisi2
+ 4002 1710 FA215BE1 		ldrsh	r2, [fp, #-26]
+ 4003 1714 C23FA0E1 		mov	r3, r2, asr #31
+ 4004 1718 A33EA0E1 		mov	r3, r3, lsr #29
+ 4005 171c 032082E0 		add	r2, r2, r3
+ 4006 1720 072002E2 		and	r2, r2, #7
+ 4007 1724 023063E0 		rsb	r3, r3, r2
+ 4008 1728 0338A0E1 		mov	r3, r3, asl #16
+ 4009 172c 2338A0E1 		mov	r3, r3, lsr #16
+ 4010 1730 0338A0E1 		mov	r3, r3, asl #16
+ 4011 1734 4338A0E1 		mov	r3, r3, asr #16
+ 4012 1738 073063E2 		rsb	r3, r3, #7
+ 4013 173c 0331A0E1 		mov	r3, r3, asl #2
+ 4014 1740 1C33A0E1 		mov	r3, ip, asl r3
+ 4015 1744 033080E1 		orr	r3, r0, r3
+ 4016 1748 003081E5 		str	r3, [r1, #0]
+ 4017              	.L69:
+ 333:../lcd.c      ****         while( (usLen--) > 0 )
+ 4018              		.loc 1 333 0 discriminator 1
+ 4019 174c FE305BE1 		ldrsh	r3, [fp, #-14]
+ 4020 1750 000053E3 		cmp	r3, #0
+ 4021 1754 0030A0D3 		movle	r3, #0
+ 4022 1758 0130A0C3 		movgt	r3, #1
+ 4023 175c FF3003E2 		and	r3, r3, #255
+ 4024 1760 BE205BE1 		ldrh	r2, [fp, #-14]	@ movhi
+ 4025 1764 012042E2 		sub	r2, r2, #1
+ 4026 1768 BE204BE1 		strh	r2, [fp, #-14]	@ movhi
+ 4027 176c 000053E3 		cmp	r3, #0
+ 4028 1770 A6FFFF1A 		bne	.L70
+ 336:../lcd.c      ****         }
+ 337:../lcd.c      ****         usX0++;
+ 4029              		.loc 1 337 0
+ 4030 1774 BA315BE1 		ldrh	r3, [fp, #-26]	@ movhi
+ 4031 1778 013083E2 		add	r3, r3, #1
+ 4032 177c BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 4033 1780 000000EA 		b	.L68
+ 4034              	.L72:
+ 330:../lcd.c      ****     while( (usWidth--) > 0 )
+ 4035              		.loc 1 330 0
+ 4036 1784 0000A0E1 		mov	r0, r0	@ nop
+ 4037              	.L68:
+ 330:../lcd.c      ****     while( (usWidth--) > 0 )
+ 4038              		.loc 1 330 0 is_stmt 0 discriminator 1
+ 4039 1788 B430DBE1 		ldrh	r3, [fp, #4]
+ 4040 178c 000053E3 		cmp	r3, #0
+ 4041 1790 0030A003 		moveq	r3, #0
+ 4042 1794 0130A013 		movne	r3, #1
+ 4043 1798 FF3003E2 		and	r3, r3, #255
+ 4044 179c B420DBE1 		ldrh	r2, [fp, #4]	@ movhi
+ 4045 17a0 012042E2 		sub	r2, r2, #1
+ 4046 17a4 B420CBE1 		strh	r2, [fp, #4]	@ movhi
+ 4047 17a8 000053E3 		cmp	r3, #0
+ 4048 17ac 8DFFFF1A 		bne	.L71
+ 338:../lcd.c      ****     }
+ 339:../lcd.c      **** }
+ 4049              		.loc 1 339 0 is_stmt 1
+ 4050 17b0 0CD04BE2 		sub	sp, fp, #12
+ 4051 17b4 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4052 17b8 1EFF2FE1 		bx	lr
+ 4053              		.cfi_endproc
+ 4054              	.LFE8:
+ 4056              		.align	2
+ 4057              		.global	Lcd_DspAscII8x16
+ 4059              	Lcd_DspAscII8x16:
+ 4060              	.LFB9:
+ 340:../lcd.c      **** 
+ 341:../lcd.c      **** /*********************************************************************************************
+ 342:../lcd.c      **** * name:		Lcd_DspAscII8x16()
+ 343:../lcd.c      **** * func:		display 8x16 ASCII character string 
+ 344:../lcd.c      **** * para:		usX0,usY0 -- ASCII character string's start point coordinate
+ 345:../lcd.c      **** *			ForeColor -- appointed color value
+ 346:../lcd.c      **** *			pucChar   -- ASCII character string
+ 347:../lcd.c      **** * ret:		none
+ 348:../lcd.c      **** * modify:
+ 349:../lcd.c      **** * comment:		
+ 350:../lcd.c      **** *********************************************************************************************/
+ 351:../lcd.c      **** void Lcd_DspAscII8x16(INT16U x0, INT16U y0, INT8U ForeColor, INT8U * s)
+ 352:../lcd.c      **** {
+ 4061              		.loc 1 352 0
+ 4062              		.cfi_startproc
+ 4063              		@ Function supports interworking.
+ 4064              		@ args = 0, pretend = 0, frame = 56
+ 4065              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4066 17bc 0DC0A0E1 		mov	ip, sp
+ 4067              	.LCFI18:
+ 4068              		.cfi_def_cfa_register 12
+ 4069 17c0 10D82DE9 		stmfd	sp!, {r4, fp, ip, lr, pc}
+ 4070 17c4 04B04CE2 		sub	fp, ip, #4
+ 4071              		.cfi_offset 14, -8
+ 4072              		.cfi_offset 13, -12
+ 4073              		.cfi_offset 11, -16
+ 4074              		.cfi_offset 4, -20
+ 4075              	.LCFI19:
+ 4076              		.cfi_def_cfa 11, 4
+ 4077 17c8 3CD04DE2 		sub	sp, sp, #60
+ 4078 17cc 48300BE5 		str	r3, [fp, #-72]
+ 4079 17d0 BE034BE1 		strh	r0, [fp, #-62]	@ movhi
+ 4080 17d4 B0144BE1 		strh	r1, [fp, #-64]	@ movhi
+ 4081 17d8 0230A0E1 		mov	r3, r2
+ 4082 17dc 41304BE5 		strb	r3, [fp, #-65]
+ 353:../lcd.c      **** 	INT16 i,j,k,x,y,xx;
+ 354:../lcd.c      **** 	INT8U qm;
+ 355:../lcd.c      **** 	INT32U ulOffset;
+ 356:../lcd.c      **** 	INT8 ywbuf[16],temp[2];
+ 357:../lcd.c      ****     
+ 358:../lcd.c      **** 	for( i = 0; i < strlen((const char*)s); i++ )
+ 4083              		.loc 1 358 0
+ 4084 17e0 0030A0E3 		mov	r3, #0
+ 4085 17e4 B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 4086 17e8 AE0000EA 		b	.L74
+ 4087              	.L84:
+ 359:../lcd.c      **** 	{
+ 360:../lcd.c      **** 		if( (INT8U)*(s+i) >= 161 )
+ 4088              		.loc 1 360 0
+ 4089 17ec F6315BE1 		ldrsh	r3, [fp, #-22]
+ 4090 17f0 48201BE5 		ldr	r2, [fp, #-72]
+ 4091 17f4 033082E0 		add	r3, r2, r3
+ 4092 17f8 0030D3E5 		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 4093 17fc A00053E3 		cmp	r3, #160
+ 4094 1800 0700009A 		bls	.L75
+ 361:../lcd.c      **** 		{
+ 362:../lcd.c      **** 			temp[0] = *(s + i);
+ 4095              		.loc 1 362 0
+ 4096 1804 F6315BE1 		ldrsh	r3, [fp, #-22]
+ 4097 1808 48201BE5 		ldr	r2, [fp, #-72]
+ 4098 180c 033082E0 		add	r3, r2, r3
+ 4099 1810 0030D3E5 		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 4100 1814 3C304BE5 		strb	r3, [fp, #-60]
+ 363:../lcd.c      **** 			temp[1] = '\0';
+ 4101              		.loc 1 363 0
+ 4102 1818 0030A0E3 		mov	r3, #0
+ 4103 181c 3B304BE5 		strb	r3, [fp, #-59]
+ 364:../lcd.c      **** 			return;
+ 4104              		.loc 1 364 0
+ 4105 1820 A60000EA 		b	.L73
+ 4106              	.L75:
+ 365:../lcd.c      **** 		}
+ 366:../lcd.c      **** 		else
+ 367:../lcd.c      **** 		{
+ 368:../lcd.c      **** 			qm = *(s+i);
+ 4107              		.loc 1 368 0
+ 4108 1824 F6315BE1 		ldrsh	r3, [fp, #-22]
+ 4109 1828 48201BE5 		ldr	r2, [fp, #-72]
+ 4110 182c 033082E0 		add	r3, r2, r3
+ 4111 1830 0030D3E5 		ldrb	r3, [r3, #0]
+ 4112 1834 1D304BE5 		strb	r3, [fp, #-29]
+ 369:../lcd.c      **** 			ulOffset = (INT32U)(qm) * 16;		//Here to be changed tomorrow
+ 4113              		.loc 1 369 0
+ 4114 1838 1D305BE5 		ldrb	r3, [fp, #-29]	@ zero_extendqisi2
+ 4115 183c 0332A0E1 		mov	r3, r3, asl #4
+ 4116 1840 24300BE5 		str	r3, [fp, #-36]
+ 370:../lcd.c      **** 			for( j = 0; j < 16; j ++ )
+ 4117              		.loc 1 370 0
+ 4118 1844 0030A0E3 		mov	r3, #0
+ 4119 1848 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 4120 184c 0D0000EA 		b	.L77
+ 4121              	.L78:
+ 371:../lcd.c      **** 			{
+ 372:../lcd.c      **** 				ywbuf[j] = g_auc_Ascii8x16[ulOffset + j];
+ 4122              		.loc 1 372 0 discriminator 2
+ 4123 1850 F8115BE1 		ldrsh	r1, [fp, #-24]
+ 4124 1854 F8215BE1 		ldrsh	r2, [fp, #-24]
+ 4125 1858 24301BE5 		ldr	r3, [fp, #-36]
+ 4126 185c 033082E0 		add	r3, r2, r3
+ 4127 1860 64229FE5 		ldr	r2, .L85
+ 4128 1864 0320D2E7 		ldrb	r2, [r2, r3]	@ zero_extendqisi2
+ 4129 1868 2330E0E3 		mvn	r3, #35
+ 4130 186c 14004BE2 		sub	r0, fp, #20
+ 4131 1870 011080E0 		add	r1, r0, r1
+ 4132 1874 033081E0 		add	r3, r1, r3
+ 4133 1878 0020C3E5 		strb	r2, [r3, #0]
+ 370:../lcd.c      **** 			for( j = 0; j < 16; j ++ )
+ 4134              		.loc 1 370 0 discriminator 2
+ 4135 187c B8315BE1 		ldrh	r3, [fp, #-24]	@ movhi
+ 4136 1880 013083E2 		add	r3, r3, #1
+ 4137 1884 B8314BE1 		strh	r3, [fp, #-24]	@ movhi
+ 4138              	.L77:
+ 370:../lcd.c      **** 			for( j = 0; j < 16; j ++ )
+ 4139              		.loc 1 370 0 is_stmt 0 discriminator 1
+ 4140 1888 F8315BE1 		ldrsh	r3, [fp, #-24]
+ 4141 188c 0F0053E3 		cmp	r3, #15
+ 4142 1890 EEFFFFDA 		ble	.L78
+ 373:../lcd.c      ****             }
+ 374:../lcd.c      **** 
+ 375:../lcd.c      ****             for( y = 0; y < 16; y++ )
+ 4143              		.loc 1 375 0 is_stmt 1
+ 4144 1894 0030A0E3 		mov	r3, #0
+ 4145 1898 BC314BE1 		strh	r3, [fp, #-28]	@ movhi
+ 4146 189c 7B0000EA 		b	.L79
+ 4147              	.L83:
+ 376:../lcd.c      ****             {
+ 377:../lcd.c      ****             	for( x = 0; x < 8; x++ ) 
+ 4148              		.loc 1 377 0
+ 4149 18a0 0030A0E3 		mov	r3, #0
+ 4150 18a4 BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 4151 18a8 720000EA 		b	.L80
+ 4152              	.L82:
+ 378:../lcd.c      ****                	{
+ 379:../lcd.c      ****                 	k = x % 8;
+ 4153              		.loc 1 379 0
+ 4154 18ac FA215BE1 		ldrsh	r2, [fp, #-26]
+ 4155 18b0 C23FA0E1 		mov	r3, r2, asr #31
+ 4156 18b4 A33EA0E1 		mov	r3, r3, lsr #29
+ 4157 18b8 032082E0 		add	r2, r2, r3
+ 4158 18bc 072002E2 		and	r2, r2, #7
+ 4159 18c0 023063E0 		rsb	r3, r3, r2
+ 4160 18c4 B6324BE1 		strh	r3, [fp, #-38]	@ movhi
+ 380:../lcd.c      **** 			    	if( ywbuf[y]  & (0x80 >> k) )
+ 4161              		.loc 1 380 0
+ 4162 18c8 FC215BE1 		ldrsh	r2, [fp, #-28]
+ 4163 18cc 2330E0E3 		mvn	r3, #35
+ 4164 18d0 14104BE2 		sub	r1, fp, #20
+ 4165 18d4 022081E0 		add	r2, r1, r2
+ 4166 18d8 033082E0 		add	r3, r2, r3
+ 4167 18dc 0030D3E5 		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 4168 18e0 0320A0E1 		mov	r2, r3
+ 4169 18e4 F6325BE1 		ldrsh	r3, [fp, #-38]
+ 4170 18e8 8010A0E3 		mov	r1, #128
+ 4171 18ec 5133A0E1 		mov	r3, r1, asr r3
+ 4172 18f0 033002E0 		and	r3, r2, r3
+ 4173 18f4 000053E3 		cmp	r3, #0
+ 4174 18f8 5B00000A 		beq	.L81
+ 381:../lcd.c      **** 			       	{
+ 382:../lcd.c      **** 			       		xx = x0 + x + i*8;
+ 4175              		.loc 1 382 0
+ 4176 18fc BA215BE1 		ldrh	r2, [fp, #-26]
+ 4177 1900 BE335BE1 		ldrh	r3, [fp, #-62]	@ movhi
+ 4178 1904 033082E0 		add	r3, r2, r3
+ 4179 1908 0338A0E1 		mov	r3, r3, asl #16
+ 4180 190c 2328A0E1 		mov	r2, r3, lsr #16
+ 4181 1910 B6315BE1 		ldrh	r3, [fp, #-22]
+ 4182 1914 8331A0E1 		mov	r3, r3, asl #3
+ 4183 1918 0338A0E1 		mov	r3, r3, asl #16
+ 4184 191c 2338A0E1 		mov	r3, r3, lsr #16
+ 4185 1920 033082E0 		add	r3, r2, r3
+ 4186 1924 0338A0E1 		mov	r3, r3, asl #16
+ 4187 1928 2338A0E1 		mov	r3, r3, lsr #16
+ 4188 192c B8324BE1 		strh	r3, [fp, #-40]	@ movhi
+ 383:../lcd.c      **** 			       		LCD_PutPixel(xx, y + y0, (INT8U)ForeColor);
+ 4189              		.loc 1 383 0
+ 4190 1930 FC215BE1 		ldrsh	r2, [fp, #-28]
+ 4191 1934 B0345BE1 		ldrh	r3, [fp, #-64]
+ 4192 1938 032082E0 		add	r2, r2, r3
+ 4193 193c 0230A0E1 		mov	r3, r2
+ 4194 1940 0331A0E1 		mov	r3, r3, asl #2
+ 4195 1944 023083E0 		add	r3, r3, r2
+ 4196 1948 0333A0E1 		mov	r3, r3, asl #6
+ 4197 194c A32FA0E1 		mov	r2, r3, lsr #31
+ 4198 1950 033082E0 		add	r3, r2, r3
+ 4199 1954 C330A0E1 		mov	r3, r3, asr #1
+ 4200 1958 C32683E2 		add	r2, r3, #204472320
+ 4201 195c 962C82E2 		add	r2, r2, #38400
+ 4202 1960 F8325BE1 		ldrsh	r3, [fp, #-40]
+ 4203 1964 071083E2 		add	r1, r3, #7
+ 4204 1968 000053E3 		cmp	r3, #0
+ 4205 196c 0130A0B1 		movlt	r3, r1
+ 4206 1970 C331A0E1 		mov	r3, r3, asr #3
+ 4207 1974 0338A0E1 		mov	r3, r3, asl #16
+ 4208 1978 2338A0E1 		mov	r3, r3, lsr #16
+ 4209 197c 0338A0E1 		mov	r3, r3, asl #16
+ 4210 1980 4338A0E1 		mov	r3, r3, asr #16
+ 4211 1984 0331A0E1 		mov	r3, r3, asl #2
+ 4212 1988 033082E0 		add	r3, r2, r3
+ 4213 198c 0310A0E1 		mov	r1, r3
+ 4214 1990 FC215BE1 		ldrsh	r2, [fp, #-28]
+ 4215 1994 B0345BE1 		ldrh	r3, [fp, #-64]
+ 4216 1998 032082E0 		add	r2, r2, r3
+ 4217 199c 0230A0E1 		mov	r3, r2
+ 4218 19a0 0331A0E1 		mov	r3, r3, asl #2
+ 4219 19a4 023083E0 		add	r3, r3, r2
+ 4220 19a8 0333A0E1 		mov	r3, r3, asl #6
+ 4221 19ac A32FA0E1 		mov	r2, r3, lsr #31
+ 4222 19b0 033082E0 		add	r3, r2, r3
+ 4223 19b4 C330A0E1 		mov	r3, r3, asr #1
+ 4224 19b8 C32683E2 		add	r2, r3, #204472320
+ 4225 19bc 962C82E2 		add	r2, r2, #38400
+ 4226 19c0 F8325BE1 		ldrsh	r3, [fp, #-40]
+ 4227 19c4 070083E2 		add	r0, r3, #7
+ 4228 19c8 000053E3 		cmp	r3, #0
+ 4229 19cc 0030A0B1 		movlt	r3, r0
+ 4230 19d0 C331A0E1 		mov	r3, r3, asr #3
+ 4231 19d4 0338A0E1 		mov	r3, r3, asl #16
+ 4232 19d8 2338A0E1 		mov	r3, r3, lsr #16
+ 4233 19dc 0338A0E1 		mov	r3, r3, asl #16
+ 4234 19e0 4338A0E1 		mov	r3, r3, asr #16
+ 4235 19e4 0331A0E1 		mov	r3, r3, asl #2
+ 4236 19e8 033082E0 		add	r3, r2, r3
+ 4237 19ec 000093E5 		ldr	r0, [r3, #0]
+ 4238 19f0 F8225BE1 		ldrsh	r2, [fp, #-40]
+ 4239 19f4 C23FA0E1 		mov	r3, r2, asr #31
+ 4240 19f8 A33EA0E1 		mov	r3, r3, lsr #29
+ 4241 19fc 032082E0 		add	r2, r2, r3
+ 4242 1a00 072002E2 		and	r2, r2, #7
+ 4243 1a04 023063E0 		rsb	r3, r3, r2
+ 4244 1a08 0338A0E1 		mov	r3, r3, asl #16
+ 4245 1a0c 2338A0E1 		mov	r3, r3, lsr #16
+ 4246 1a10 0338A0E1 		mov	r3, r3, asl #16
+ 4247 1a14 4338A0E1 		mov	r3, r3, asr #16
+ 4248 1a18 0331A0E1 		mov	r3, r3, asl #2
+ 4249 1a1c 0F22A0E3 		mov	r2, #-268435456
+ 4250 1a20 3233A0E1 		mov	r3, r2, lsr r3
+ 4251 1a24 0330E0E1 		mvn	r3, r3
+ 4252 1a28 030000E0 		and	r0, r0, r3
+ 4253 1a2c 41C05BE5 		ldrb	ip, [fp, #-65]	@ zero_extendqisi2
+ 4254 1a30 F8225BE1 		ldrsh	r2, [fp, #-40]
+ 4255 1a34 C23FA0E1 		mov	r3, r2, asr #31
+ 4256 1a38 A33EA0E1 		mov	r3, r3, lsr #29
+ 4257 1a3c 032082E0 		add	r2, r2, r3
+ 4258 1a40 072002E2 		and	r2, r2, #7
+ 4259 1a44 023063E0 		rsb	r3, r3, r2
+ 4260 1a48 0338A0E1 		mov	r3, r3, asl #16
+ 4261 1a4c 2338A0E1 		mov	r3, r3, lsr #16
+ 4262 1a50 0338A0E1 		mov	r3, r3, asl #16
+ 4263 1a54 4338A0E1 		mov	r3, r3, asr #16
+ 4264 1a58 073063E2 		rsb	r3, r3, #7
+ 4265 1a5c 0331A0E1 		mov	r3, r3, asl #2
+ 4266 1a60 1C33A0E1 		mov	r3, ip, asl r3
+ 4267 1a64 033080E1 		orr	r3, r0, r3
+ 4268 1a68 003081E5 		str	r3, [r1, #0]
+ 4269              	.L81:
+ 377:../lcd.c      ****             	for( x = 0; x < 8; x++ ) 
+ 4270              		.loc 1 377 0
+ 4271 1a6c BA315BE1 		ldrh	r3, [fp, #-26]	@ movhi
+ 4272 1a70 013083E2 		add	r3, r3, #1
+ 4273 1a74 BA314BE1 		strh	r3, [fp, #-26]	@ movhi
+ 4274              	.L80:
+ 377:../lcd.c      ****             	for( x = 0; x < 8; x++ ) 
+ 4275              		.loc 1 377 0 is_stmt 0 discriminator 1
+ 4276 1a78 FA315BE1 		ldrsh	r3, [fp, #-26]
+ 4277 1a7c 070053E3 		cmp	r3, #7
+ 4278 1a80 89FFFFDA 		ble	.L82
+ 375:../lcd.c      ****             for( y = 0; y < 16; y++ )
+ 4279              		.loc 1 375 0 is_stmt 1
+ 4280 1a84 BC315BE1 		ldrh	r3, [fp, #-28]	@ movhi
+ 4281 1a88 013083E2 		add	r3, r3, #1
+ 4282 1a8c BC314BE1 		strh	r3, [fp, #-28]	@ movhi
+ 4283              	.L79:
+ 375:../lcd.c      ****             for( y = 0; y < 16; y++ )
+ 4284              		.loc 1 375 0 is_stmt 0 discriminator 1
+ 4285 1a90 FC315BE1 		ldrsh	r3, [fp, #-28]
+ 4286 1a94 0F0053E3 		cmp	r3, #15
+ 4287 1a98 80FFFFDA 		ble	.L83
+ 358:../lcd.c      **** 	for( i = 0; i < strlen((const char*)s); i++ )
+ 4288              		.loc 1 358 0 is_stmt 1
+ 4289 1a9c B6315BE1 		ldrh	r3, [fp, #-22]	@ movhi
+ 4290 1aa0 013083E2 		add	r3, r3, #1
+ 4291 1aa4 B6314BE1 		strh	r3, [fp, #-22]	@ movhi
+ 4292              	.L74:
+ 358:../lcd.c      **** 	for( i = 0; i < strlen((const char*)s); i++ )
+ 4293              		.loc 1 358 0 is_stmt 0 discriminator 1
+ 4294 1aa8 F6415BE1 		ldrsh	r4, [fp, #-22]
+ 4295 1aac 48001BE5 		ldr	r0, [fp, #-72]
+ 4296 1ab0 FEFFFFEB 		bl	strlen
+ 4297 1ab4 0030A0E1 		mov	r3, r0
+ 4298 1ab8 030054E1 		cmp	r4, r3
+ 4299 1abc 4AFFFF3A 		bcc	.L84
+ 4300              	.L73:
+ 384:../lcd.c      **** 			       	}
+ 385:../lcd.c      **** 			   	}
+ 386:../lcd.c      ****             }
+ 387:../lcd.c      **** 		}
+ 388:../lcd.c      **** 	}
+ 389:../lcd.c      **** }
+ 4301              		.loc 1 389 0 is_stmt 1
+ 4302 1ac0 10D04BE2 		sub	sp, fp, #16
+ 4303 1ac4 10689DE8 		ldmfd	sp, {r4, fp, sp, lr}
+ 4304 1ac8 1EFF2FE1 		bx	lr
+ 4305              	.L86:
+ 4306              		.align	2
+ 4307              	.L85:
+ 4308 1acc 00000000 		.word	g_auc_Ascii8x16
+ 4309              		.cfi_endproc
+ 4310              	.LFE9:
+ 4312              		.align	2
+ 4313              		.global	ReverseLine
+ 4315              	ReverseLine:
+ 4316              	.LFB10:
+ 390:../lcd.c      **** 
+ 391:../lcd.c      **** /*********************************************************************************************
+ 392:../lcd.c      **** * name:		ReverseLine()
+ 393:../lcd.c      **** * func:		Reverse display some lines 
+ 394:../lcd.c      **** * para:		ulHeight -- line's height
+ 395:../lcd.c      **** *			ulY -- line's Y-coordinate
+ 396:../lcd.c      **** * ret:		none
+ 397:../lcd.c      **** * modify:
+ 398:../lcd.c      **** * comment:		
+ 399:../lcd.c      **** *********************************************************************************************/
+ 400:../lcd.c      **** void ReverseLine(INT32U ulHeight, INT32U ulY)
+ 401:../lcd.c      **** {
+ 4317              		.loc 1 401 0
+ 4318              		.cfi_startproc
+ 4319              		@ Function supports interworking.
+ 4320              		@ args = 0, pretend = 0, frame = 24
+ 4321              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4322 1ad0 0DC0A0E1 		mov	ip, sp
+ 4323              	.LCFI20:
+ 4324              		.cfi_def_cfa_register 12
+ 4325 1ad4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4326 1ad8 04B04CE2 		sub	fp, ip, #4
+ 4327              		.cfi_offset 14, -8
+ 4328              		.cfi_offset 13, -12
+ 4329              		.cfi_offset 11, -16
+ 4330              	.LCFI21:
+ 4331              		.cfi_def_cfa 11, 4
+ 4332 1adc 18D04DE2 		sub	sp, sp, #24
+ 4333 1ae0 20000BE5 		str	r0, [fp, #-32]
+ 4334 1ae4 24100BE5 		str	r1, [fp, #-36]
+ 402:../lcd.c      **** 	INT32U i, j, temp;
+ 403:../lcd.c      **** 	
+ 404:../lcd.c      **** 	for( i = 0; i < ulHeight; i++ )
+ 4335              		.loc 1 404 0
+ 4336 1ae8 0030A0E3 		mov	r3, #0
+ 4337 1aec 10300BE5 		str	r3, [fp, #-16]
+ 4338 1af0 2C0000EA 		b	.L88
+ 4339              	.L91:
+ 405:../lcd.c      **** 	{
+ 406:../lcd.c      **** 		for( j = 0; j < (SCR_XSIZE/4/2) ; j++ )
+ 4340              		.loc 1 406 0
+ 4341 1af4 0030A0E3 		mov	r3, #0
+ 4342 1af8 14300BE5 		str	r3, [fp, #-20]
+ 4343 1afc 230000EA 		b	.L89
+ 4344              	.L90:
+ 407:../lcd.c      **** 		{
+ 408:../lcd.c      **** 			temp = *(INT32U*)(LCD_VIRTUAL_BUFFER + (ulY+i)*SCR_XSIZE/2 + j*4);
+ 4345              		.loc 1 408 0 discriminator 2
+ 4346 1b00 24201BE5 		ldr	r2, [fp, #-36]
+ 4347 1b04 10301BE5 		ldr	r3, [fp, #-16]
+ 4348 1b08 032082E0 		add	r2, r2, r3
+ 4349 1b0c 0230A0E1 		mov	r3, r2
+ 4350 1b10 0331A0E1 		mov	r3, r3, asl #2
+ 4351 1b14 023083E0 		add	r3, r3, r2
+ 4352 1b18 0333A0E1 		mov	r3, r3, asl #6
+ 4353 1b1c A320A0E1 		mov	r2, r3, lsr #1
+ 4354 1b20 14301BE5 		ldr	r3, [fp, #-20]
+ 4355 1b24 0331A0E1 		mov	r3, r3, asl #2
+ 4356 1b28 033082E0 		add	r3, r2, r3
+ 4357 1b2c C33683E2 		add	r3, r3, #204472320
+ 4358 1b30 963C83E2 		add	r3, r3, #38400
+ 4359 1b34 003093E5 		ldr	r3, [r3, #0]
+ 4360 1b38 18300BE5 		str	r3, [fp, #-24]
+ 409:../lcd.c      **** 			temp ^= 0xFFFFFFFF;
+ 4361              		.loc 1 409 0 discriminator 2
+ 4362 1b3c 18301BE5 		ldr	r3, [fp, #-24]
+ 4363 1b40 0330E0E1 		mvn	r3, r3
+ 4364 1b44 18300BE5 		str	r3, [fp, #-24]
+ 410:../lcd.c      **** 			*(INT32U*)(LCD_VIRTUAL_BUFFER + (ulY+i)*SCR_XSIZE/2 + j*4) = temp;
+ 4365              		.loc 1 410 0 discriminator 2
+ 4366 1b48 24201BE5 		ldr	r2, [fp, #-36]
+ 4367 1b4c 10301BE5 		ldr	r3, [fp, #-16]
+ 4368 1b50 032082E0 		add	r2, r2, r3
+ 4369 1b54 0230A0E1 		mov	r3, r2
+ 4370 1b58 0331A0E1 		mov	r3, r3, asl #2
+ 4371 1b5c 023083E0 		add	r3, r3, r2
+ 4372 1b60 0333A0E1 		mov	r3, r3, asl #6
+ 4373 1b64 A320A0E1 		mov	r2, r3, lsr #1
+ 4374 1b68 14301BE5 		ldr	r3, [fp, #-20]
+ 4375 1b6c 0331A0E1 		mov	r3, r3, asl #2
+ 4376 1b70 033082E0 		add	r3, r2, r3
+ 4377 1b74 C33683E2 		add	r3, r3, #204472320
+ 4378 1b78 963C83E2 		add	r3, r3, #38400
+ 4379 1b7c 18201BE5 		ldr	r2, [fp, #-24]
+ 4380 1b80 002083E5 		str	r2, [r3, #0]
+ 406:../lcd.c      **** 		for( j = 0; j < (SCR_XSIZE/4/2) ; j++ )
+ 4381              		.loc 1 406 0 discriminator 2
+ 4382 1b84 14301BE5 		ldr	r3, [fp, #-20]
+ 4383 1b88 013083E2 		add	r3, r3, #1
+ 4384 1b8c 14300BE5 		str	r3, [fp, #-20]
+ 4385              	.L89:
+ 406:../lcd.c      **** 		for( j = 0; j < (SCR_XSIZE/4/2) ; j++ )
+ 4386              		.loc 1 406 0 is_stmt 0 discriminator 1
+ 4387 1b90 14301BE5 		ldr	r3, [fp, #-20]
+ 4388 1b94 270053E3 		cmp	r3, #39
+ 4389 1b98 D8FFFF9A 		bls	.L90
+ 404:../lcd.c      **** 	for( i = 0; i < ulHeight; i++ )
+ 4390              		.loc 1 404 0 is_stmt 1
+ 4391 1b9c 10301BE5 		ldr	r3, [fp, #-16]
+ 4392 1ba0 013083E2 		add	r3, r3, #1
+ 4393 1ba4 10300BE5 		str	r3, [fp, #-16]
+ 4394              	.L88:
+ 404:../lcd.c      **** 	for( i = 0; i < ulHeight; i++ )
+ 4395              		.loc 1 404 0 is_stmt 0 discriminator 1
+ 4396 1ba8 10201BE5 		ldr	r2, [fp, #-16]
+ 4397 1bac 20301BE5 		ldr	r3, [fp, #-32]
+ 4398 1bb0 030052E1 		cmp	r2, r3
+ 4399 1bb4 CEFFFF3A 		bcc	.L91
+ 411:../lcd.c      **** 		}
+ 412:../lcd.c      **** 	}
+ 413:../lcd.c      **** }
+ 4400              		.loc 1 413 0 is_stmt 1
+ 4401 1bb8 0CD04BE2 		sub	sp, fp, #12
+ 4402 1bbc 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4403 1bc0 1EFF2FE1 		bx	lr
+ 4404              		.cfi_endproc
+ 4405              	.LFE10:
+ 4407              		.data
+ 4410              	ucZdma0Done:
+ 4411 0000 01       		.byte	1
+ 4412              		.text
+ 4413              		.align	2
+ 4414              		.global	Zdma0Done
+ 4416              	Zdma0Done:
+ 4417              	.LFB11:
+ 414:../lcd.c      **** 
+ 415:../lcd.c      **** /*********************************************************************************************
+ 416:../lcd.c      **** * name:		Zdma0Done()
+ 417:../lcd.c      **** * func:		LCD dma interrupt handle function
+ 418:../lcd.c      **** * para:		none
+ 419:../lcd.c      **** * ret:		none
+ 420:../lcd.c      **** * modify:
+ 421:../lcd.c      **** * comment:		
+ 422:../lcd.c      **** *********************************************************************************************/
+ 423:../lcd.c      **** static INT8U ucZdma0Done=1;	//When DMA is finish,ucZdma0Done is cleared to Zero
+ 424:../lcd.c      **** void Zdma0Done(void)
+ 425:../lcd.c      **** {
+ 4418              		.loc 1 425 0
+ 4419              		.cfi_startproc
+ 4420              		@ Interrupt Service Routine.
+ 4421              		@ args = 0, pretend = 0, frame = 0
+ 4422              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4423 1bc4 04C02DE5 		str	ip, [sp, #-4]!
+ 4424 1bc8 0DC0A0E1 		mov	ip, sp
+ 4425              	.LCFI22:
+ 4426              		.cfi_def_cfa_register 12
+ 4427 1bcc 0CD82DE9 		stmfd	sp!, {r2, r3, fp, ip, lr, pc}
+ 4428 1bd0 04B04CE2 		sub	fp, ip, #4
+ 4429              		.cfi_offset 14, -8
+ 4430              		.cfi_offset 13, -12
+ 4431              		.cfi_offset 11, -16
+ 4432              		.cfi_offset 3, -20
+ 4433              		.cfi_offset 2, -24
+ 4434              	.LCFI23:
+ 4435              		.cfi_def_cfa 11, 4
+ 426:../lcd.c      **** 	rI_ISPC=BIT_ZDMA0;	    //clear pending
+ 4436              		.loc 1 426 0
+ 4437 1bd4 20309FE5 		ldr	r3, .L93
+ 4438 1bd8 0227A0E3 		mov	r2, #524288
+ 4439 1bdc 002083E5 		str	r2, [r3, #0]
+ 427:../lcd.c      **** 	ucZdma0Done=0;
+ 4440              		.loc 1 427 0
+ 4441 1be0 18309FE5 		ldr	r3, .L93+4
+ 4442 1be4 0020A0E3 		mov	r2, #0
+ 4443 1be8 0020C3E5 		strb	r2, [r3, #0]
+ 428:../lcd.c      **** }
+ 4444              		.loc 1 428 0
+ 4445 1bec 14D04BE2 		sub	sp, fp, #20
+ 4446 1bf0 0C689DE8 		ldmfd	sp, {r2, r3, fp, sp, lr}
+ 4447 1bf4 04C09DE4 		ldmfd	sp!, {ip}
+ 4448 1bf8 04F05EE2 		subs	pc, lr, #4
+ 4449              	.L94:
+ 4450              		.align	2
+ 4451              	.L93:
+ 4452 1bfc 2400E001 		.word	31457316
+ 4453 1c00 00000000 		.word	ucZdma0Done
+ 4454              		.cfi_endproc
+ 4455              	.LFE11:
+ 4457              		.align	2
+ 4458              		.global	Lcd_Dma_Trans
+ 4460              	Lcd_Dma_Trans:
+ 4461              	.LFB12:
+ 429:../lcd.c      **** 
+ 430:../lcd.c      **** /*********************************************************************************************
+ 431:../lcd.c      **** * name:		Lcd_Dma_Trans()
+ 432:../lcd.c      **** * func:		dma transport virtual LCD screen to LCD actual screen
+ 433:../lcd.c      **** * para:		none
+ 434:../lcd.c      **** * ret:		none
+ 435:../lcd.c      **** * modify:
+ 436:../lcd.c      **** * comment:		
+ 437:../lcd.c      **** *********************************************************************************************/
+ 438:../lcd.c      **** void Lcd_Dma_Trans(void)
+ 439:../lcd.c      **** {
+ 4462              		.loc 1 439 0
+ 4463              		.cfi_startproc
+ 4464              		@ Function supports interworking.
+ 4465              		@ args = 0, pretend = 0, frame = 0
+ 4466              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4467 1c04 0DC0A0E1 		mov	ip, sp
+ 4468              	.LCFI24:
+ 4469              		.cfi_def_cfa_register 12
+ 4470 1c08 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4471 1c0c 04B04CE2 		sub	fp, ip, #4
+ 4472              		.cfi_offset 14, -8
+ 4473              		.cfi_offset 13, -12
+ 4474              		.cfi_offset 11, -16
+ 4475              	.LCFI25:
+ 4476              		.cfi_def_cfa 11, 4
+ 440:../lcd.c      **** 	INT8U err;
+ 441:../lcd.c      **** 	
+ 442:../lcd.c      **** 	ucZdma0Done=1;
+ 4477              		.loc 1 442 0
+ 4478 1c10 74309FE5 		ldr	r3, .L97
+ 4479 1c14 0120A0E3 		mov	r2, #1
+ 4480 1c18 0020C3E5 		strb	r2, [r3, #0]
+ 443:../lcd.c      **** 	//#define LCD_VIRTUAL_BUFFER	(0xc400000)
+ 444:../lcd.c      **** 	//#define LCD_ACTIVE_BUFFER	(LCD_VIRTUAL_BUFFER+(SCR_XSIZE*SCR_YSIZE/2))	//DMA ON
+ 445:../lcd.c      **** 	//#define LCD_ACTIVE_BUFFER	LCD_VIRTUAL_BUFFER								//DMA OFF
+ 446:../lcd.c      **** 	//#define LCD_BUF_SIZE		(SCR_XSIZE*SCR_YSIZE/2)
+ 447:../lcd.c      **** 	//So the Lcd Buffer Low area is from LCD_VIRTUAL_BUFFER to (LCD_ACTIVE_BUFFER+(SCR_XSIZE*SCR_YSIZE
+ 448:../lcd.c      **** 	rNCACHBE1=(((unsigned)(LCD_ACTIVE_BUFFER)>>12) <<16 )|((unsigned)(LCD_VIRTUAL_BUFFER)>>12);
+ 4481              		.loc 1 448 0
+ 4482 1c1c 6C309FE5 		ldr	r3, .L97+4
+ 4483 1c20 6C209FE5 		ldr	r2, .L97+8
+ 4484 1c24 002083E5 		str	r2, [r3, #0]
+ 449:../lcd.c      ****   	rZDISRC0=(DW<<30)|(1<<28)|LCD_VIRTUAL_BUFFER; // inc
+ 4485              		.loc 1 449 0
+ 4486 1c28 68309FE5 		ldr	r3, .L97+12
+ 4487 1c2c 68209FE5 		ldr	r2, .L97+16
+ 4488 1c30 002083E5 		str	r2, [r3, #0]
+ 450:../lcd.c      ****   	rZDIDES0=( 2<<30)  |(1<<28)|LCD_ACTIVE_BUFFER; // inc
+ 4489              		.loc 1 450 0
+ 4490 1c34 64309FE5 		ldr	r3, .L97+20
+ 4491 1c38 64209FE5 		ldr	r2, .L97+24
+ 4492 1c3c 002083E5 		str	r2, [r3, #0]
+ 451:../lcd.c      ****         rZDICNT0=( 2<<28)|(1<<26)|(3<<22)|(0<<20)|(LCD_BUF_SIZE);
+ 4493              		.loc 1 451 0
+ 4494 1c40 60309FE5 		ldr	r3, .L97+28
+ 4495 1c44 60209FE5 		ldr	r2, .L97+32
+ 4496 1c48 002083E5 		str	r2, [r3, #0]
+ 452:../lcd.c      ****         //                      |            |            |             |            |---->0 = Disa
+ 453:../lcd.c      ****         //                      |            |            |             |------------>Int. whenever
+ 454:../lcd.c      ****         //                      |            |            |-------------------->Write time on the f
+ 455:../lcd.c      ****         //                      |            |---------------------------->Block(4-word) transfer m
+ 456:../lcd.c      ****         //                      |------------------------------------>whole service
+ 457:../lcd.c      **** 	//reEnable ZDMA transfer
+ 458:../lcd.c      ****   	rZDICNT0 |= (1<<20);		//after ES3
+ 4497              		.loc 1 458 0
+ 4498 1c4c 54309FE5 		ldr	r3, .L97+28
+ 4499 1c50 50209FE5 		ldr	r2, .L97+28
+ 4500 1c54 002092E5 		ldr	r2, [r2, #0]
+ 4501 1c58 012682E3 		orr	r2, r2, #1048576
+ 4502 1c5c 002083E5 		str	r2, [r3, #0]
+ 459:../lcd.c      ****     rZDCON0=0x1; // start!!!  
+ 4503              		.loc 1 459 0
+ 4504 1c60 7A37A0E3 		mov	r3, #31981568
+ 4505 1c64 0120A0E3 		mov	r2, #1
+ 4506 1c68 002083E5 		str	r2, [r3, #0]
+ 460:../lcd.c      **** 
+ 461:../lcd.c      **** 	//Delay(500);
+ 462:../lcd.c      **** 	while(ucZdma0Done);		//wait for DMA finish
+ 4507              		.loc 1 462 0
+ 4508 1c6c 0000A0E1 		mov	r0, r0	@ nop
+ 4509              	.L96:
+ 4510              		.loc 1 462 0 is_stmt 0 discriminator 1
+ 4511 1c70 14309FE5 		ldr	r3, .L97
+ 4512 1c74 0030D3E5 		ldrb	r3, [r3, #0]	@ zero_extendqisi2
+ 4513 1c78 000053E3 		cmp	r3, #0
+ 4514 1c7c FBFFFF1A 		bne	.L96
+ 463:../lcd.c      **** }
+ 4515              		.loc 1 463 0 is_stmt 1
+ 4516 1c80 0CD04BE2 		sub	sp, fp, #12
+ 4517 1c84 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4518 1c88 1EFF2FE1 		bx	lr
+ 4519              	.L98:
+ 4520              		.align	2
+ 4521              	.L97:
+ 4522 1c8c 00000000 		.word	ucZdma0Done
+ 4523 1c90 0800C001 		.word	29360136
+ 4524 1c94 09C300C3 		.word	-1023360247
+ 4525 1c98 0400E801 		.word	31981572
+ 4526 1c9c 0096301C 		.word	472946176
+ 4527 1ca0 0800E801 		.word	31981576
+ 4528 1ca4 0000309C 		.word	-1674575872
+ 4529 1ca8 0C00E801 		.word	31981580
+ 4530 1cac 0096C024 		.word	616601088
+ 4531              		.cfi_endproc
+ 4532              	.LFE12:
+ 4534              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 lcd.c
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2132   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2135   .text:00000000 Lcd_Init
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2240   .text:00000110 $d
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4416   .text:00001bc4 Zdma0Done
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2276   .text:00000194 $a
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2279   .text:00000194 Lcd_Active_Clr
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2329   .text:000001f8 $d
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2333   .text:000001fc $a
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2336   .text:000001fc LCD_GetPixel
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2417   .text:000002cc Lcd_Clr
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2467   .text:00000330 $d
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2472   .text:00000338 $a
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2475   .text:00000338 LcdClrRect
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:2954   .text:00000988 Lcd_Draw_Box
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:3715   .text:0000137c Lcd_Draw_HLine
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:3881   .text:00001584 Lcd_Draw_VLine
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:3019   .text:00000a24 Lcd_Draw_Line
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4059   .text:000017bc Lcd_DspAscII8x16
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4308   .text:00001acc $d
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4312   .text:00001ad0 $a
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4315   .text:00001ad0 ReverseLine
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4410   .data:00000000 ucZdma0Done
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4452   .text:00001bfc $d
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4457   .text:00001c04 $a
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4460   .text:00001c04 Lcd_Dma_Trans
+C:\Users\a680669\AppData\Local\Temp\ccj7VOFB.s:4522   .text:00001c8c $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+__aeabi_idiv
+strlen
+g_auc_Ascii8x16

@@ -1,0 +1,172 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"listaCircularEstatica.c"
+  21              	.Ltext0:
+  22              		.file 1 "../listaCircularEstatica.c"
+ 2870              		.align	2
+ 2873              	lista:
+ 2874 0000 FCED7F0C 		.word	209710588
+ 2875              		.bss
+ 2876              		.align	2
+ 2877              	indice:
+ 2878 0000 00000000 		.space	4
+ 2879              		.text
+ 2880              		.align	2
+ 2881              		.global	anadirElemento
+ 2883              	anadirElemento:
+ 2884              	.LFB0:
+   1:../listaCircularEstatica.c **** /*********************************************************************************************
+   2:../listaCircularEstatica.c **** * Fichero:	listaCircularEstatica.c
+   3:../listaCircularEstatica.c **** * Autor:
+   4:../listaCircularEstatica.c **** * Descrip:	lista circular estatica para la pila
+   5:../listaCircularEstatica.c **** * Version:
+   6:../listaCircularEstatica.c **** *********************************************************************************************/
+   7:../listaCircularEstatica.c **** #include "44blib.h"
+   8:../listaCircularEstatica.c **** #include <stdio.h>
+   9:../listaCircularEstatica.c **** #include <stdlib.h>
+  10:../listaCircularEstatica.c **** #include <inttypes.h>
+  11:../listaCircularEstatica.c **** 
+  12:../listaCircularEstatica.c **** //Creacion del tipo de dato tipoNodo (representa el elemento a apilar)
+  13:../listaCircularEstatica.c **** typedef struct{
+  14:../listaCircularEstatica.c ****    int ID_evento;				// Identificador del evento.
+  15:../listaCircularEstatica.c ****    int auxData;					// Datos auxiliares
+  16:../listaCircularEstatica.c ****    uint32_t tiempo;				// Momento de el que tuvo lugar la interrupciÃ³n
+  17:../listaCircularEstatica.c **** } tipoNodo;
+  18:../listaCircularEstatica.c **** 
+  19:../listaCircularEstatica.c **** tipoNodo* lista = (tipoNodo *) 0xc7fedfc;		// Puntero a la posicion inicial de la lista. (260 bytes
+  20:../listaCircularEstatica.c **** 
+  21:../listaCircularEstatica.c **** void anadirElemento(int identificador, int dato, int tiempo);
+  22:../listaCircularEstatica.c **** 
+  23:../listaCircularEstatica.c **** 
+  24:../listaCircularEstatica.c **** // Indice que marca el ultimo elemento de la pila
+  25:../listaCircularEstatica.c **** static int indice = 0;
+  26:../listaCircularEstatica.c **** 
+  27:../listaCircularEstatica.c **** // Operacion que se encarga de aÃ±adir un nuevo elemento a la lista
+  28:../listaCircularEstatica.c **** void anadirElemento(int identificador, int dato, int tiempo){
+ 2885              		.loc 1 28 0
+ 2886              		.cfi_startproc
+ 2887              		@ Function supports interworking.
+ 2888              		@ args = 0, pretend = 0, frame = 16
+ 2889              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2890 0000 0DC0A0E1 		mov	ip, sp
+ 2891              	.LCFI0:
+ 2892              		.cfi_def_cfa_register 12
+ 2893 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2894 0008 04B04CE2 		sub	fp, ip, #4
+ 2895              		.cfi_offset 14, -8
+ 2896              		.cfi_offset 13, -12
+ 2897              		.cfi_offset 11, -16
+ 2898              	.LCFI1:
+ 2899              		.cfi_def_cfa 11, 4
+ 2900 000c 10D04DE2 		sub	sp, sp, #16
+ 2901 0010 10000BE5 		str	r0, [fp, #-16]
+ 2902 0014 14100BE5 		str	r1, [fp, #-20]
+ 2903 0018 18200BE5 		str	r2, [fp, #-24]
+  29:../listaCircularEstatica.c **** 	lista[indice].ID_evento = identificador;
+ 2904              		.loc 1 29 0
+ 2905 001c EC309FE5 		ldr	r3, .L3
+ 2906 0020 001093E5 		ldr	r1, [r3, #0]
+ 2907 0024 E8309FE5 		ldr	r3, .L3+4
+ 2908 0028 003093E5 		ldr	r3, [r3, #0]
+ 2909 002c 0320A0E1 		mov	r2, r3
+ 2910 0030 0230A0E1 		mov	r3, r2
+ 2911 0034 8330A0E1 		mov	r3, r3, asl #1
+ 2912 0038 023083E0 		add	r3, r3, r2
+ 2913 003c 0331A0E1 		mov	r3, r3, asl #2
+ 2914 0040 033081E0 		add	r3, r1, r3
+ 2915 0044 10201BE5 		ldr	r2, [fp, #-16]
+ 2916 0048 002083E5 		str	r2, [r3, #0]
+  30:../listaCircularEstatica.c **** 	lista[indice].auxData = dato;
+ 2917              		.loc 1 30 0
+ 2918 004c BC309FE5 		ldr	r3, .L3
+ 2919 0050 001093E5 		ldr	r1, [r3, #0]
+ 2920 0054 B8309FE5 		ldr	r3, .L3+4
+ 2921 0058 003093E5 		ldr	r3, [r3, #0]
+ 2922 005c 0320A0E1 		mov	r2, r3
+ 2923 0060 0230A0E1 		mov	r3, r2
+ 2924 0064 8330A0E1 		mov	r3, r3, asl #1
+ 2925 0068 023083E0 		add	r3, r3, r2
+ 2926 006c 0331A0E1 		mov	r3, r3, asl #2
+ 2927 0070 033081E0 		add	r3, r1, r3
+ 2928 0074 14201BE5 		ldr	r2, [fp, #-20]
+ 2929 0078 042083E5 		str	r2, [r3, #4]
+  31:../listaCircularEstatica.c **** 	lista[indice].tiempo = tiempo;
+ 2930              		.loc 1 31 0
+ 2931 007c 8C309FE5 		ldr	r3, .L3
+ 2932 0080 001093E5 		ldr	r1, [r3, #0]
+ 2933 0084 88309FE5 		ldr	r3, .L3+4
+ 2934 0088 003093E5 		ldr	r3, [r3, #0]
+ 2935 008c 0320A0E1 		mov	r2, r3
+ 2936 0090 0230A0E1 		mov	r3, r2
+ 2937 0094 8330A0E1 		mov	r3, r3, asl #1
+ 2938 0098 023083E0 		add	r3, r3, r2
+ 2939 009c 0331A0E1 		mov	r3, r3, asl #2
+ 2940 00a0 033081E0 		add	r3, r1, r3
+ 2941 00a4 18201BE5 		ldr	r2, [fp, #-24]
+ 2942 00a8 082083E5 		str	r2, [r3, #8]
+  32:../listaCircularEstatica.c **** 	indice++;
+ 2943              		.loc 1 32 0
+ 2944 00ac 60309FE5 		ldr	r3, .L3+4
+ 2945 00b0 003093E5 		ldr	r3, [r3, #0]
+ 2946 00b4 012083E2 		add	r2, r3, #1
+ 2947 00b8 54309FE5 		ldr	r3, .L3+4
+ 2948 00bc 002083E5 		str	r2, [r3, #0]
+  33:../listaCircularEstatica.c **** 	
+  34:../listaCircularEstatica.c **** 	//Resetea el indice de la lista si esta llega al tope
+  35:../listaCircularEstatica.c **** 	if((int)&lista[indice]>0xc7fef00){
+ 2949              		.loc 1 35 0
+ 2950 00c0 48309FE5 		ldr	r3, .L3
+ 2951 00c4 001093E5 		ldr	r1, [r3, #0]
+ 2952 00c8 44309FE5 		ldr	r3, .L3+4
+ 2953 00cc 003093E5 		ldr	r3, [r3, #0]
+ 2954 00d0 0320A0E1 		mov	r2, r3
+ 2955 00d4 0230A0E1 		mov	r3, r2
+ 2956 00d8 8330A0E1 		mov	r3, r3, asl #1
+ 2957 00dc 023083E0 		add	r3, r3, r2
+ 2958 00e0 0331A0E1 		mov	r3, r3, asl #2
+ 2959 00e4 033081E0 		add	r3, r1, r3
+ 2960 00e8 0320A0E1 		mov	r2, r3
+ 2961 00ec 24309FE5 		ldr	r3, .L3+8
+ 2962 00f0 030052E1 		cmp	r2, r3
+ 2963 00f4 020000DA 		ble	.L1
+  36:../listaCircularEstatica.c **** 		indice = 0;
+ 2964              		.loc 1 36 0
+ 2965 00f8 14309FE5 		ldr	r3, .L3+4
+ 2966 00fc 0020A0E3 		mov	r2, #0
+ 2967 0100 002083E5 		str	r2, [r3, #0]
+ 2968              	.L1:
+  37:../listaCircularEstatica.c **** 	}
+  38:../listaCircularEstatica.c **** }
+ 2969              		.loc 1 38 0
+ 2970 0104 0CD04BE2 		sub	sp, fp, #12
+ 2971 0108 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2972 010c 1EFF2FE1 		bx	lr
+ 2973              	.L4:
+ 2974              		.align	2
+ 2975              	.L3:
+ 2976 0110 00000000 		.word	lista
+ 2977 0114 00000000 		.word	indice
+ 2978 0118 00EF7F0C 		.word	209710848
+ 2979              		.cfi_endproc
+ 2980              	.LFE0:
+ 2982              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 listaCircularEstatica.c
+C:\Users\a680669\AppData\Local\Temp\ccXRqiAV.s:2873   .data:00000000 lista
+C:\Users\a680669\AppData\Local\Temp\ccXRqiAV.s:2870   .data:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccXRqiAV.s:2876   .bss:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccXRqiAV.s:2877   .bss:00000000 indice
+C:\Users\a680669\AppData\Local\Temp\ccXRqiAV.s:2880   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccXRqiAV.s:2883   .text:00000000 anadirElemento
+C:\Users\a680669\AppData\Local\Temp\ccXRqiAV.s:2976   .text:00000110 $d
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS

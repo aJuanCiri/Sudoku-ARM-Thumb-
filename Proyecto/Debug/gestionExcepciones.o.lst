@@ -1,0 +1,268 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gestionExcepciones.c"
+  21              	.Ltext0:
+  22              		.file 1 "../gestionExcepciones.c"
+ 3654              		.align	2
+ 3657              	NUM_ALERTAS:
+ 3658 0000 14000000 		.word	20
+ 3659              		.text
+ 3660              		.align	2
+ 3661              		.global	gestionGlobal
+ 3663              	gestionGlobal:
+ 3664              	.LFB0:
+   1:../gestionExcepciones.c **** /*********************************************************************************************
+   2:../gestionExcepciones.c **** * Fichero:	gestionExcepciones.c
+   3:../gestionExcepciones.c **** * Autor:
+   4:../gestionExcepciones.c **** * Descrip:	gestiona todas las excepciones de la placa
+   5:../gestionExcepciones.c **** *********************************************************************************************/
+   6:../gestionExcepciones.c **** 
+   7:../gestionExcepciones.c **** /*--- ficheros de cabecera ---*/
+   8:../gestionExcepciones.c **** #include "44blib.h"
+   9:../gestionExcepciones.c **** #include "44b.h"
+  10:../gestionExcepciones.c **** #include "stdio.h"
+  11:../gestionExcepciones.c **** #include <inttypes.h>
+  12:../gestionExcepciones.c **** 
+  13:../gestionExcepciones.c **** /*--- variables globales ---*/
+  14:../gestionExcepciones.c **** int NUM_ALERTAS = 20;
+  15:../gestionExcepciones.c **** /*--- funciones externas ---*/
+  16:../gestionExcepciones.c **** extern void D8Led_symbol(int value);
+  17:../gestionExcepciones.c **** extern void push_debug(int ID_evento, int auxData);
+  18:../gestionExcepciones.c **** /*--- declaracion de funciones ---*/
+  19:../gestionExcepciones.c **** void avisoExcepcion(int tipo);
+  20:../gestionExcepciones.c **** void init_excep();
+  21:../gestionExcepciones.c **** void gestionGlobal(void) __attribute__((interrupt("ABORT")));
+  22:../gestionExcepciones.c **** void gestionGlobal(void) __attribute__((interrupt("UNDEF")));
+  23:../gestionExcepciones.c **** void gestionGlobal(void) __attribute__((interrupt("ABORT")));
+  24:../gestionExcepciones.c **** /*--- codigo de funciones ---*/
+  25:../gestionExcepciones.c **** 
+  26:../gestionExcepciones.c **** void gestionGlobal(void){
+ 3665              		.loc 1 26 0
+ 3666              		.cfi_startproc
+ 3667              		@ ARM Exception Handler.
+ 3668              		@ args = 0, pretend = 0, frame = 8
+ 3669              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3670 0000 04C02DE5 		str	ip, [sp, #-4]!
+ 3671 0004 0DC0A0E1 		mov	ip, sp
+ 3672              	.LCFI0:
+ 3673              		.cfi_def_cfa_register 12
+ 3674 0008 1FD82DE9 		stmfd	sp!, {r0, r1, r2, r3, r4, fp, ip, lr, pc}
+ 3675 000c 04B04CE2 		sub	fp, ip, #4
+ 3676              		.cfi_offset 14, -8
+ 3677              		.cfi_offset 13, -12
+ 3678              		.cfi_offset 11, -16
+ 3679              		.cfi_offset 4, -20
+ 3680              		.cfi_offset 3, -24
+ 3681              		.cfi_offset 2, -28
+ 3682              		.cfi_offset 1, -32
+ 3683              		.cfi_offset 0, -36
+ 3684              	.LCFI1:
+ 3685              		.cfi_def_cfa 11, 4
+ 3686 0010 0CD04DE2 		sub	sp, sp, #12
+  27:../gestionExcepciones.c **** 	uint32_t direccion;
+  28:../gestionExcepciones.c **** 	uint32_t tipo;
+  29:../gestionExcepciones.c **** 	asm ("mov %0, lr;" : "=r" (direccion));
+ 3687              		.loc 1 29 0
+ 3688              	@ 29 "../gestionExcepciones.c" 1
+ 3689 0014 0E40A0E1 		mov r4, lr;
+ 3690              	@ 0 "" 2
+ 3691 0018 28400BE5 		str	r4, [fp, #-40]
+  30:../gestionExcepciones.c **** 	asm ("mrs %0, cpsr;" : "=r" (tipo));   //tipo = cpsr
+ 3692              		.loc 1 30 0
+ 3693              	@ 30 "../gestionExcepciones.c" 1
+ 3694 001c 00400FE1 		mrs r4, cpsr;
+ 3695              	@ 0 "" 2
+ 3696 0020 2C400BE5 		str	r4, [fp, #-44]
+  31:../gestionExcepciones.c **** 	switch(tipo&0x1F){  //compara con el modo (con los ultimos 5 bits)
+ 3697              		.loc 1 31 0
+ 3698 0024 2C301BE5 		ldr	r3, [fp, #-44]
+ 3699 0028 1F3003E2 		and	r3, r3, #31
+ 3700 002c 170053E3 		cmp	r3, #23
+ 3701 0030 0800000A 		beq	.L3
+ 3702 0034 1B0053E3 		cmp	r3, #27
+ 3703 0038 0D00001A 		bne	.L1
+ 3704              	.L4:
+  32:../gestionExcepciones.c **** 		case 0x1B:  //undefined
+  33:../gestionExcepciones.c **** 			push_debug(1,direccion);
+ 3705              		.loc 1 33 0
+ 3706 003c 28301BE5 		ldr	r3, [fp, #-40]
+ 3707 0040 0100A0E3 		mov	r0, #1
+ 3708 0044 0310A0E1 		mov	r1, r3
+ 3709 0048 FEFFFFEB 		bl	push_debug
+  34:../gestionExcepciones.c **** 			avisoExcepcion(1);
+ 3710              		.loc 1 34 0
+ 3711 004c 0100A0E3 		mov	r0, #1
+ 3712 0050 FEFFFFEB 		bl	avisoExcepcion
+  35:../gestionExcepciones.c **** 			break;
+ 3713              		.loc 1 35 0
+ 3714 0054 060000EA 		b	.L1
+ 3715              	.L3:
+  36:../gestionExcepciones.c **** 		case 0x17:  //abort --> en data lr = lr+8, en prefetch lr = lr+4
+  37:../gestionExcepciones.c **** 			push_debug(2,direccion);
+ 3716              		.loc 1 37 0
+ 3717 0058 28301BE5 		ldr	r3, [fp, #-40]
+ 3718 005c 0200A0E3 		mov	r0, #2
+ 3719 0060 0310A0E1 		mov	r1, r3
+ 3720 0064 FEFFFFEB 		bl	push_debug
+  38:../gestionExcepciones.c **** 			avisoExcepcion(2);
+ 3721              		.loc 1 38 0
+ 3722 0068 0200A0E3 		mov	r0, #2
+ 3723 006c FEFFFFEB 		bl	avisoExcepcion
+  39:../gestionExcepciones.c **** 			break;
+ 3724              		.loc 1 39 0
+ 3725 0070 0000A0E1 		mov	r0, r0	@ nop
+ 3726              	.L1:
+  40:../gestionExcepciones.c **** 	}
+  41:../gestionExcepciones.c **** 
+  42:../gestionExcepciones.c **** }
+ 3727              		.loc 1 42 0
+ 3728 0074 20D04BE2 		sub	sp, fp, #32
+ 3729 0078 1F689DE8 		ldmfd	sp, {r0, r1, r2, r3, r4, fp, sp, lr}
+ 3730 007c 04C09DE4 		ldmfd	sp!, {ip}
+ 3731 0080 0EF0B0E1 		movs	pc, lr
+ 3732              		.cfi_endproc
+ 3733              	.LFE0:
+ 3735              		.align	2
+ 3736              		.global	avisoExcepcion
+ 3738              	avisoExcepcion:
+ 3739              	.LFB1:
+  43:../gestionExcepciones.c **** 
+  44:../gestionExcepciones.c **** /* Avisa de que ha ocurrido una excepcion mostrando el número de la excepción */
+  45:../gestionExcepciones.c **** void avisoExcepcion(int tipo){
+ 3740              		.loc 1 45 0
+ 3741              		.cfi_startproc
+ 3742              		@ Function supports interworking.
+ 3743              		@ args = 0, pretend = 0, frame = 16
+ 3744              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3745 0084 0DC0A0E1 		mov	ip, sp
+ 3746              	.LCFI2:
+ 3747              		.cfi_def_cfa_register 12
+ 3748 0088 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3749 008c 04B04CE2 		sub	fp, ip, #4
+ 3750              		.cfi_offset 14, -8
+ 3751              		.cfi_offset 13, -12
+ 3752              		.cfi_offset 11, -16
+ 3753              	.LCFI3:
+ 3754              		.cfi_def_cfa 11, 4
+ 3755 0090 10D04DE2 		sub	sp, sp, #16
+ 3756 0094 18000BE5 		str	r0, [fp, #-24]
+  46:../gestionExcepciones.c **** 	int paridad = 0;				//Cuando sea par mostrara el dato, impar se apagara
+ 3757              		.loc 1 46 0
+ 3758 0098 0030A0E3 		mov	r3, #0
+ 3759 009c 10300BE5 		str	r3, [fp, #-16]
+ 3760              	.L8:
+  47:../gestionExcepciones.c **** 	while(1){
+  48:../gestionExcepciones.c **** 		if(paridad%2==0){			//Par = muestra codigo de error
+ 3761              		.loc 1 48 0
+ 3762 00a0 10301BE5 		ldr	r3, [fp, #-16]
+ 3763 00a4 013003E2 		and	r3, r3, #1
+ 3764 00a8 000053E3 		cmp	r3, #0
+ 3765 00ac 0200001A 		bne	.L6
+  49:../gestionExcepciones.c **** 			D8Led_symbol(tipo);
+ 3766              		.loc 1 49 0
+ 3767 00b0 18001BE5 		ldr	r0, [fp, #-24]
+ 3768 00b4 FEFFFFEB 		bl	D8Led_symbol
+ 3769 00b8 010000EA 		b	.L7
+ 3770              	.L6:
+  50:../gestionExcepciones.c **** 		}else{						//Impar = se apaga para parpadear
+  51:../gestionExcepciones.c **** 			D8Led_symbol(16);
+ 3771              		.loc 1 51 0
+ 3772 00bc 1000A0E3 		mov	r0, #16
+ 3773 00c0 FEFFFFEB 		bl	D8Led_symbol
+ 3774              	.L7:
+  52:../gestionExcepciones.c **** 		}
+  53:../gestionExcepciones.c **** 		paridad++;
+ 3775              		.loc 1 53 0
+ 3776 00c4 10301BE5 		ldr	r3, [fp, #-16]
+ 3777 00c8 013083E2 		add	r3, r3, #1
+ 3778 00cc 10300BE5 		str	r3, [fp, #-16]
+  54:../gestionExcepciones.c **** 		Delay(5000);
+ 3779              		.loc 1 54 0
+ 3780 00d0 04009FE5 		ldr	r0, .L9
+ 3781 00d4 FEFFFFEB 		bl	Delay
+  55:../gestionExcepciones.c **** 	}
+ 3782              		.loc 1 55 0
+ 3783 00d8 F0FFFFEA 		b	.L8
+ 3784              	.L10:
+ 3785              		.align	2
+ 3786              	.L9:
+ 3787 00dc 88130000 		.word	5000
+ 3788              		.cfi_endproc
+ 3789              	.LFE1:
+ 3791              		.align	2
+ 3792              		.global	init_excep
+ 3794              	init_excep:
+ 3795              	.LFB2:
+  56:../gestionExcepciones.c **** }
+  57:../gestionExcepciones.c **** 
+  58:../gestionExcepciones.c **** void init_excep() {
+ 3796              		.loc 1 58 0
+ 3797              		.cfi_startproc
+ 3798              		@ Function supports interworking.
+ 3799              		@ args = 0, pretend = 0, frame = 0
+ 3800              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3801 00e0 0DC0A0E1 		mov	ip, sp
+ 3802              	.LCFI4:
+ 3803              		.cfi_def_cfa_register 12
+ 3804 00e4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3805 00e8 04B04CE2 		sub	fp, ip, #4
+ 3806              		.cfi_offset 14, -8
+ 3807              		.cfi_offset 13, -12
+ 3808              		.cfi_offset 11, -16
+ 3809              	.LCFI5:
+ 3810              		.cfi_def_cfa 11, 4
+  59:../gestionExcepciones.c **** 	pISR_DABORT = (unsigned) gestionGlobal;
+ 3811              		.loc 1 59 0
+ 3812 00ec 28309FE5 		ldr	r3, .L12
+ 3813 00f0 28209FE5 		ldr	r2, .L12+4
+ 3814 00f4 002083E5 		str	r2, [r3, #0]
+  60:../gestionExcepciones.c **** 	pISR_UNDEF = (unsigned) gestionGlobal;
+ 3815              		.loc 1 60 0
+ 3816 00f8 24309FE5 		ldr	r3, .L12+8
+ 3817 00fc 1C209FE5 		ldr	r2, .L12+4
+ 3818 0100 002083E5 		str	r2, [r3, #0]
+  61:../gestionExcepciones.c **** 	pISR_PABORT = (unsigned) gestionGlobal;
+ 3819              		.loc 1 61 0
+ 3820 0104 1C309FE5 		ldr	r3, .L12+12
+ 3821 0108 10209FE5 		ldr	r2, .L12+4
+ 3822 010c 002083E5 		str	r2, [r3, #0]
+  62:../gestionExcepciones.c **** }
+ 3823              		.loc 1 62 0
+ 3824 0110 0CD04BE2 		sub	sp, fp, #12
+ 3825 0114 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 3826 0118 1EFF2FE1 		bx	lr
+ 3827              	.L13:
+ 3828              		.align	2
+ 3829              	.L12:
+ 3830 011c 10FF7F0C 		.word	209714960
+ 3831 0120 00000000 		.word	gestionGlobal
+ 3832 0124 04FF7F0C 		.word	209714948
+ 3833 0128 0CFF7F0C 		.word	209714956
+ 3834              		.cfi_endproc
+ 3835              	.LFE2:
+ 3837              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 gestionExcepciones.c
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3657   .data:00000000 NUM_ALERTAS
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3654   .data:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3660   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3663   .text:00000000 gestionGlobal
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3738   .text:00000084 avisoExcepcion
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3787   .text:000000dc $d
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3791   .text:000000e0 $a
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3794   .text:000000e0 init_excep
+C:\Users\a680669\AppData\Local\Temp\ccyBzN44.s:3830   .text:0000011c $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+push_debug
+D8Led_symbol
+Delay

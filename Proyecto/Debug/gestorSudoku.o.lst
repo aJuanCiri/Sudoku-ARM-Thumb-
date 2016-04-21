@@ -1,0 +1,606 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gestorSudoku.c"
+  21              	.Ltext0:
+  22              		.file 1 "../gestorSudoku.c"
+ 1821              		.align	2
+ 1824              	estadoSudoku:
+ 1825 0000 00000000 		.space	4
+ 1826              		.global	datoMostradoPorPantalla
+ 1827              		.align	2
+ 1830              	datoMostradoPorPantalla:
+ 1831 0004 00000000 		.space	4
+ 1832              		.comm	fila,4,4
+ 1833              		.comm	columna,4,4
+ 1834              		.global	pintar
+ 1835              		.align	2
+ 1838              	pintar:
+ 1839 0008 00000000 		.space	4
+ 1840              		.text
+ 1841              		.align	2
+ 1842              		.global	gestionarSudoku
+ 1844              	gestionarSudoku:
+ 1845              	.LFB0:
+   1:../gestorSudoku.c **** #include "8led.h"
+   2:../gestorSudoku.c **** #include "sudoku_2015.h"
+   3:../gestorSudoku.c **** #include "gestorPantalla.h"
+   4:../gestorSudoku.c **** #include "timer2.h"
+   5:../gestorSudoku.c **** #include "timer4.h"
+   6:../gestorSudoku.c **** 
+   7:../gestorSudoku.c **** enum {sinEmpezar = 0, mostrarF = 1, elegirFila = 2, mostrarC = 3,
+   8:../gestorSudoku.c **** 	elegirColumna = 4, mostrarD = 5, elegirValorDato = 6, confirmarFinal=7};
+   9:../gestorSudoku.c **** enum {botonIzquierdo = 0, botonDerecho = 1};
+  10:../gestorSudoku.c **** enum {pantallaJuego = 0, pantallaConfirmacionFinal = 1, pantallaVolverAJugar = 2,
+  11:../gestorSudoku.c **** 	pantallaInstrucciones = 3};
+  12:../gestorSudoku.c **** 
+  13:../gestorSudoku.c **** int estadoSudoku = sinEmpezar; // Variable que marca estado actual
+  14:../gestorSudoku.c **** int datoMostradoPorPantalla = 0;
+  15:../gestorSudoku.c **** int fila, columna;
+  16:../gestorSudoku.c **** int pintar = 0;
+  17:../gestorSudoku.c **** 
+  18:../gestorSudoku.c **** /* Gestiona el juego del sudoku, actualizando los estados y
+  19:../gestorSudoku.c ****  * mostrando las salidas correspondientes */
+  20:../gestorSudoku.c **** void gestionarSudoku(int botonPulsado) {
+ 1846              		.loc 1 20 0
+ 1847              		.cfi_startproc
+ 1848              		@ Function supports interworking.
+ 1849              		@ args = 0, pretend = 0, frame = 16
+ 1850              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1851 0000 0DC0A0E1 		mov	ip, sp
+ 1852              	.LCFI0:
+ 1853              		.cfi_def_cfa_register 12
+ 1854 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 1855 0008 04B04CE2 		sub	fp, ip, #4
+ 1856              		.cfi_offset 14, -8
+ 1857              		.cfi_offset 13, -12
+ 1858              		.cfi_offset 11, -16
+ 1859              	.LCFI1:
+ 1860              		.cfi_def_cfa 11, 4
+ 1861 000c 10D04DE2 		sub	sp, sp, #16
+ 1862 0010 18000BE5 		str	r0, [fp, #-24]
+  21:../gestorSudoku.c **** 	/* ESTADOSUDOKU = SIN EMPEZAR */
+  22:../gestorSudoku.c **** 	if (estadoSudoku == sinEmpezar) {
+ 1863              		.loc 1 22 0
+ 1864 0014 B0339FE5 		ldr	r3, .L18
+ 1865 0018 003093E5 		ldr	r3, [r3, #0]
+ 1866 001c 000053E3 		cmp	r3, #0
+ 1867 0020 0F00001A 		bne	.L2
+ 1868              	.LBB2:
+  23:../gestorSudoku.c **** 		timer4_reset();
+ 1869              		.loc 1 23 0
+ 1870 0024 FEFFFFEB 		bl	timer4_reset
+  24:../gestorSudoku.c **** 		timer4_init();
+ 1871              		.loc 1 24 0
+ 1872 0028 FEFFFFEB 		bl	timer4_init
+  25:../gestorSudoku.c **** 		estadoSudoku = mostrarF;
+ 1873              		.loc 1 25 0
+ 1874 002c 98339FE5 		ldr	r3, .L18
+ 1875 0030 0120A0E3 		mov	r2, #1
+ 1876 0034 002083E5 		str	r2, [r3, #0]
+  26:../gestorSudoku.c **** 		datoMostradoPorPantalla = 15;	// Mostramos una F por pantalla
+ 1877              		.loc 1 26 0
+ 1878 0038 90339FE5 		ldr	r3, .L18+4
+ 1879 003c 0F20A0E3 		mov	r2, #15
+ 1880 0040 002083E5 		str	r2, [r3, #0]
+  27:../gestorSudoku.c **** 		iniciarArmThumb();				// Iniciamos algoritmo (ARM-THUMB)
+ 1881              		.loc 1 27 0
+ 1882 0044 FEFFFFEB 		bl	iniciarArmThumb
+  28:../gestorSudoku.c **** 		setPantalla(pantallaJuego);
+ 1883              		.loc 1 28 0
+ 1884 0048 0000A0E3 		mov	r0, #0
+ 1885 004c FEFFFFEB 		bl	setPantalla
+  29:../gestorSudoku.c **** 		refrescarPantalla(1);
+ 1886              		.loc 1 29 0
+ 1887 0050 7C339FE5 		ldr	r3, .L18+8
+ 1888 0054 0100A0E3 		mov	r0, #1
+ 1889 0058 0FE0A0E1 		mov	lr, pc
+ 1890 005c 13FF2FE1 		bx	r3
+ 1891 0060 D20000EA 		b	.L3
+ 1892              	.L2:
+ 1893              	.LBE2:
+  30:../gestorSudoku.c **** 	}
+  31:../gestorSudoku.c **** 
+  32:../gestorSudoku.c **** 	/* ESTADOSUDOKU = MOSTRAR F */
+  33:../gestorSudoku.c **** 	else if (estadoSudoku == mostrarF && botonPulsado == botonIzquierdo) {
+ 1894              		.loc 1 33 0
+ 1895 0064 60339FE5 		ldr	r3, .L18
+ 1896 0068 003093E5 		ldr	r3, [r3, #0]
+ 1897 006c 010053E3 		cmp	r3, #1
+ 1898 0070 0900001A 		bne	.L4
+ 1899              		.loc 1 33 0 is_stmt 0 discriminator 1
+ 1900 0074 18301BE5 		ldr	r3, [fp, #-24]
+ 1901 0078 000053E3 		cmp	r3, #0
+ 1902 007c 0600001A 		bne	.L4
+  34:../gestorSudoku.c **** 		datoMostradoPorPantalla = 1;	// Mostramos en pantalla un 1
+ 1903              		.loc 1 34 0 is_stmt 1
+ 1904 0080 48339FE5 		ldr	r3, .L18+4
+ 1905 0084 0120A0E3 		mov	r2, #1
+ 1906 0088 002083E5 		str	r2, [r3, #0]
+  35:../gestorSudoku.c **** 		estadoSudoku = elegirFila;	// Avanzamos de estado
+ 1907              		.loc 1 35 0
+ 1908 008c 38339FE5 		ldr	r3, .L18
+ 1909 0090 0220A0E3 		mov	r2, #2
+ 1910 0094 002083E5 		str	r2, [r3, #0]
+ 1911 0098 C40000EA 		b	.L3
+ 1912              	.L4:
+  36:../gestorSudoku.c **** 	}
+  37:../gestorSudoku.c **** 
+  38:../gestorSudoku.c **** 	/* ESTADOSUDOKU = ELEGIR FILA */
+  39:../gestorSudoku.c **** 	else if (estadoSudoku == elegirFila) {
+ 1913              		.loc 1 39 0
+ 1914 009c 28339FE5 		ldr	r3, .L18
+ 1915 00a0 003093E5 		ldr	r3, [r3, #0]
+ 1916 00a4 020053E3 		cmp	r3, #2
+ 1917 00a8 2B00001A 		bne	.L5
+  40:../gestorSudoku.c **** 		if (botonPulsado == botonIzquierdo) {
+ 1918              		.loc 1 40 0
+ 1919 00ac 18301BE5 		ldr	r3, [fp, #-24]
+ 1920 00b0 000053E3 		cmp	r3, #0
+ 1921 00b4 0C00001A 		bne	.L6
+  41:../gestorSudoku.c **** 			datoMostradoPorPantalla++;
+ 1922              		.loc 1 41 0
+ 1923 00b8 10339FE5 		ldr	r3, .L18+4
+ 1924 00bc 003093E5 		ldr	r3, [r3, #0]
+ 1925 00c0 012083E2 		add	r2, r3, #1
+ 1926 00c4 04339FE5 		ldr	r3, .L18+4
+ 1927 00c8 002083E5 		str	r2, [r3, #0]
+  42:../gestorSudoku.c **** 			if (datoMostradoPorPantalla == 11) {
+ 1928              		.loc 1 42 0
+ 1929 00cc FC329FE5 		ldr	r3, .L18+4
+ 1930 00d0 003093E5 		ldr	r3, [r3, #0]
+ 1931 00d4 0B0053E3 		cmp	r3, #11
+ 1932 00d8 B400001A 		bne	.L3
+  43:../gestorSudoku.c **** 				datoMostradoPorPantalla = 1;
+ 1933              		.loc 1 43 0
+ 1934 00dc EC329FE5 		ldr	r3, .L18+4
+ 1935 00e0 0120A0E3 		mov	r2, #1
+ 1936 00e4 002083E5 		str	r2, [r3, #0]
+ 1937 00e8 B00000EA 		b	.L3
+ 1938              	.L6:
+  44:../gestorSudoku.c **** 			}
+  45:../gestorSudoku.c **** 		} else if (botonPulsado == botonDerecho) {
+ 1939              		.loc 1 45 0
+ 1940 00ec 18301BE5 		ldr	r3, [fp, #-24]
+ 1941 00f0 010053E3 		cmp	r3, #1
+ 1942 00f4 AD00001A 		bne	.L3
+  46:../gestorSudoku.c **** 			fila = datoMostradoPorPantalla;
+ 1943              		.loc 1 46 0
+ 1944 00f8 D0329FE5 		ldr	r3, .L18+4
+ 1945 00fc 002093E5 		ldr	r2, [r3, #0]
+ 1946 0100 D0329FE5 		ldr	r3, .L18+12
+ 1947 0104 002083E5 		str	r2, [r3, #0]
+  47:../gestorSudoku.c **** 			if (fila == 10) {
+ 1948              		.loc 1 47 0
+ 1949 0108 C8329FE5 		ldr	r3, .L18+12
+ 1950 010c 003093E5 		ldr	r3, [r3, #0]
+ 1951 0110 0A0053E3 		cmp	r3, #10
+ 1952 0114 0900001A 		bne	.L7
+ 1953              	.LBB3:
+  48:../gestorSudoku.c **** 				estadoSudoku = confirmarFinal;
+ 1954              		.loc 1 48 0
+ 1955 0118 AC329FE5 		ldr	r3, .L18
+ 1956 011c 0720A0E3 		mov	r2, #7
+ 1957 0120 002083E5 		str	r2, [r3, #0]
+  49:../gestorSudoku.c **** 				setPantalla(pantallaConfirmacionFinal);
+ 1958              		.loc 1 49 0
+ 1959 0124 0100A0E3 		mov	r0, #1
+ 1960 0128 FEFFFFEB 		bl	setPantalla
+  50:../gestorSudoku.c **** 				refrescarPantalla(1);
+ 1961              		.loc 1 50 0
+ 1962 012c A0329FE5 		ldr	r3, .L18+8
+ 1963 0130 0100A0E3 		mov	r0, #1
+ 1964 0134 0FE0A0E1 		mov	lr, pc
+ 1965 0138 13FF2FE1 		bx	r3
+ 1966 013c 9B0000EA 		b	.L3
+ 1967              	.L7:
+ 1968              	.LBE3:
+  51:../gestorSudoku.c **** 			} else {
+  52:../gestorSudoku.c **** 				estadoSudoku = mostrarC;
+ 1969              		.loc 1 52 0
+ 1970 0140 84329FE5 		ldr	r3, .L18
+ 1971 0144 0320A0E3 		mov	r2, #3
+ 1972 0148 002083E5 		str	r2, [r3, #0]
+  53:../gestorSudoku.c **** 				datoMostradoPorPantalla = 12;
+ 1973              		.loc 1 53 0
+ 1974 014c 7C329FE5 		ldr	r3, .L18+4
+ 1975 0150 0C20A0E3 		mov	r2, #12
+ 1976 0154 002083E5 		str	r2, [r3, #0]
+ 1977 0158 940000EA 		b	.L3
+ 1978              	.L5:
+  54:../gestorSudoku.c **** 			}
+  55:../gestorSudoku.c **** 		}
+  56:../gestorSudoku.c **** 	}
+  57:../gestorSudoku.c **** 
+  58:../gestorSudoku.c **** 	/* ESTADOSUDOKU = MOSTRAR C */
+  59:../gestorSudoku.c **** 	else if (estadoSudoku == mostrarC && botonPulsado == botonIzquierdo) {
+ 1979              		.loc 1 59 0
+ 1980 015c 68329FE5 		ldr	r3, .L18
+ 1981 0160 003093E5 		ldr	r3, [r3, #0]
+ 1982 0164 030053E3 		cmp	r3, #3
+ 1983 0168 0900001A 		bne	.L8
+ 1984              		.loc 1 59 0 is_stmt 0 discriminator 1
+ 1985 016c 18301BE5 		ldr	r3, [fp, #-24]
+ 1986 0170 000053E3 		cmp	r3, #0
+ 1987 0174 0600001A 		bne	.L8
+  60:../gestorSudoku.c **** 		datoMostradoPorPantalla = 1;
+ 1988              		.loc 1 60 0 is_stmt 1
+ 1989 0178 50329FE5 		ldr	r3, .L18+4
+ 1990 017c 0120A0E3 		mov	r2, #1
+ 1991 0180 002083E5 		str	r2, [r3, #0]
+  61:../gestorSudoku.c **** 		estadoSudoku = elegirColumna;
+ 1992              		.loc 1 61 0
+ 1993 0184 40329FE5 		ldr	r3, .L18
+ 1994 0188 0420A0E3 		mov	r2, #4
+ 1995 018c 002083E5 		str	r2, [r3, #0]
+ 1996 0190 860000EA 		b	.L3
+ 1997              	.L8:
+  62:../gestorSudoku.c **** 	}
+  63:../gestorSudoku.c **** 
+  64:../gestorSudoku.c **** 	/* ESTADOSUDOKU = ELEGIR COLUMNA */
+  65:../gestorSudoku.c **** 	else if (estadoSudoku == elegirColumna) {
+ 1998              		.loc 1 65 0
+ 1999 0194 30329FE5 		ldr	r3, .L18
+ 2000 0198 003093E5 		ldr	r3, [r3, #0]
+ 2001 019c 040053E3 		cmp	r3, #4
+ 2002 01a0 1D00001A 		bne	.L9
+  66:../gestorSudoku.c **** 		if (botonPulsado == botonIzquierdo) {
+ 2003              		.loc 1 66 0
+ 2004 01a4 18301BE5 		ldr	r3, [fp, #-24]
+ 2005 01a8 000053E3 		cmp	r3, #0
+ 2006 01ac 0C00001A 		bne	.L10
+  67:../gestorSudoku.c **** 			datoMostradoPorPantalla++;
+ 2007              		.loc 1 67 0
+ 2008 01b0 18329FE5 		ldr	r3, .L18+4
+ 2009 01b4 003093E5 		ldr	r3, [r3, #0]
+ 2010 01b8 012083E2 		add	r2, r3, #1
+ 2011 01bc 0C329FE5 		ldr	r3, .L18+4
+ 2012 01c0 002083E5 		str	r2, [r3, #0]
+  68:../gestorSudoku.c **** 			if (datoMostradoPorPantalla == 10) {
+ 2013              		.loc 1 68 0
+ 2014 01c4 04329FE5 		ldr	r3, .L18+4
+ 2015 01c8 003093E5 		ldr	r3, [r3, #0]
+ 2016 01cc 0A0053E3 		cmp	r3, #10
+ 2017 01d0 7600001A 		bne	.L3
+  69:../gestorSudoku.c **** 				datoMostradoPorPantalla = 1;
+ 2018              		.loc 1 69 0
+ 2019 01d4 F4319FE5 		ldr	r3, .L18+4
+ 2020 01d8 0120A0E3 		mov	r2, #1
+ 2021 01dc 002083E5 		str	r2, [r3, #0]
+ 2022 01e0 720000EA 		b	.L3
+ 2023              	.L10:
+  70:../gestorSudoku.c **** 			}
+  71:../gestorSudoku.c **** 		} else if (botonPulsado == botonDerecho) {
+ 2024              		.loc 1 71 0
+ 2025 01e4 18301BE5 		ldr	r3, [fp, #-24]
+ 2026 01e8 010053E3 		cmp	r3, #1
+ 2027 01ec 6F00001A 		bne	.L3
+  72:../gestorSudoku.c **** 			columna = datoMostradoPorPantalla;
+ 2028              		.loc 1 72 0
+ 2029 01f0 D8319FE5 		ldr	r3, .L18+4
+ 2030 01f4 002093E5 		ldr	r2, [r3, #0]
+ 2031 01f8 DC319FE5 		ldr	r3, .L18+16
+ 2032 01fc 002083E5 		str	r2, [r3, #0]
+  73:../gestorSudoku.c **** 			estadoSudoku = mostrarD;
+ 2033              		.loc 1 73 0
+ 2034 0200 C4319FE5 		ldr	r3, .L18
+ 2035 0204 0520A0E3 		mov	r2, #5
+ 2036 0208 002083E5 		str	r2, [r3, #0]
+  74:../gestorSudoku.c **** 			datoMostradoPorPantalla = 13;
+ 2037              		.loc 1 74 0
+ 2038 020c BC319FE5 		ldr	r3, .L18+4
+ 2039 0210 0D20A0E3 		mov	r2, #13
+ 2040 0214 002083E5 		str	r2, [r3, #0]
+ 2041 0218 640000EA 		b	.L3
+ 2042              	.L9:
+  75:../gestorSudoku.c **** 		}
+  76:../gestorSudoku.c **** 	}
+  77:../gestorSudoku.c **** 
+  78:../gestorSudoku.c **** 	/* ESTADOSUDOKU = MOSTRAR D */
+  79:../gestorSudoku.c **** 	else if (estadoSudoku == mostrarD && botonPulsado == botonIzquierdo) {
+ 2043              		.loc 1 79 0
+ 2044 021c A8319FE5 		ldr	r3, .L18
+ 2045 0220 003093E5 		ldr	r3, [r3, #0]
+ 2046 0224 050053E3 		cmp	r3, #5
+ 2047 0228 0900001A 		bne	.L11
+ 2048              		.loc 1 79 0 is_stmt 0 discriminator 1
+ 2049 022c 18301BE5 		ldr	r3, [fp, #-24]
+ 2050 0230 000053E3 		cmp	r3, #0
+ 2051 0234 0600001A 		bne	.L11
+  80:../gestorSudoku.c **** 		datoMostradoPorPantalla = 1;
+ 2052              		.loc 1 80 0 is_stmt 1
+ 2053 0238 90319FE5 		ldr	r3, .L18+4
+ 2054 023c 0120A0E3 		mov	r2, #1
+ 2055 0240 002083E5 		str	r2, [r3, #0]
+  81:../gestorSudoku.c **** 		estadoSudoku = elegirValorDato;
+ 2056              		.loc 1 81 0
+ 2057 0244 80319FE5 		ldr	r3, .L18
+ 2058 0248 0620A0E3 		mov	r2, #6
+ 2059 024c 002083E5 		str	r2, [r3, #0]
+ 2060 0250 560000EA 		b	.L3
+ 2061              	.L11:
+  82:../gestorSudoku.c **** 	}
+  83:../gestorSudoku.c **** 
+  84:../gestorSudoku.c **** 	/* ESTADOSUDOKU = ELEGIR VALOR DATO */
+  85:../gestorSudoku.c **** 	else if (estadoSudoku == elegirValorDato) {
+ 2062              		.loc 1 85 0
+ 2063 0254 70319FE5 		ldr	r3, .L18
+ 2064 0258 003093E5 		ldr	r3, [r3, #0]
+ 2065 025c 060053E3 		cmp	r3, #6
+ 2066 0260 3500001A 		bne	.L12
+  86:../gestorSudoku.c **** 		if (botonPulsado == botonIzquierdo) {
+ 2067              		.loc 1 86 0
+ 2068 0264 18301BE5 		ldr	r3, [fp, #-24]
+ 2069 0268 000053E3 		cmp	r3, #0
+ 2070 026c 0F00001A 		bne	.L13
+  87:../gestorSudoku.c **** 			datoMostradoPorPantalla = (datoMostradoPorPantalla+1)%10;
+ 2071              		.loc 1 87 0
+ 2072 0270 58319FE5 		ldr	r3, .L18+4
+ 2073 0274 003093E5 		ldr	r3, [r3, #0]
+ 2074 0278 011083E2 		add	r1, r3, #1
+ 2075 027c 5C319FE5 		ldr	r3, .L18+20
+ 2076 0280 9123C3E0 		smull	r2, r3, r1, r3
+ 2077 0284 4321A0E1 		mov	r2, r3, asr #2
+ 2078 0288 C13FA0E1 		mov	r3, r1, asr #31
+ 2079 028c 022063E0 		rsb	r2, r3, r2
+ 2080 0290 0230A0E1 		mov	r3, r2
+ 2081 0294 0331A0E1 		mov	r3, r3, asl #2
+ 2082 0298 023083E0 		add	r3, r3, r2
+ 2083 029c 8330A0E1 		mov	r3, r3, asl #1
+ 2084 02a0 012063E0 		rsb	r2, r3, r1
+ 2085 02a4 24319FE5 		ldr	r3, .L18+4
+ 2086 02a8 002083E5 		str	r2, [r3, #0]
+ 2087 02ac 3F0000EA 		b	.L3
+ 2088              	.L13:
+  88:../gestorSudoku.c **** 		} else if (botonPulsado == botonDerecho) {
+ 2089              		.loc 1 88 0
+ 2090 02b0 18301BE5 		ldr	r3, [fp, #-24]
+ 2091 02b4 010053E3 		cmp	r3, #1
+ 2092 02b8 3C00001A 		bne	.L3
+ 2093              	.LBB4:
+  89:../gestorSudoku.c **** 			int celdasVacias = insertValor(fila, columna, datoMostradoPorPantalla);
+ 2094              		.loc 1 89 0
+ 2095 02bc 14319FE5 		ldr	r3, .L18+12
+ 2096 02c0 001093E5 		ldr	r1, [r3, #0]
+ 2097 02c4 10319FE5 		ldr	r3, .L18+16
+ 2098 02c8 002093E5 		ldr	r2, [r3, #0]
+ 2099 02cc FC309FE5 		ldr	r3, .L18+4
+ 2100 02d0 003093E5 		ldr	r3, [r3, #0]
+ 2101 02d4 0100A0E1 		mov	r0, r1
+ 2102 02d8 0210A0E1 		mov	r1, r2
+ 2103 02dc 0320A0E1 		mov	r2, r3
+ 2104 02e0 FEFFFFEB 		bl	insertValor
+ 2105 02e4 10000BE5 		str	r0, [fp, #-16]
+  90:../gestorSudoku.c **** 			if (celdasVacias == 0) {
+ 2106              		.loc 1 90 0
+ 2107 02e8 10301BE5 		ldr	r3, [fp, #-16]
+ 2108 02ec 000053E3 		cmp	r3, #0
+ 2109 02f0 0600001A 		bne	.L14
+  91:../gestorSudoku.c **** 				estadoSudoku = sinEmpezar;
+ 2110              		.loc 1 91 0
+ 2111 02f4 D0309FE5 		ldr	r3, .L18
+ 2112 02f8 0020A0E3 		mov	r2, #0
+ 2113 02fc 002083E5 		str	r2, [r3, #0]
+  92:../gestorSudoku.c **** 				setPantalla(pantallaVolverAJugar);
+ 2114              		.loc 1 92 0
+ 2115 0300 0200A0E3 		mov	r0, #2
+ 2116 0304 FEFFFFEB 		bl	setPantalla
+  93:../gestorSudoku.c **** 				timer4_stop();
+ 2117              		.loc 1 93 0
+ 2118 0308 FEFFFFEB 		bl	timer4_stop
+ 2119 030c 050000EA 		b	.L15
+ 2120              	.L14:
+  94:../gestorSudoku.c **** 			} else {
+  95:../gestorSudoku.c **** 				estadoSudoku = mostrarF;
+ 2121              		.loc 1 95 0
+ 2122 0310 B4309FE5 		ldr	r3, .L18
+ 2123 0314 0120A0E3 		mov	r2, #1
+ 2124 0318 002083E5 		str	r2, [r3, #0]
+  96:../gestorSudoku.c **** 				datoMostradoPorPantalla = 15;
+ 2125              		.loc 1 96 0
+ 2126 031c AC309FE5 		ldr	r3, .L18+4
+ 2127 0320 0F20A0E3 		mov	r2, #15
+ 2128 0324 002083E5 		str	r2, [r3, #0]
+ 2129              	.L15:
+  97:../gestorSudoku.c **** 			}
+  98:../gestorSudoku.c **** 			refrescarPantalla(1);
+ 2130              		.loc 1 98 0
+ 2131 0328 A4309FE5 		ldr	r3, .L18+8
+ 2132 032c 0100A0E3 		mov	r0, #1
+ 2133 0330 0FE0A0E1 		mov	lr, pc
+ 2134 0334 13FF2FE1 		bx	r3
+ 2135 0338 1C0000EA 		b	.L3
+ 2136              	.L12:
+ 2137              	.LBE4:
+  99:../gestorSudoku.c **** 		}
+ 100:../gestorSudoku.c **** 	}
+ 101:../gestorSudoku.c **** 
+ 102:../gestorSudoku.c **** 	else if (estadoSudoku == confirmarFinal){
+ 2138              		.loc 1 102 0
+ 2139 033c 88309FE5 		ldr	r3, .L18
+ 2140 0340 003093E5 		ldr	r3, [r3, #0]
+ 2141 0344 070053E3 		cmp	r3, #7
+ 2142 0348 1800001A 		bne	.L3
+ 2143              	.LBB5:
+ 103:../gestorSudoku.c **** 		if (botonPulsado == botonIzquierdo) {
+ 2144              		.loc 1 103 0
+ 2145 034c 18301BE5 		ldr	r3, [fp, #-24]
+ 2146 0350 000053E3 		cmp	r3, #0
+ 2147 0354 0800001A 		bne	.L16
+ 104:../gestorSudoku.c **** 			estadoSudoku = mostrarF;
+ 2148              		.loc 1 104 0
+ 2149 0358 6C309FE5 		ldr	r3, .L18
+ 2150 035c 0120A0E3 		mov	r2, #1
+ 2151 0360 002083E5 		str	r2, [r3, #0]
+ 105:../gestorSudoku.c **** 			datoMostradoPorPantalla = 15;	// Mostramos una F por pantalla
+ 2152              		.loc 1 105 0
+ 2153 0364 64309FE5 		ldr	r3, .L18+4
+ 2154 0368 0F20A0E3 		mov	r2, #15
+ 2155 036c 002083E5 		str	r2, [r3, #0]
+ 106:../gestorSudoku.c **** 			setPantalla(pantallaJuego);
+ 2156              		.loc 1 106 0
+ 2157 0370 0000A0E3 		mov	r0, #0
+ 2158 0374 FEFFFFEB 		bl	setPantalla
+ 2159 0378 080000EA 		b	.L17
+ 2160              	.L16:
+ 107:../gestorSudoku.c **** 		} else if(botonPulsado == botonDerecho) {
+ 2161              		.loc 1 107 0
+ 2162 037c 18301BE5 		ldr	r3, [fp, #-24]
+ 2163 0380 010053E3 		cmp	r3, #1
+ 2164 0384 0500001A 		bne	.L17
+ 108:../gestorSudoku.c **** 			timer4_stop();
+ 2165              		.loc 1 108 0
+ 2166 0388 FEFFFFEB 		bl	timer4_stop
+ 109:../gestorSudoku.c **** 			estadoSudoku = sinEmpezar;
+ 2167              		.loc 1 109 0
+ 2168 038c 38309FE5 		ldr	r3, .L18
+ 2169 0390 0020A0E3 		mov	r2, #0
+ 2170 0394 002083E5 		str	r2, [r3, #0]
+ 110:../gestorSudoku.c **** 			setPantalla(pantallaVolverAJugar);
+ 2171              		.loc 1 110 0
+ 2172 0398 0200A0E3 		mov	r0, #2
+ 2173 039c FEFFFFEB 		bl	setPantalla
+ 2174              	.L17:
+ 111:../gestorSudoku.c **** 		}
+ 112:../gestorSudoku.c **** 		refrescarPantalla(1);
+ 2175              		.loc 1 112 0
+ 2176 03a0 2C309FE5 		ldr	r3, .L18+8
+ 2177 03a4 0100A0E3 		mov	r0, #1
+ 2178 03a8 0FE0A0E1 		mov	lr, pc
+ 2179 03ac 13FF2FE1 		bx	r3
+ 2180              	.L3:
+ 2181              	.LBE5:
+ 113:../gestorSudoku.c **** 	}
+ 114:../gestorSudoku.c **** 	D8Led_symbol(datoMostradoPorPantalla);
+ 2182              		.loc 1 114 0
+ 2183 03b0 18309FE5 		ldr	r3, .L18+4
+ 2184 03b4 003093E5 		ldr	r3, [r3, #0]
+ 2185 03b8 0300A0E1 		mov	r0, r3
+ 2186 03bc FEFFFFEB 		bl	D8Led_symbol
+ 115:../gestorSudoku.c **** }
+ 2187              		.loc 1 115 0
+ 2188 03c0 0CD04BE2 		sub	sp, fp, #12
+ 2189 03c4 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2190 03c8 1EFF2FE1 		bx	lr
+ 2191              	.L19:
+ 2192              		.align	2
+ 2193              	.L18:
+ 2194 03cc 00000000 		.word	estadoSudoku
+ 2195 03d0 00000000 		.word	datoMostradoPorPantalla
+ 2196 03d4 00000000 		.word	refrescarPantalla
+ 2197 03d8 00000000 		.word	fila
+ 2198 03dc 00000000 		.word	columna
+ 2199 03e0 67666666 		.word	1717986919
+ 2200              		.cfi_endproc
+ 2201              	.LFE0:
+ 2203              		.align	2
+ 2204              		.global	hayQueRefrescar
+ 2206              	hayQueRefrescar:
+ 2207              	.LFB1:
+ 116:../gestorSudoku.c **** 
+ 117:../gestorSudoku.c **** int hayQueRefrescar(){
+ 2208              		.loc 1 117 0
+ 2209              		.cfi_startproc
+ 2210              		@ Function supports interworking.
+ 2211              		@ args = 0, pretend = 0, frame = 0
+ 2212              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2213 03e4 0DC0A0E1 		mov	ip, sp
+ 2214              	.LCFI2:
+ 2215              		.cfi_def_cfa_register 12
+ 2216 03e8 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2217 03ec 04B04CE2 		sub	fp, ip, #4
+ 2218              		.cfi_offset 14, -8
+ 2219              		.cfi_offset 13, -12
+ 2220              		.cfi_offset 11, -16
+ 2221              	.LCFI3:
+ 2222              		.cfi_def_cfa 11, 4
+ 118:../gestorSudoku.c **** 	return pintar;
+ 2223              		.loc 1 118 0
+ 2224 03f0 10309FE5 		ldr	r3, .L21
+ 2225 03f4 003093E5 		ldr	r3, [r3, #0]
+ 119:../gestorSudoku.c **** }
+ 2226              		.loc 1 119 0
+ 2227 03f8 0300A0E1 		mov	r0, r3
+ 2228 03fc 0CD04BE2 		sub	sp, fp, #12
+ 2229 0400 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2230 0404 1EFF2FE1 		bx	lr
+ 2231              	.L22:
+ 2232              		.align	2
+ 2233              	.L21:
+ 2234 0408 00000000 		.word	pintar
+ 2235              		.cfi_endproc
+ 2236              	.LFE1:
+ 2238              		.align	2
+ 2239              		.global	refrescarPantalla
+ 2241              	refrescarPantalla:
+ 2242              	.LFB2:
+ 120:../gestorSudoku.c **** 
+ 121:../gestorSudoku.c **** void refrescarPantalla(int x){
+ 2243              		.loc 1 121 0
+ 2244              		.cfi_startproc
+ 2245              		@ Function supports interworking.
+ 2246              		@ args = 0, pretend = 0, frame = 8
+ 2247              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2248 040c 0DC0A0E1 		mov	ip, sp
+ 2249              	.LCFI4:
+ 2250              		.cfi_def_cfa_register 12
+ 2251 0410 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2252 0414 04B04CE2 		sub	fp, ip, #4
+ 2253              		.cfi_offset 14, -8
+ 2254              		.cfi_offset 13, -12
+ 2255              		.cfi_offset 11, -16
+ 2256              	.LCFI5:
+ 2257              		.cfi_def_cfa 11, 4
+ 2258 0418 08D04DE2 		sub	sp, sp, #8
+ 2259 041c 10000BE5 		str	r0, [fp, #-16]
+ 122:../gestorSudoku.c **** 	pintar = x;
+ 2260              		.loc 1 122 0
+ 2261 0420 10309FE5 		ldr	r3, .L24
+ 2262 0424 10201BE5 		ldr	r2, [fp, #-16]
+ 2263 0428 002083E5 		str	r2, [r3, #0]
+ 123:../gestorSudoku.c **** }
+ 2264              		.loc 1 123 0
+ 2265 042c 0CD04BE2 		sub	sp, fp, #12
+ 2266 0430 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2267 0434 1EFF2FE1 		bx	lr
+ 2268              	.L25:
+ 2269              		.align	2
+ 2270              	.L24:
+ 2271 0438 00000000 		.word	pintar
+ 2272              		.cfi_endproc
+ 2273              	.LFE2:
+ 2275              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 gestorSudoku.c
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:1824   .bss:00000000 estadoSudoku
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:1821   .bss:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:1830   .bss:00000004 datoMostradoPorPantalla
+                            *COM*:00000004 fila
+                            *COM*:00000004 columna
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:1838   .bss:00000008 pintar
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:1841   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:1844   .text:00000000 gestionarSudoku
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:2194   .text:000003cc $d
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:2241   .text:0000040c refrescarPantalla
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:2203   .text:000003e4 $a
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:2206   .text:000003e4 hayQueRefrescar
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:2234   .text:00000408 $d
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:2238   .text:0000040c $a
+C:\Users\a680669\AppData\Local\Temp\ccDnM8eH.s:2271   .text:00000438 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+timer4_reset
+timer4_init
+iniciarArmThumb
+setPantalla
+insertValor
+timer4_stop
+D8Led_symbol

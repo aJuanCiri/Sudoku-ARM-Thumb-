@@ -1,0 +1,1746 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gestorPantalla.c"
+  21              	.Ltext0:
+  22              		.file 1 "../gestorPantalla.c"
+ 3588              		.align	2
+ 3591              	margenIzquierdoLeyenda:
+ 3592 0000 00000000 		.space	4
+ 3593              		.global	margenSuperiorLeyenda
+ 3594              		.align	2
+ 3597              	margenSuperiorLeyenda:
+ 3598 0004 05000000 		.word	5
+ 3599              		.global	margenIzquierdoSudoku
+ 3600              		.align	2
+ 3603              	margenIzquierdoSudoku:
+ 3604 0008 0F000000 		.word	15
+ 3605              		.global	margenSuperiorSudoku
+ 3606              		.align	2
+ 3609              	margenSuperiorSudoku:
+ 3610 000c 1E000000 		.word	30
+ 3611              		.global	sizeOfCell
+ 3612              		.align	2
+ 3615              	sizeOfCell:
+ 3616 0010 16000000 		.word	22
+ 3617              		.global	idSiguientePantalla
+ 3618              		.bss
+ 3619              		.align	2
+ 3622              	idSiguientePantalla:
+ 3623 0000 00000000 		.space	4
+ 3624              		.comm	leyenda,4,4
+ 3625              		.comm	tiempoCalculoEnPantalla,15,4
+ 3626              		.comm	tiempoTotalEnPantalla,15,4
+ 3627              		.section	.rodata
+ 3628              		.align	2
+ 3629              	.LC0:
+ 3630 0014 496E7472 		.ascii	"Introduzca Fila A para acabar la partida\000"
+ 3630      6F64757A 
+ 3630      63612046 
+ 3630      696C6120 
+ 3630      41207061 
+ 3631 003d 000000   		.align	2
+ 3632              	.LC1:
+ 3633 0040 50756C73 		.ascii	"Pulse un boton para jugar\000"
+ 3633      6520756E 
+ 3633      20626F74 
+ 3633      6F6E2070 
+ 3633      61726120 
+ 3634              		.text
+ 3635              		.align	2
+ 3636              		.global	actualizarPantalla
+ 3638              	actualizarPantalla:
+ 3639              	.LFB0:
+   1:../gestorPantalla.c **** /*********************************************************************************************
+   2:../gestorPantalla.c **** * Fichero:	gestorPantalla.c
+   3:../gestorPantalla.c **** * Autor:	
+   4:../gestorPantalla.c **** * Descrip:	Gestiona lo que se muestra por pantalla para el caso concreto de un sudoku
+   5:../gestorPantalla.c **** * Version:	<P6-ARM>
+   6:../gestorPantalla.c **** *********************************************************************************************/
+   7:../gestorPantalla.c **** 
+   8:../gestorPantalla.c **** /*--- ficheros de cabecera ---*/
+   9:../gestorPantalla.c **** #include "def.h"
+  10:../gestorPantalla.c **** #include "44b.h"
+  11:../gestorPantalla.c **** #include <stdlib.h>
+  12:../gestorPantalla.c **** #include "44blib.h"
+  13:../gestorPantalla.c **** #include "lcd.h"
+  14:../gestorPantalla.c **** #include "bmp.h"
+  15:../gestorPantalla.c **** #include <inttypes.h>
+  16:../gestorPantalla.c **** #include "sudoku_2015.h"
+  17:../gestorPantalla.c **** #include "itoa.h"
+  18:../gestorPantalla.c **** #include "timer2.h"
+  19:../gestorPantalla.c **** 
+  20:../gestorPantalla.c **** enum {pantallaJuego = 0, pantallaConfirmacionFinal = 1, pantallaVolverAJugar = 2,
+  21:../gestorPantalla.c **** 	pantallaInstrucciones = 3};
+  22:../gestorPantalla.c **** 
+  23:../gestorPantalla.c **** /*--- variables internas ---*/
+  24:../gestorPantalla.c **** const int margenIzquierdoLeyenda = 0;
+  25:../gestorPantalla.c **** const int margenSuperiorLeyenda = 5;
+  26:../gestorPantalla.c **** const int margenIzquierdoSudoku = 15;
+  27:../gestorPantalla.c **** const int margenSuperiorSudoku = 30;
+  28:../gestorPantalla.c **** const int sizeOfCell = 22;
+  29:../gestorPantalla.c **** int idSiguientePantalla = 0;
+  30:../gestorPantalla.c **** char* leyenda;
+  31:../gestorPantalla.c **** char tiempoCalculoEnPantalla[15];
+  32:../gestorPantalla.c **** char tiempoTotalEnPantalla[15];
+  33:../gestorPantalla.c **** 	
+  34:../gestorPantalla.c **** /**
+  35:../gestorPantalla.c ****  * Pantalla 0  -->  Sudoku
+  36:../gestorPantalla.c ****  * Pantalla 1  --> Confirmaci髇 antes de finalizlar
+  37:../gestorPantalla.c ****  */
+  38:../gestorPantalla.c **** void actualizarPantalla(){
+ 3640              		.loc 1 38 0
+ 3641              		.cfi_startproc
+ 3642              		@ Function supports interworking.
+ 3643              		@ args = 0, pretend = 0, frame = 0
+ 3644              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3645 0000 0DC0A0E1 		mov	ip, sp
+ 3646              	.LCFI0:
+ 3647              		.cfi_def_cfa_register 12
+ 3648 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3649 0008 04B04CE2 		sub	fp, ip, #4
+ 3650              		.cfi_offset 14, -8
+ 3651              		.cfi_offset 13, -12
+ 3652              		.cfi_offset 11, -16
+ 3653              	.LCFI1:
+ 3654              		.cfi_def_cfa 11, 4
+  39:../gestorPantalla.c **** 	if(idSiguientePantalla == pantallaJuego) {
+ 3655              		.loc 1 39 0
+ 3656 000c 98309FE5 		ldr	r3, .L6
+ 3657 0010 003093E5 		ldr	r3, [r3, #0]
+ 3658 0014 000053E3 		cmp	r3, #0
+ 3659 0018 0600001A 		bne	.L2
+ 3660              	.LBB2:
+  40:../gestorPantalla.c **** 		leyenda = "Introduzca Fila A para acabar la partida";
+ 3661              		.loc 1 40 0
+ 3662 001c 8C309FE5 		ldr	r3, .L6+4
+ 3663 0020 8C209FE5 		ldr	r2, .L6+8
+ 3664 0024 002083E5 		str	r2, [r3, #0]
+  41:../gestorPantalla.c **** 		dibujar_sudoku();
+ 3665              		.loc 1 41 0
+ 3666 0028 88309FE5 		ldr	r3, .L6+12
+ 3667 002c 0FE0A0E1 		mov	lr, pc
+ 3668 0030 13FF2FE1 		bx	r3
+ 3669 0034 190000EA 		b	.L1
+ 3670              	.L2:
+ 3671              	.LBE2:
+  42:../gestorPantalla.c **** 	} else if (idSiguientePantalla == pantallaConfirmacionFinal) {
+ 3672              		.loc 1 42 0
+ 3673 0038 6C309FE5 		ldr	r3, .L6
+ 3674 003c 003093E5 		ldr	r3, [r3, #0]
+ 3675 0040 010053E3 		cmp	r3, #1
+ 3676 0044 0300001A 		bne	.L4
+ 3677              	.LBB3:
+  43:../gestorPantalla.c **** 		mostrarConfirmacionFinal();
+ 3678              		.loc 1 43 0
+ 3679 0048 6C309FE5 		ldr	r3, .L6+16
+ 3680 004c 0FE0A0E1 		mov	lr, pc
+ 3681 0050 13FF2FE1 		bx	r3
+ 3682 0054 110000EA 		b	.L1
+ 3683              	.L4:
+ 3684              	.LBE3:
+  44:../gestorPantalla.c **** 	} else if (idSiguientePantalla == pantallaVolverAJugar) {
+ 3685              		.loc 1 44 0
+ 3686 0058 4C309FE5 		ldr	r3, .L6
+ 3687 005c 003093E5 		ldr	r3, [r3, #0]
+ 3688 0060 020053E3 		cmp	r3, #2
+ 3689 0064 0600001A 		bne	.L5
+ 3690              	.LBB4:
+  45:../gestorPantalla.c **** 		leyenda = "Pulse un boton para jugar";
+ 3691              		.loc 1 45 0
+ 3692 0068 40309FE5 		ldr	r3, .L6+4
+ 3693 006c 4C209FE5 		ldr	r2, .L6+20
+ 3694 0070 002083E5 		str	r2, [r3, #0]
+  46:../gestorPantalla.c **** 		dibujar_sudoku();
+ 3695              		.loc 1 46 0
+ 3696 0074 3C309FE5 		ldr	r3, .L6+12
+ 3697 0078 0FE0A0E1 		mov	lr, pc
+ 3698 007c 13FF2FE1 		bx	r3
+ 3699 0080 060000EA 		b	.L1
+ 3700              	.L5:
+ 3701              	.LBE4:
+  47:../gestorPantalla.c **** 	} else if (idSiguientePantalla == pantallaInstrucciones) {
+ 3702              		.loc 1 47 0
+ 3703 0084 20309FE5 		ldr	r3, .L6
+ 3704 0088 003093E5 		ldr	r3, [r3, #0]
+ 3705 008c 030053E3 		cmp	r3, #3
+ 3706 0090 0200001A 		bne	.L1
+ 3707              	.LBB5:
+  48:../gestorPantalla.c **** 		mostrarInstrucciones();
+ 3708              		.loc 1 48 0
+ 3709 0094 28309FE5 		ldr	r3, .L6+24
+ 3710 0098 0FE0A0E1 		mov	lr, pc
+ 3711 009c 13FF2FE1 		bx	r3
+ 3712              	.L1:
+ 3713              	.LBE5:
+  49:../gestorPantalla.c **** 	}
+  50:../gestorPantalla.c **** }
+ 3714              		.loc 1 50 0
+ 3715 00a0 0CD04BE2 		sub	sp, fp, #12
+ 3716 00a4 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 3717 00a8 1EFF2FE1 		bx	lr
+ 3718              	.L7:
+ 3719              		.align	2
+ 3720              	.L6:
+ 3721 00ac 00000000 		.word	idSiguientePantalla
+ 3722 00b0 00000000 		.word	leyenda
+ 3723 00b4 14000000 		.word	.LC0
+ 3724 00b8 00000000 		.word	dibujar_sudoku
+ 3725 00bc 00000000 		.word	mostrarConfirmacionFinal
+ 3726 00c0 40000000 		.word	.LC1
+ 3727 00c4 00000000 		.word	mostrarInstrucciones
+ 3728              		.cfi_endproc
+ 3729              	.LFE0:
+ 3731              		.section	.rodata
+ 3732 005a 0000     		.align	2
+ 3733              	.LC2:
+ 3734 005c 00       		.ascii	"\000"
+ 3735 005d 000000   		.align	2
+ 3736              	.LC3:
+ 3737 0060 542E2074 		.ascii	"T. total:\000"
+ 3737      6F74616C 
+ 3737      3A00
+ 3738 006a 0000     		.align	2
+ 3739              	.LC4:
+ 3740 006c 542E2063 		.ascii	"T. calculo:\000"
+ 3740      616C6375 
+ 3740      6C6F3A00 
+ 3741              		.text
+ 3742              		.align	2
+ 3743              		.global	dibujar_sudoku
+ 3745              	dibujar_sudoku:
+ 3746              	.LFB1:
+  51:../gestorPantalla.c **** 
+  52:../gestorPantalla.c **** /*********************************************************************************************
+  53:../gestorPantalla.c **** * name:		dibujar_sudoku(int sizeX, int sizeY)
+  54:../gestorPantalla.c **** * func:		Dibuja el esqueleto del sudoku
+  55:../gestorPantalla.c **** * para:		none
+  56:../gestorPantalla.c **** * ret:		none
+  57:../gestorPantalla.c **** * modify:
+  58:../gestorPantalla.c **** * comment:		
+  59:../gestorPantalla.c **** *********************************************************************************************/
+  60:../gestorPantalla.c **** void dibujar_sudoku(){
+ 3747              		.loc 1 60 0
+ 3748              		.cfi_startproc
+ 3749              		@ Function supports interworking.
+ 3750              		@ args = 0, pretend = 0, frame = 32
+ 3751              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3752 00c8 0DC0A0E1 		mov	ip, sp
+ 3753              	.LCFI2:
+ 3754              		.cfi_def_cfa_register 12
+ 3755 00cc 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3756 00d0 04B04CE2 		sub	fp, ip, #4
+ 3757              		.cfi_offset 14, -8
+ 3758              		.cfi_offset 13, -12
+ 3759              		.cfi_offset 11, -16
+ 3760              	.LCFI3:
+ 3761              		.cfi_def_cfa 11, 4
+ 3762 00d4 28D04DE2 		sub	sp, sp, #40
+  61:../gestorPantalla.c **** 	/* clear screen */
+  62:../gestorPantalla.c **** 	Lcd_Clr();
+ 3763              		.loc 1 62 0
+ 3764 00d8 FEFFFFEB 		bl	Lcd_Clr
+  63:../gestorPantalla.c **** 	Lcd_Active_Clr();
+ 3765              		.loc 1 63 0
+ 3766 00dc FEFFFFEB 		bl	Lcd_Active_Clr
+  64:../gestorPantalla.c **** 
+  65:../gestorPantalla.c **** 	/* draw rectangle pattern */ 
+  66:../gestorPantalla.c ****     #ifdef Eng_v // english version
+  67:../gestorPantalla.c **** 	Lcd_DspAscII8x16(10,0,DARKGRAY,"Embest S3CEV40 ");
+  68:../gestorPantalla.c **** 	#else
+  69:../gestorPantalla.c **** //	Lcd_DspHz16(10,0,DARKGRAY,"英蓓特三星实验评估板");
+  70:../gestorPantalla.c **** 	#endif
+  71:../gestorPantalla.c **** 
+  72:../gestorPantalla.c **** 	Lcd_DspAscII8x16(margenIzquierdoLeyenda,margenSuperiorLeyenda,BLACK,leyenda);
+ 3767              		.loc 1 72 0
+ 3768 00e0 8C349FE5 		ldr	r3, .L20
+ 3769 00e4 003093E5 		ldr	r3, [r3, #0]
+ 3770 00e8 0338A0E1 		mov	r3, r3, asl #16
+ 3771 00ec 2318A0E1 		mov	r1, r3, lsr #16
+ 3772 00f0 80349FE5 		ldr	r3, .L20+4
+ 3773 00f4 003093E5 		ldr	r3, [r3, #0]
+ 3774 00f8 0338A0E1 		mov	r3, r3, asl #16
+ 3775 00fc 2328A0E1 		mov	r2, r3, lsr #16
+ 3776 0100 74349FE5 		ldr	r3, .L20+8
+ 3777 0104 003093E5 		ldr	r3, [r3, #0]
+ 3778 0108 0100A0E1 		mov	r0, r1
+ 3779 010c 0210A0E1 		mov	r1, r2
+ 3780 0110 0F20A0E3 		mov	r2, #15
+ 3781 0114 FEFFFFEB 		bl	Lcd_DspAscII8x16
+  73:../gestorPantalla.c **** 	int x0 = margenIzquierdoSudoku, x1, y0 = margenSuperiorSudoku, y1=235;
+ 3782              		.loc 1 73 0
+ 3783 0118 60349FE5 		ldr	r3, .L20+12
+ 3784 011c 003093E5 		ldr	r3, [r3, #0]
+ 3785 0120 10300BE5 		str	r3, [fp, #-16]
+ 3786 0124 58349FE5 		ldr	r3, .L20+16
+ 3787 0128 003093E5 		ldr	r3, [r3, #0]
+ 3788 012c 14300BE5 		str	r3, [fp, #-20]
+ 3789 0130 EB30A0E3 		mov	r3, #235
+ 3790 0134 1C300BE5 		str	r3, [fp, #-28]
+  74:../gestorPantalla.c **** 	//posiciones para colocar numeraci髇 del 1 al 9
+  75:../gestorPantalla.c **** 	int margenIzquierdoNumeros = x0-10;
+ 3791              		.loc 1 75 0
+ 3792 0138 10301BE5 		ldr	r3, [fp, #-16]
+ 3793 013c 0A3043E2 		sub	r3, r3, #10
+ 3794 0140 20300BE5 		str	r3, [fp, #-32]
+  76:../gestorPantalla.c **** 	int margenSuperiorNumeros = y0-10;
+ 3795              		.loc 1 76 0
+ 3796 0144 14301BE5 		ldr	r3, [fp, #-20]
+ 3797 0148 0A3043E2 		sub	r3, r3, #10
+ 3798 014c 24300BE5 		str	r3, [fp, #-36]
+  77:../gestorPantalla.c **** 	int i;
+  78:../gestorPantalla.c **** 	INT8U* numero = "";
+ 3799              		.loc 1 78 0
+ 3800 0150 30349FE5 		ldr	r3, .L20+20
+ 3801 0154 28300BE5 		str	r3, [fp, #-40]
+  79:../gestorPantalla.c **** 	//Coloca los n鷐eros para las columnas y filas
+  80:../gestorPantalla.c **** 	for (i = 1; i<10; i++) {
+ 3802              		.loc 1 80 0
+ 3803 0158 0130A0E3 		mov	r3, #1
+ 3804 015c 18300BE5 		str	r3, [fp, #-24]
+ 3805 0160 2E0000EA 		b	.L9
+ 3806              	.L10:
+  81:../gestorPantalla.c **** 		numero[0]=i+'0';
+ 3807              		.loc 1 81 0 discriminator 2
+ 3808 0164 18301BE5 		ldr	r3, [fp, #-24]
+ 3809 0168 FF3003E2 		and	r3, r3, #255
+ 3810 016c 303083E2 		add	r3, r3, #48
+ 3811 0170 FF2003E2 		and	r2, r3, #255
+ 3812 0174 28301BE5 		ldr	r3, [fp, #-40]
+ 3813 0178 0020C3E5 		strb	r2, [r3, #0]
+  82:../gestorPantalla.c **** 		Lcd_DspAscII8x16(x0+8,margenSuperiorNumeros,BLACK,numero);
+ 3814              		.loc 1 82 0 discriminator 2
+ 3815 017c 10301BE5 		ldr	r3, [fp, #-16]
+ 3816 0180 0338A0E1 		mov	r3, r3, asl #16
+ 3817 0184 2338A0E1 		mov	r3, r3, lsr #16
+ 3818 0188 083083E2 		add	r3, r3, #8
+ 3819 018c 0338A0E1 		mov	r3, r3, asl #16
+ 3820 0190 2328A0E1 		mov	r2, r3, lsr #16
+ 3821 0194 24301BE5 		ldr	r3, [fp, #-36]
+ 3822 0198 0338A0E1 		mov	r3, r3, asl #16
+ 3823 019c 2338A0E1 		mov	r3, r3, lsr #16
+ 3824 01a0 0200A0E1 		mov	r0, r2
+ 3825 01a4 0310A0E1 		mov	r1, r3
+ 3826 01a8 0F20A0E3 		mov	r2, #15
+ 3827 01ac 28301BE5 		ldr	r3, [fp, #-40]
+ 3828 01b0 FEFFFFEB 		bl	Lcd_DspAscII8x16
+  83:../gestorPantalla.c **** 		Lcd_DspAscII8x16(margenIzquierdoNumeros,y0+8,BLACK,numero);
+ 3829              		.loc 1 83 0 discriminator 2
+ 3830 01b4 20301BE5 		ldr	r3, [fp, #-32]
+ 3831 01b8 0338A0E1 		mov	r3, r3, asl #16
+ 3832 01bc 2328A0E1 		mov	r2, r3, lsr #16
+ 3833 01c0 14301BE5 		ldr	r3, [fp, #-20]
+ 3834 01c4 0338A0E1 		mov	r3, r3, asl #16
+ 3835 01c8 2338A0E1 		mov	r3, r3, lsr #16
+ 3836 01cc 083083E2 		add	r3, r3, #8
+ 3837 01d0 0338A0E1 		mov	r3, r3, asl #16
+ 3838 01d4 2338A0E1 		mov	r3, r3, lsr #16
+ 3839 01d8 0200A0E1 		mov	r0, r2
+ 3840 01dc 0310A0E1 		mov	r1, r3
+ 3841 01e0 0F20A0E3 		mov	r2, #15
+ 3842 01e4 28301BE5 		ldr	r3, [fp, #-40]
+ 3843 01e8 FEFFFFEB 		bl	Lcd_DspAscII8x16
+  84:../gestorPantalla.c **** 		x0 += sizeOfCell;
+ 3844              		.loc 1 84 0 discriminator 2
+ 3845 01ec 98339FE5 		ldr	r3, .L20+24
+ 3846 01f0 003093E5 		ldr	r3, [r3, #0]
+ 3847 01f4 10201BE5 		ldr	r2, [fp, #-16]
+ 3848 01f8 033082E0 		add	r3, r2, r3
+ 3849 01fc 10300BE5 		str	r3, [fp, #-16]
+  85:../gestorPantalla.c **** 		y0 += sizeOfCell;
+ 3850              		.loc 1 85 0 discriminator 2
+ 3851 0200 84339FE5 		ldr	r3, .L20+24
+ 3852 0204 003093E5 		ldr	r3, [r3, #0]
+ 3853 0208 14201BE5 		ldr	r2, [fp, #-20]
+ 3854 020c 033082E0 		add	r3, r2, r3
+ 3855 0210 14300BE5 		str	r3, [fp, #-20]
+  80:../gestorPantalla.c **** 	for (i = 1; i<10; i++) {
+ 3856              		.loc 1 80 0 discriminator 2
+ 3857 0214 18301BE5 		ldr	r3, [fp, #-24]
+ 3858 0218 013083E2 		add	r3, r3, #1
+ 3859 021c 18300BE5 		str	r3, [fp, #-24]
+ 3860              	.L9:
+  80:../gestorPantalla.c **** 	for (i = 1; i<10; i++) {
+ 3861              		.loc 1 80 0 is_stmt 0 discriminator 1
+ 3862 0220 18301BE5 		ldr	r3, [fp, #-24]
+ 3863 0224 090053E3 		cmp	r3, #9
+ 3864 0228 CDFFFFDA 		ble	.L10
+  86:../gestorPantalla.c **** 	}
+  87:../gestorPantalla.c **** 	//Se dibujan las l韓eas horizontales del sudoku:
+  88:../gestorPantalla.c **** 	x0=margenIzquierdoSudoku; y0=margenSuperiorSudoku+4; x1=215;
+ 3865              		.loc 1 88 0 is_stmt 1
+ 3866 022c 4C339FE5 		ldr	r3, .L20+12
+ 3867 0230 003093E5 		ldr	r3, [r3, #0]
+ 3868 0234 10300BE5 		str	r3, [fp, #-16]
+ 3869 0238 44339FE5 		ldr	r3, .L20+16
+ 3870 023c 003093E5 		ldr	r3, [r3, #0]
+ 3871 0240 043083E2 		add	r3, r3, #4
+ 3872 0244 14300BE5 		str	r3, [fp, #-20]
+ 3873 0248 D730A0E3 		mov	r3, #215
+ 3874 024c 2C300BE5 		str	r3, [fp, #-44]
+  89:../gestorPantalla.c **** 	for(i=0; i<10; i++){
+ 3875              		.loc 1 89 0
+ 3876 0250 0030A0E3 		mov	r3, #0
+ 3877 0254 18300BE5 		str	r3, [fp, #-24]
+ 3878 0258 3F0000EA 		b	.L11
+ 3879              	.L14:
+  90:../gestorPantalla.c **** 		if(i%3==0){
+ 3880              		.loc 1 90 0
+ 3881 025c 18101BE5 		ldr	r1, [fp, #-24]
+ 3882 0260 28339FE5 		ldr	r3, .L20+28
+ 3883 0264 9301C2E0 		smull	r0, r2, r3, r1
+ 3884 0268 C13FA0E1 		mov	r3, r1, asr #31
+ 3885 026c 022063E0 		rsb	r2, r3, r2
+ 3886 0270 0230A0E1 		mov	r3, r2
+ 3887 0274 8330A0E1 		mov	r3, r3, asl #1
+ 3888 0278 023083E0 		add	r3, r3, r2
+ 3889 027c 012063E0 		rsb	r2, r3, r1
+ 3890 0280 000052E3 		cmp	r2, #0
+ 3891 0284 1600001A 		bne	.L12
+  91:../gestorPantalla.c **** 			Lcd_Draw_HLine(x0,x1,y0,15,3);
+ 3892              		.loc 1 91 0
+ 3893 0288 10301BE5 		ldr	r3, [fp, #-16]
+ 3894 028c 0338A0E1 		mov	r3, r3, asl #16
+ 3895 0290 2318A0E1 		mov	r1, r3, lsr #16
+ 3896 0294 2C301BE5 		ldr	r3, [fp, #-44]
+ 3897 0298 0338A0E1 		mov	r3, r3, asl #16
+ 3898 029c 2328A0E1 		mov	r2, r3, lsr #16
+ 3899 02a0 14301BE5 		ldr	r3, [fp, #-20]
+ 3900 02a4 0338A0E1 		mov	r3, r3, asl #16
+ 3901 02a8 2338A0E1 		mov	r3, r3, lsr #16
+ 3902 02ac 0118A0E1 		mov	r1, r1, asl #16
+ 3903 02b0 4118A0E1 		mov	r1, r1, asr #16
+ 3904 02b4 0228A0E1 		mov	r2, r2, asl #16
+ 3905 02b8 4228A0E1 		mov	r2, r2, asr #16
+ 3906 02bc 0338A0E1 		mov	r3, r3, asl #16
+ 3907 02c0 4338A0E1 		mov	r3, r3, asr #16
+ 3908 02c4 0300A0E3 		mov	r0, #3
+ 3909 02c8 00008DE5 		str	r0, [sp, #0]
+ 3910 02cc 0100A0E1 		mov	r0, r1
+ 3911 02d0 0210A0E1 		mov	r1, r2
+ 3912 02d4 0320A0E1 		mov	r2, r3
+ 3913 02d8 0F30A0E3 		mov	r3, #15
+ 3914 02dc FEFFFFEB 		bl	Lcd_Draw_HLine
+ 3915 02e0 150000EA 		b	.L13
+ 3916              	.L12:
+  92:../gestorPantalla.c **** 		} else {
+  93:../gestorPantalla.c **** 			Lcd_Draw_HLine(x0,x1,y0,15,1);
+ 3917              		.loc 1 93 0
+ 3918 02e4 10301BE5 		ldr	r3, [fp, #-16]
+ 3919 02e8 0338A0E1 		mov	r3, r3, asl #16
+ 3920 02ec 2318A0E1 		mov	r1, r3, lsr #16
+ 3921 02f0 2C301BE5 		ldr	r3, [fp, #-44]
+ 3922 02f4 0338A0E1 		mov	r3, r3, asl #16
+ 3923 02f8 2328A0E1 		mov	r2, r3, lsr #16
+ 3924 02fc 14301BE5 		ldr	r3, [fp, #-20]
+ 3925 0300 0338A0E1 		mov	r3, r3, asl #16
+ 3926 0304 2338A0E1 		mov	r3, r3, lsr #16
+ 3927 0308 0118A0E1 		mov	r1, r1, asl #16
+ 3928 030c 4118A0E1 		mov	r1, r1, asr #16
+ 3929 0310 0228A0E1 		mov	r2, r2, asl #16
+ 3930 0314 4228A0E1 		mov	r2, r2, asr #16
+ 3931 0318 0338A0E1 		mov	r3, r3, asl #16
+ 3932 031c 4338A0E1 		mov	r3, r3, asr #16
+ 3933 0320 0100A0E3 		mov	r0, #1
+ 3934 0324 00008DE5 		str	r0, [sp, #0]
+ 3935 0328 0100A0E1 		mov	r0, r1
+ 3936 032c 0210A0E1 		mov	r1, r2
+ 3937 0330 0320A0E1 		mov	r2, r3
+ 3938 0334 0F30A0E3 		mov	r3, #15
+ 3939 0338 FEFFFFEB 		bl	Lcd_Draw_HLine
+ 3940              	.L13:
+  94:../gestorPantalla.c **** 		}
+  95:../gestorPantalla.c **** 		y0 += sizeOfCell;
+ 3941              		.loc 1 95 0
+ 3942 033c 48329FE5 		ldr	r3, .L20+24
+ 3943 0340 003093E5 		ldr	r3, [r3, #0]
+ 3944 0344 14201BE5 		ldr	r2, [fp, #-20]
+ 3945 0348 033082E0 		add	r3, r2, r3
+ 3946 034c 14300BE5 		str	r3, [fp, #-20]
+  89:../gestorPantalla.c **** 	for(i=0; i<10; i++){
+ 3947              		.loc 1 89 0
+ 3948 0350 18301BE5 		ldr	r3, [fp, #-24]
+ 3949 0354 013083E2 		add	r3, r3, #1
+ 3950 0358 18300BE5 		str	r3, [fp, #-24]
+ 3951              	.L11:
+  89:../gestorPantalla.c **** 	for(i=0; i<10; i++){
+ 3952              		.loc 1 89 0 is_stmt 0 discriminator 1
+ 3953 035c 18301BE5 		ldr	r3, [fp, #-24]
+ 3954 0360 090053E3 		cmp	r3, #9
+ 3955 0364 BCFFFFDA 		ble	.L14
+  96:../gestorPantalla.c **** 	}
+  97:../gestorPantalla.c **** 	//Se dibujan las l韓eas verticales del sudoku:
+  98:../gestorPantalla.c **** 	x0=margenIzquierdoSudoku; y0=margenSuperiorSudoku+4;
+ 3956              		.loc 1 98 0 is_stmt 1
+ 3957 0368 10329FE5 		ldr	r3, .L20+12
+ 3958 036c 003093E5 		ldr	r3, [r3, #0]
+ 3959 0370 10300BE5 		str	r3, [fp, #-16]
+ 3960 0374 08329FE5 		ldr	r3, .L20+16
+ 3961 0378 003093E5 		ldr	r3, [r3, #0]
+ 3962 037c 043083E2 		add	r3, r3, #4
+ 3963 0380 14300BE5 		str	r3, [fp, #-20]
+  99:../gestorPantalla.c **** 	y1=232;
+ 3964              		.loc 1 99 0
+ 3965 0384 E830A0E3 		mov	r3, #232
+ 3966 0388 1C300BE5 		str	r3, [fp, #-28]
+ 100:../gestorPantalla.c **** 	for(i=0; i<10; i++){
+ 3967              		.loc 1 100 0
+ 3968 038c 0030A0E3 		mov	r3, #0
+ 3969 0390 18300BE5 		str	r3, [fp, #-24]
+ 3970 0394 3F0000EA 		b	.L15
+ 3971              	.L18:
+ 101:../gestorPantalla.c **** 		if(i%3==0){
+ 3972              		.loc 1 101 0
+ 3973 0398 18101BE5 		ldr	r1, [fp, #-24]
+ 3974 039c EC319FE5 		ldr	r3, .L20+28
+ 3975 03a0 9301C2E0 		smull	r0, r2, r3, r1
+ 3976 03a4 C13FA0E1 		mov	r3, r1, asr #31
+ 3977 03a8 022063E0 		rsb	r2, r3, r2
+ 3978 03ac 0230A0E1 		mov	r3, r2
+ 3979 03b0 8330A0E1 		mov	r3, r3, asl #1
+ 3980 03b4 023083E0 		add	r3, r3, r2
+ 3981 03b8 012063E0 		rsb	r2, r3, r1
+ 3982 03bc 000052E3 		cmp	r2, #0
+ 3983 03c0 1600001A 		bne	.L16
+ 102:../gestorPantalla.c **** 			Lcd_Draw_VLine(y0,y1,x0,15,3);
+ 3984              		.loc 1 102 0
+ 3985 03c4 14301BE5 		ldr	r3, [fp, #-20]
+ 3986 03c8 0338A0E1 		mov	r3, r3, asl #16
+ 3987 03cc 2318A0E1 		mov	r1, r3, lsr #16
+ 3988 03d0 1C301BE5 		ldr	r3, [fp, #-28]
+ 3989 03d4 0338A0E1 		mov	r3, r3, asl #16
+ 3990 03d8 2328A0E1 		mov	r2, r3, lsr #16
+ 3991 03dc 10301BE5 		ldr	r3, [fp, #-16]
+ 3992 03e0 0338A0E1 		mov	r3, r3, asl #16
+ 3993 03e4 2338A0E1 		mov	r3, r3, lsr #16
+ 3994 03e8 0118A0E1 		mov	r1, r1, asl #16
+ 3995 03ec 4118A0E1 		mov	r1, r1, asr #16
+ 3996 03f0 0228A0E1 		mov	r2, r2, asl #16
+ 3997 03f4 4228A0E1 		mov	r2, r2, asr #16
+ 3998 03f8 0338A0E1 		mov	r3, r3, asl #16
+ 3999 03fc 4338A0E1 		mov	r3, r3, asr #16
+ 4000 0400 0300A0E3 		mov	r0, #3
+ 4001 0404 00008DE5 		str	r0, [sp, #0]
+ 4002 0408 0100A0E1 		mov	r0, r1
+ 4003 040c 0210A0E1 		mov	r1, r2
+ 4004 0410 0320A0E1 		mov	r2, r3
+ 4005 0414 0F30A0E3 		mov	r3, #15
+ 4006 0418 FEFFFFEB 		bl	Lcd_Draw_VLine
+ 4007 041c 150000EA 		b	.L17
+ 4008              	.L16:
+ 103:../gestorPantalla.c **** 		} else {
+ 104:../gestorPantalla.c **** 			Lcd_Draw_VLine(y0,y1,x0,15,1);
+ 4009              		.loc 1 104 0
+ 4010 0420 14301BE5 		ldr	r3, [fp, #-20]
+ 4011 0424 0338A0E1 		mov	r3, r3, asl #16
+ 4012 0428 2318A0E1 		mov	r1, r3, lsr #16
+ 4013 042c 1C301BE5 		ldr	r3, [fp, #-28]
+ 4014 0430 0338A0E1 		mov	r3, r3, asl #16
+ 4015 0434 2328A0E1 		mov	r2, r3, lsr #16
+ 4016 0438 10301BE5 		ldr	r3, [fp, #-16]
+ 4017 043c 0338A0E1 		mov	r3, r3, asl #16
+ 4018 0440 2338A0E1 		mov	r3, r3, lsr #16
+ 4019 0444 0118A0E1 		mov	r1, r1, asl #16
+ 4020 0448 4118A0E1 		mov	r1, r1, asr #16
+ 4021 044c 0228A0E1 		mov	r2, r2, asl #16
+ 4022 0450 4228A0E1 		mov	r2, r2, asr #16
+ 4023 0454 0338A0E1 		mov	r3, r3, asl #16
+ 4024 0458 4338A0E1 		mov	r3, r3, asr #16
+ 4025 045c 0100A0E3 		mov	r0, #1
+ 4026 0460 00008DE5 		str	r0, [sp, #0]
+ 4027 0464 0100A0E1 		mov	r0, r1
+ 4028 0468 0210A0E1 		mov	r1, r2
+ 4029 046c 0320A0E1 		mov	r2, r3
+ 4030 0470 0F30A0E3 		mov	r3, #15
+ 4031 0474 FEFFFFEB 		bl	Lcd_Draw_VLine
+ 4032              	.L17:
+ 105:../gestorPantalla.c **** 		}
+ 106:../gestorPantalla.c **** 		x0 += sizeOfCell;
+ 4033              		.loc 1 106 0
+ 4034 0478 0C319FE5 		ldr	r3, .L20+24
+ 4035 047c 003093E5 		ldr	r3, [r3, #0]
+ 4036 0480 10201BE5 		ldr	r2, [fp, #-16]
+ 4037 0484 033082E0 		add	r3, r2, r3
+ 4038 0488 10300BE5 		str	r3, [fp, #-16]
+ 100:../gestorPantalla.c **** 	for(i=0; i<10; i++){
+ 4039              		.loc 1 100 0
+ 4040 048c 18301BE5 		ldr	r3, [fp, #-24]
+ 4041 0490 013083E2 		add	r3, r3, #1
+ 4042 0494 18300BE5 		str	r3, [fp, #-24]
+ 4043              	.L15:
+ 100:../gestorPantalla.c **** 	for(i=0; i<10; i++){
+ 4044              		.loc 1 100 0 is_stmt 0 discriminator 1
+ 4045 0498 18301BE5 		ldr	r3, [fp, #-24]
+ 4046 049c 090053E3 		cmp	r3, #9
+ 4047 04a0 BCFFFFDA 		ble	.L18
+ 107:../gestorPantalla.c **** 	}
+ 108:../gestorPantalla.c **** 	Lcd_DspAscII8x16(margenIzquierdoSudoku+210,margenSuperiorSudoku+4,BLACK,"T. total:");
+ 4048              		.loc 1 108 0 is_stmt 1
+ 4049 04a4 D4309FE5 		ldr	r3, .L20+12
+ 4050 04a8 003093E5 		ldr	r3, [r3, #0]
+ 4051 04ac 0338A0E1 		mov	r3, r3, asl #16
+ 4052 04b0 2338A0E1 		mov	r3, r3, lsr #16
+ 4053 04b4 D23083E2 		add	r3, r3, #210
+ 4054 04b8 0338A0E1 		mov	r3, r3, asl #16
+ 4055 04bc 2328A0E1 		mov	r2, r3, lsr #16
+ 4056 04c0 BC309FE5 		ldr	r3, .L20+16
+ 4057 04c4 003093E5 		ldr	r3, [r3, #0]
+ 4058 04c8 0338A0E1 		mov	r3, r3, asl #16
+ 4059 04cc 2338A0E1 		mov	r3, r3, lsr #16
+ 4060 04d0 043083E2 		add	r3, r3, #4
+ 4061 04d4 0338A0E1 		mov	r3, r3, asl #16
+ 4062 04d8 2338A0E1 		mov	r3, r3, lsr #16
+ 4063 04dc 0200A0E1 		mov	r0, r2
+ 4064 04e0 0310A0E1 		mov	r1, r3
+ 4065 04e4 0F20A0E3 		mov	r2, #15
+ 4066 04e8 A4309FE5 		ldr	r3, .L20+32
+ 4067 04ec FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 109:../gestorPantalla.c **** 	Lcd_DspAscII8x16(margenIzquierdoSudoku+210,margenSuperiorSudoku+50,BLACK,"T. calculo:");
+ 4068              		.loc 1 109 0
+ 4069 04f0 88309FE5 		ldr	r3, .L20+12
+ 4070 04f4 003093E5 		ldr	r3, [r3, #0]
+ 4071 04f8 0338A0E1 		mov	r3, r3, asl #16
+ 4072 04fc 2338A0E1 		mov	r3, r3, lsr #16
+ 4073 0500 D23083E2 		add	r3, r3, #210
+ 4074 0504 0338A0E1 		mov	r3, r3, asl #16
+ 4075 0508 2328A0E1 		mov	r2, r3, lsr #16
+ 4076 050c 70309FE5 		ldr	r3, .L20+16
+ 4077 0510 003093E5 		ldr	r3, [r3, #0]
+ 4078 0514 0338A0E1 		mov	r3, r3, asl #16
+ 4079 0518 2338A0E1 		mov	r3, r3, lsr #16
+ 4080 051c 323083E2 		add	r3, r3, #50
+ 4081 0520 0338A0E1 		mov	r3, r3, asl #16
+ 4082 0524 2338A0E1 		mov	r3, r3, lsr #16
+ 4083 0528 0200A0E1 		mov	r0, r2
+ 4084 052c 0310A0E1 		mov	r1, r3
+ 4085 0530 0F20A0E3 		mov	r2, #15
+ 4086 0534 5C309FE5 		ldr	r3, .L20+36
+ 4087 0538 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 110:../gestorPantalla.c **** 	escribirDatos();
+ 4088              		.loc 1 110 0
+ 4089 053c 58309FE5 		ldr	r3, .L20+40
+ 4090 0540 0FE0A0E1 		mov	lr, pc
+ 4091 0544 13FF2FE1 		bx	r3
+ 111:../gestorPantalla.c **** 	//Se actualiza la pantalla con la nueva informaci髇
+ 112:../gestorPantalla.c **** 	if(idSiguientePantalla == pantallaVolverAJugar){
+ 4092              		.loc 1 112 0
+ 4093 0548 50309FE5 		ldr	r3, .L20+44
+ 4094 054c 003093E5 		ldr	r3, [r3, #0]
+ 4095 0550 020053E3 		cmp	r3, #2
+ 4096 0554 0200001A 		bne	.L19
+ 4097              	.LBB6:
+ 113:../gestorPantalla.c **** 		actualizarTiempoTotalEnPantalla();
+ 4098              		.loc 1 113 0
+ 4099 0558 44309FE5 		ldr	r3, .L20+48
+ 4100 055c 0FE0A0E1 		mov	lr, pc
+ 4101 0560 13FF2FE1 		bx	r3
+ 4102              	.L19:
+ 4103              	.LBE6:
+ 114:../gestorPantalla.c **** 	}
+ 115:../gestorPantalla.c **** 	Lcd_Dma_Trans();
+ 4104              		.loc 1 115 0
+ 4105 0564 FEFFFFEB 		bl	Lcd_Dma_Trans
+ 116:../gestorPantalla.c **** }
+ 4106              		.loc 1 116 0
+ 4107 0568 0CD04BE2 		sub	sp, fp, #12
+ 4108 056c 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4109 0570 1EFF2FE1 		bx	lr
+ 4110              	.L21:
+ 4111              		.align	2
+ 4112              	.L20:
+ 4113 0574 00000000 		.word	margenIzquierdoLeyenda
+ 4114 0578 00000000 		.word	margenSuperiorLeyenda
+ 4115 057c 00000000 		.word	leyenda
+ 4116 0580 00000000 		.word	margenIzquierdoSudoku
+ 4117 0584 00000000 		.word	margenSuperiorSudoku
+ 4118 0588 5C000000 		.word	.LC2
+ 4119 058c 00000000 		.word	sizeOfCell
+ 4120 0590 56555555 		.word	1431655766
+ 4121 0594 60000000 		.word	.LC3
+ 4122 0598 6C000000 		.word	.LC4
+ 4123 059c 00000000 		.word	escribirDatos
+ 4124 05a0 00000000 		.word	idSiguientePantalla
+ 4125 05a4 00000000 		.word	actualizarTiempoTotalEnPantalla
+ 4126              		.cfi_endproc
+ 4127              	.LFE1:
+ 4129              		.align	2
+ 4130              		.global	escribirDatos
+ 4132              	escribirDatos:
+ 4133              	.LFB2:
+ 117:../gestorPantalla.c **** 
+ 118:../gestorPantalla.c **** /*********************************************************************************************
+ 119:../gestorPantalla.c **** * name:		escribirDato()
+ 120:../gestorPantalla.c **** * func:		funcion que escribe todos los datos en la pantalla
+ 121:../gestorPantalla.c **** * para:		none
+ 122:../gestorPantalla.c **** * ret:		none
+ 123:../gestorPantalla.c **** * modify:
+ 124:../gestorPantalla.c **** * comment:
+ 125:../gestorPantalla.c **** *********************************************************************************************/
+ 126:../gestorPantalla.c **** void escribirDatos(){
+ 4134              		.loc 1 126 0
+ 4135              		.cfi_startproc
+ 4136              		@ Function supports interworking.
+ 4137              		@ args = 0, pretend = 0, frame = 24
+ 4138              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4139 05a8 0DC0A0E1 		mov	ip, sp
+ 4140              	.LCFI4:
+ 4141              		.cfi_def_cfa_register 12
+ 4142 05ac 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4143 05b0 04B04CE2 		sub	fp, ip, #4
+ 4144              		.cfi_offset 14, -8
+ 4145              		.cfi_offset 13, -12
+ 4146              		.cfi_offset 11, -16
+ 4147              	.LCFI5:
+ 4148              		.cfi_def_cfa 11, 4
+ 4149 05b4 20D04DE2 		sub	sp, sp, #32
+ 127:../gestorPantalla.c **** 	int i,j;
+ 128:../gestorPantalla.c **** 	INT8U* numero = "";
+ 4150              		.loc 1 128 0
+ 4151 05b8 18349FE5 		ldr	r3, .L32
+ 4152 05bc 18300BE5 		str	r3, [fp, #-24]
+ 129:../gestorPantalla.c **** 	for(i=0; i<9; i++){
+ 4153              		.loc 1 129 0
+ 4154 05c0 0030A0E3 		mov	r3, #0
+ 4155 05c4 10300BE5 		str	r3, [fp, #-16]
+ 4156 05c8 E90000EA 		b	.L23
+ 4157              	.L31:
+ 130:../gestorPantalla.c **** 		for(j=0; j<9; j++){
+ 4158              		.loc 1 130 0
+ 4159 05cc 0030A0E3 		mov	r3, #0
+ 4160 05d0 14300BE5 		str	r3, [fp, #-20]
+ 4161 05d4 E00000EA 		b	.L24
+ 4162              	.L30:
+ 4163              	.LBB7:
+ 131:../gestorPantalla.c **** 			int valor = obtenerValor(i,j);
+ 4164              		.loc 1 131 0
+ 4165 05d8 10001BE5 		ldr	r0, [fp, #-16]
+ 4166 05dc 14101BE5 		ldr	r1, [fp, #-20]
+ 4167 05e0 FEFFFFEB 		bl	obtenerValor
+ 4168 05e4 1C000BE5 		str	r0, [fp, #-28]
+ 132:../gestorPantalla.c **** 			numero[0]=valor+'0';
+ 4169              		.loc 1 132 0
+ 4170 05e8 1C301BE5 		ldr	r3, [fp, #-28]
+ 4171 05ec FF3003E2 		and	r3, r3, #255
+ 4172 05f0 303083E2 		add	r3, r3, #48
+ 4173 05f4 FF2003E2 		and	r2, r3, #255
+ 4174 05f8 18301BE5 		ldr	r3, [fp, #-24]
+ 4175 05fc 0020C3E5 		strb	r2, [r3, #0]
+ 133:../gestorPantalla.c **** 			int x0 = margenIzquierdoSudoku+(j)*sizeOfCell;
+ 4176              		.loc 1 133 0
+ 4177 0600 D4339FE5 		ldr	r3, .L32+4
+ 4178 0604 003093E5 		ldr	r3, [r3, #0]
+ 4179 0608 14201BE5 		ldr	r2, [fp, #-20]
+ 4180 060c 930202E0 		mul	r2, r3, r2
+ 4181 0610 C8339FE5 		ldr	r3, .L32+8
+ 4182 0614 003093E5 		ldr	r3, [r3, #0]
+ 4183 0618 033082E0 		add	r3, r2, r3
+ 4184 061c 20300BE5 		str	r3, [fp, #-32]
+ 134:../gestorPantalla.c **** 			int y0 = margenSuperiorSudoku+(i)*sizeOfCell;
+ 4185              		.loc 1 134 0
+ 4186 0620 B4339FE5 		ldr	r3, .L32+4
+ 4187 0624 003093E5 		ldr	r3, [r3, #0]
+ 4188 0628 10201BE5 		ldr	r2, [fp, #-16]
+ 4189 062c 930202E0 		mul	r2, r3, r2
+ 4190 0630 AC339FE5 		ldr	r3, .L32+12
+ 4191 0634 003093E5 		ldr	r3, [r3, #0]
+ 4192 0638 033082E0 		add	r3, r2, r3
+ 4193 063c 24300BE5 		str	r3, [fp, #-36]
+ 135:../gestorPantalla.c **** 			if(valor==0){
+ 4194              		.loc 1 135 0
+ 4195 0640 1C301BE5 		ldr	r3, [fp, #-28]
+ 4196 0644 000053E3 		cmp	r3, #0
+ 4197 0648 0500001A 		bne	.L25
+ 4198              	.LBB8:
+ 136:../gestorPantalla.c **** 				//No hay valor, poner candidatos
+ 137:../gestorPantalla.c **** 				colocarCandidatos(i,j);
+ 4199              		.loc 1 137 0
+ 4200 064c 94339FE5 		ldr	r3, .L32+16
+ 4201 0650 10001BE5 		ldr	r0, [fp, #-16]
+ 4202 0654 14101BE5 		ldr	r1, [fp, #-20]
+ 4203 0658 0FE0A0E1 		mov	lr, pc
+ 4204 065c 13FF2FE1 		bx	r3
+ 4205 0660 BA0000EA 		b	.L26
+ 4206              	.L25:
+ 4207              	.LBE8:
+ 138:../gestorPantalla.c **** 			} else if(esPista(i,j)){
+ 4208              		.loc 1 138 0
+ 4209 0664 10001BE5 		ldr	r0, [fp, #-16]
+ 4210 0668 14101BE5 		ldr	r1, [fp, #-20]
+ 4211 066c FEFFFFEB 		bl	esPista
+ 4212 0670 0030A0E1 		mov	r3, r0
+ 4213 0674 000053E3 		cmp	r3, #0
+ 4214 0678 5A00000A 		beq	.L27
+ 139:../gestorPantalla.c **** 				if(esError(i,j)) {
+ 4215              		.loc 1 139 0
+ 4216 067c 10001BE5 		ldr	r0, [fp, #-16]
+ 4217 0680 14101BE5 		ldr	r1, [fp, #-20]
+ 4218 0684 FEFFFFEB 		bl	esError
+ 4219 0688 0030A0E1 		mov	r3, r0
+ 4220 068c 000053E3 		cmp	r3, #0
+ 4221 0690 4200000A 		beq	.L28
+ 140:../gestorPantalla.c **** 					LcdClrRect(x0, y0+4, x0+sizeOfCell, y0+4+sizeOfCell, BLACK);
+ 4222              		.loc 1 140 0
+ 4223 0694 20301BE5 		ldr	r3, [fp, #-32]
+ 4224 0698 0338A0E1 		mov	r3, r3, asl #16
+ 4225 069c 2308A0E1 		mov	r0, r3, lsr #16
+ 4226 06a0 24301BE5 		ldr	r3, [fp, #-36]
+ 4227 06a4 0338A0E1 		mov	r3, r3, asl #16
+ 4228 06a8 2338A0E1 		mov	r3, r3, lsr #16
+ 4229 06ac 043083E2 		add	r3, r3, #4
+ 4230 06b0 0338A0E1 		mov	r3, r3, asl #16
+ 4231 06b4 2338A0E1 		mov	r3, r3, lsr #16
+ 4232 06b8 0338A0E1 		mov	r3, r3, asl #16
+ 4233 06bc 2318A0E1 		mov	r1, r3, lsr #16
+ 4234 06c0 20301BE5 		ldr	r3, [fp, #-32]
+ 4235 06c4 0338A0E1 		mov	r3, r3, asl #16
+ 4236 06c8 2328A0E1 		mov	r2, r3, lsr #16
+ 4237 06cc 08339FE5 		ldr	r3, .L32+4
+ 4238 06d0 003093E5 		ldr	r3, [r3, #0]
+ 4239 06d4 0338A0E1 		mov	r3, r3, asl #16
+ 4240 06d8 2338A0E1 		mov	r3, r3, lsr #16
+ 4241 06dc 033082E0 		add	r3, r2, r3
+ 4242 06e0 0338A0E1 		mov	r3, r3, asl #16
+ 4243 06e4 2338A0E1 		mov	r3, r3, lsr #16
+ 4244 06e8 0338A0E1 		mov	r3, r3, asl #16
+ 4245 06ec 2328A0E1 		mov	r2, r3, lsr #16
+ 4246 06f0 24301BE5 		ldr	r3, [fp, #-36]
+ 4247 06f4 0338A0E1 		mov	r3, r3, asl #16
+ 4248 06f8 23C8A0E1 		mov	ip, r3, lsr #16
+ 4249 06fc D8329FE5 		ldr	r3, .L32+4
+ 4250 0700 003093E5 		ldr	r3, [r3, #0]
+ 4251 0704 0338A0E1 		mov	r3, r3, asl #16
+ 4252 0708 2338A0E1 		mov	r3, r3, lsr #16
+ 4253 070c 03308CE0 		add	r3, ip, r3
+ 4254 0710 0338A0E1 		mov	r3, r3, asl #16
+ 4255 0714 2338A0E1 		mov	r3, r3, lsr #16
+ 4256 0718 043083E2 		add	r3, r3, #4
+ 4257 071c 0338A0E1 		mov	r3, r3, asl #16
+ 4258 0720 2338A0E1 		mov	r3, r3, lsr #16
+ 4259 0724 0338A0E1 		mov	r3, r3, asl #16
+ 4260 0728 2338A0E1 		mov	r3, r3, lsr #16
+ 4261 072c 0008A0E1 		mov	r0, r0, asl #16
+ 4262 0730 4008A0E1 		mov	r0, r0, asr #16
+ 4263 0734 0118A0E1 		mov	r1, r1, asl #16
+ 4264 0738 4118A0E1 		mov	r1, r1, asr #16
+ 4265 073c 0228A0E1 		mov	r2, r2, asl #16
+ 4266 0740 4228A0E1 		mov	r2, r2, asr #16
+ 4267 0744 0338A0E1 		mov	r3, r3, asl #16
+ 4268 0748 4338A0E1 		mov	r3, r3, asr #16
+ 4269 074c 0FC0A0E3 		mov	ip, #15
+ 4270 0750 00C08DE5 		str	ip, [sp, #0]
+ 4271 0754 FEFFFFEB 		bl	LcdClrRect
+ 141:../gestorPantalla.c **** 					Lcd_DspAscII8x16(8+x0,8+y0,DARKGRAY, numero);
+ 4272              		.loc 1 141 0
+ 4273 0758 20301BE5 		ldr	r3, [fp, #-32]
+ 4274 075c 0338A0E1 		mov	r3, r3, asl #16
+ 4275 0760 2338A0E1 		mov	r3, r3, lsr #16
+ 4276 0764 083083E2 		add	r3, r3, #8
+ 4277 0768 0338A0E1 		mov	r3, r3, asl #16
+ 4278 076c 2328A0E1 		mov	r2, r3, lsr #16
+ 4279 0770 24301BE5 		ldr	r3, [fp, #-36]
+ 4280 0774 0338A0E1 		mov	r3, r3, asl #16
+ 4281 0778 2338A0E1 		mov	r3, r3, lsr #16
+ 4282 077c 083083E2 		add	r3, r3, #8
+ 4283 0780 0338A0E1 		mov	r3, r3, asl #16
+ 4284 0784 2338A0E1 		mov	r3, r3, lsr #16
+ 4285 0788 0200A0E1 		mov	r0, r2
+ 4286 078c 0310A0E1 		mov	r1, r3
+ 4287 0790 0A20A0E3 		mov	r2, #10
+ 4288 0794 18301BE5 		ldr	r3, [fp, #-24]
+ 4289 0798 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 4290 079c 6B0000EA 		b	.L26
+ 4291              	.L28:
+ 142:../gestorPantalla.c **** 				} else {
+ 143:../gestorPantalla.c **** 					//Dibujar con otro color
+ 144:../gestorPantalla.c **** 					Lcd_DspAscII8x16(8+x0,8+y0,DARKGRAY, numero);
+ 4292              		.loc 1 144 0
+ 4293 07a0 20301BE5 		ldr	r3, [fp, #-32]
+ 4294 07a4 0338A0E1 		mov	r3, r3, asl #16
+ 4295 07a8 2338A0E1 		mov	r3, r3, lsr #16
+ 4296 07ac 083083E2 		add	r3, r3, #8
+ 4297 07b0 0338A0E1 		mov	r3, r3, asl #16
+ 4298 07b4 2328A0E1 		mov	r2, r3, lsr #16
+ 4299 07b8 24301BE5 		ldr	r3, [fp, #-36]
+ 4300 07bc 0338A0E1 		mov	r3, r3, asl #16
+ 4301 07c0 2338A0E1 		mov	r3, r3, lsr #16
+ 4302 07c4 083083E2 		add	r3, r3, #8
+ 4303 07c8 0338A0E1 		mov	r3, r3, asl #16
+ 4304 07cc 2338A0E1 		mov	r3, r3, lsr #16
+ 4305 07d0 0200A0E1 		mov	r0, r2
+ 4306 07d4 0310A0E1 		mov	r1, r3
+ 4307 07d8 0A20A0E3 		mov	r2, #10
+ 4308 07dc 18301BE5 		ldr	r3, [fp, #-24]
+ 4309 07e0 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 4310 07e4 590000EA 		b	.L26
+ 4311              	.L27:
+ 145:../gestorPantalla.c **** 				}
+ 146:../gestorPantalla.c **** 			} else if(esError(i,j)){
+ 4312              		.loc 1 146 0
+ 4313 07e8 10001BE5 		ldr	r0, [fp, #-16]
+ 4314 07ec 14101BE5 		ldr	r1, [fp, #-20]
+ 4315 07f0 FEFFFFEB 		bl	esError
+ 4316 07f4 0030A0E1 		mov	r3, r0
+ 4317 07f8 000053E3 		cmp	r3, #0
+ 4318 07fc 4200000A 		beq	.L29
+ 147:../gestorPantalla.c **** 				//Dibujar como error
+ 148:../gestorPantalla.c **** 				LcdClrRect(x0, y0+4, x0+sizeOfCell, y0+4+sizeOfCell, BLACK);
+ 4319              		.loc 1 148 0
+ 4320 0800 20301BE5 		ldr	r3, [fp, #-32]
+ 4321 0804 0338A0E1 		mov	r3, r3, asl #16
+ 4322 0808 2308A0E1 		mov	r0, r3, lsr #16
+ 4323 080c 24301BE5 		ldr	r3, [fp, #-36]
+ 4324 0810 0338A0E1 		mov	r3, r3, asl #16
+ 4325 0814 2338A0E1 		mov	r3, r3, lsr #16
+ 4326 0818 043083E2 		add	r3, r3, #4
+ 4327 081c 0338A0E1 		mov	r3, r3, asl #16
+ 4328 0820 2338A0E1 		mov	r3, r3, lsr #16
+ 4329 0824 0338A0E1 		mov	r3, r3, asl #16
+ 4330 0828 2318A0E1 		mov	r1, r3, lsr #16
+ 4331 082c 20301BE5 		ldr	r3, [fp, #-32]
+ 4332 0830 0338A0E1 		mov	r3, r3, asl #16
+ 4333 0834 2328A0E1 		mov	r2, r3, lsr #16
+ 4334 0838 9C319FE5 		ldr	r3, .L32+4
+ 4335 083c 003093E5 		ldr	r3, [r3, #0]
+ 4336 0840 0338A0E1 		mov	r3, r3, asl #16
+ 4337 0844 2338A0E1 		mov	r3, r3, lsr #16
+ 4338 0848 033082E0 		add	r3, r2, r3
+ 4339 084c 0338A0E1 		mov	r3, r3, asl #16
+ 4340 0850 2338A0E1 		mov	r3, r3, lsr #16
+ 4341 0854 0338A0E1 		mov	r3, r3, asl #16
+ 4342 0858 2328A0E1 		mov	r2, r3, lsr #16
+ 4343 085c 24301BE5 		ldr	r3, [fp, #-36]
+ 4344 0860 0338A0E1 		mov	r3, r3, asl #16
+ 4345 0864 23C8A0E1 		mov	ip, r3, lsr #16
+ 4346 0868 6C319FE5 		ldr	r3, .L32+4
+ 4347 086c 003093E5 		ldr	r3, [r3, #0]
+ 4348 0870 0338A0E1 		mov	r3, r3, asl #16
+ 4349 0874 2338A0E1 		mov	r3, r3, lsr #16
+ 4350 0878 03308CE0 		add	r3, ip, r3
+ 4351 087c 0338A0E1 		mov	r3, r3, asl #16
+ 4352 0880 2338A0E1 		mov	r3, r3, lsr #16
+ 4353 0884 043083E2 		add	r3, r3, #4
+ 4354 0888 0338A0E1 		mov	r3, r3, asl #16
+ 4355 088c 2338A0E1 		mov	r3, r3, lsr #16
+ 4356 0890 0338A0E1 		mov	r3, r3, asl #16
+ 4357 0894 2338A0E1 		mov	r3, r3, lsr #16
+ 4358 0898 0008A0E1 		mov	r0, r0, asl #16
+ 4359 089c 4008A0E1 		mov	r0, r0, asr #16
+ 4360 08a0 0118A0E1 		mov	r1, r1, asl #16
+ 4361 08a4 4118A0E1 		mov	r1, r1, asr #16
+ 4362 08a8 0228A0E1 		mov	r2, r2, asl #16
+ 4363 08ac 4228A0E1 		mov	r2, r2, asr #16
+ 4364 08b0 0338A0E1 		mov	r3, r3, asl #16
+ 4365 08b4 4338A0E1 		mov	r3, r3, asr #16
+ 4366 08b8 0FC0A0E3 		mov	ip, #15
+ 4367 08bc 00C08DE5 		str	ip, [sp, #0]
+ 4368 08c0 FEFFFFEB 		bl	LcdClrRect
+ 149:../gestorPantalla.c **** 				Lcd_DspAscII8x16(8+x0,8+y0,WHITE, numero);
+ 4369              		.loc 1 149 0
+ 4370 08c4 20301BE5 		ldr	r3, [fp, #-32]
+ 4371 08c8 0338A0E1 		mov	r3, r3, asl #16
+ 4372 08cc 2338A0E1 		mov	r3, r3, lsr #16
+ 4373 08d0 083083E2 		add	r3, r3, #8
+ 4374 08d4 0338A0E1 		mov	r3, r3, asl #16
+ 4375 08d8 2328A0E1 		mov	r2, r3, lsr #16
+ 4376 08dc 24301BE5 		ldr	r3, [fp, #-36]
+ 4377 08e0 0338A0E1 		mov	r3, r3, asl #16
+ 4378 08e4 2338A0E1 		mov	r3, r3, lsr #16
+ 4379 08e8 083083E2 		add	r3, r3, #8
+ 4380 08ec 0338A0E1 		mov	r3, r3, asl #16
+ 4381 08f0 2338A0E1 		mov	r3, r3, lsr #16
+ 4382 08f4 0200A0E1 		mov	r0, r2
+ 4383 08f8 0310A0E1 		mov	r1, r3
+ 4384 08fc 0020A0E3 		mov	r2, #0
+ 4385 0900 18301BE5 		ldr	r3, [fp, #-24]
+ 4386 0904 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 4387 0908 100000EA 		b	.L26
+ 4388              	.L29:
+ 150:../gestorPantalla.c **** 			} else{	//Se dibuja un valor normal
+ 151:../gestorPantalla.c **** 				Lcd_DspAscII8x16(8+x0,8+y0,BLACK, numero);
+ 4389              		.loc 1 151 0
+ 4390 090c 20301BE5 		ldr	r3, [fp, #-32]
+ 4391 0910 0338A0E1 		mov	r3, r3, asl #16
+ 4392 0914 2338A0E1 		mov	r3, r3, lsr #16
+ 4393 0918 083083E2 		add	r3, r3, #8
+ 4394 091c 0338A0E1 		mov	r3, r3, asl #16
+ 4395 0920 2328A0E1 		mov	r2, r3, lsr #16
+ 4396 0924 24301BE5 		ldr	r3, [fp, #-36]
+ 4397 0928 0338A0E1 		mov	r3, r3, asl #16
+ 4398 092c 2338A0E1 		mov	r3, r3, lsr #16
+ 4399 0930 083083E2 		add	r3, r3, #8
+ 4400 0934 0338A0E1 		mov	r3, r3, asl #16
+ 4401 0938 2338A0E1 		mov	r3, r3, lsr #16
+ 4402 093c 0200A0E1 		mov	r0, r2
+ 4403 0940 0310A0E1 		mov	r1, r3
+ 4404 0944 0F20A0E3 		mov	r2, #15
+ 4405 0948 18301BE5 		ldr	r3, [fp, #-24]
+ 4406 094c FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 4407              	.L26:
+ 4408              	.LBE7:
+ 130:../gestorPantalla.c **** 		for(j=0; j<9; j++){
+ 4409              		.loc 1 130 0
+ 4410 0950 14301BE5 		ldr	r3, [fp, #-20]
+ 4411 0954 013083E2 		add	r3, r3, #1
+ 4412 0958 14300BE5 		str	r3, [fp, #-20]
+ 4413              	.L24:
+ 130:../gestorPantalla.c **** 		for(j=0; j<9; j++){
+ 4414              		.loc 1 130 0 is_stmt 0 discriminator 1
+ 4415 095c 14301BE5 		ldr	r3, [fp, #-20]
+ 4416 0960 080053E3 		cmp	r3, #8
+ 4417 0964 1BFFFFDA 		ble	.L30
+ 129:../gestorPantalla.c **** 	for(i=0; i<9; i++){
+ 4418              		.loc 1 129 0 is_stmt 1
+ 4419 0968 10301BE5 		ldr	r3, [fp, #-16]
+ 4420 096c 013083E2 		add	r3, r3, #1
+ 4421 0970 10300BE5 		str	r3, [fp, #-16]
+ 4422              	.L23:
+ 129:../gestorPantalla.c **** 	for(i=0; i<9; i++){
+ 4423              		.loc 1 129 0 is_stmt 0 discriminator 1
+ 4424 0974 10301BE5 		ldr	r3, [fp, #-16]
+ 4425 0978 080053E3 		cmp	r3, #8
+ 4426 097c 12FFFFDA 		ble	.L31
+ 152:../gestorPantalla.c **** 			}
+ 153:../gestorPantalla.c **** 		}
+ 154:../gestorPantalla.c **** 	}
+ 155:../gestorPantalla.c **** 	Lcd_DspAscII8x16(margenIzquierdoSudoku+215,margenSuperiorSudoku+65,BLACK,tiempoCalculoEnPantalla);
+ 4427              		.loc 1 155 0 is_stmt 1
+ 4428 0980 58309FE5 		ldr	r3, .L32+8
+ 4429 0984 003093E5 		ldr	r3, [r3, #0]
+ 4430 0988 0338A0E1 		mov	r3, r3, asl #16
+ 4431 098c 2338A0E1 		mov	r3, r3, lsr #16
+ 4432 0990 D73083E2 		add	r3, r3, #215
+ 4433 0994 0338A0E1 		mov	r3, r3, asl #16
+ 4434 0998 2328A0E1 		mov	r2, r3, lsr #16
+ 4435 099c 40309FE5 		ldr	r3, .L32+12
+ 4436 09a0 003093E5 		ldr	r3, [r3, #0]
+ 4437 09a4 0338A0E1 		mov	r3, r3, asl #16
+ 4438 09a8 2338A0E1 		mov	r3, r3, lsr #16
+ 4439 09ac 413083E2 		add	r3, r3, #65
+ 4440 09b0 0338A0E1 		mov	r3, r3, asl #16
+ 4441 09b4 2338A0E1 		mov	r3, r3, lsr #16
+ 4442 09b8 0200A0E1 		mov	r0, r2
+ 4443 09bc 0310A0E1 		mov	r1, r3
+ 4444 09c0 0F20A0E3 		mov	r2, #15
+ 4445 09c4 20309FE5 		ldr	r3, .L32+20
+ 4446 09c8 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 156:../gestorPantalla.c **** 
+ 157:../gestorPantalla.c **** }
+ 4447              		.loc 1 157 0
+ 4448 09cc 0CD04BE2 		sub	sp, fp, #12
+ 4449 09d0 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4450 09d4 1EFF2FE1 		bx	lr
+ 4451              	.L33:
+ 4452              		.align	2
+ 4453              	.L32:
+ 4454 09d8 5C000000 		.word	.LC2
+ 4455 09dc 00000000 		.word	sizeOfCell
+ 4456 09e0 00000000 		.word	margenIzquierdoSudoku
+ 4457 09e4 00000000 		.word	margenSuperiorSudoku
+ 4458 09e8 00000000 		.word	colocarCandidatos
+ 4459 09ec 00000000 		.word	tiempoCalculoEnPantalla
+ 4460              		.cfi_endproc
+ 4461              	.LFE2:
+ 4463              		.align	2
+ 4464              		.global	colocarCandidatos
+ 4466              	colocarCandidatos:
+ 4467              	.LFB3:
+ 158:../gestorPantalla.c **** 
+ 159:../gestorPantalla.c **** void colocarCandidatos(int x, int y) {
+ 4468              		.loc 1 159 0
+ 4469              		.cfi_startproc
+ 4470              		@ Function supports interworking.
+ 4471              		@ args = 0, pretend = 0, frame = 32
+ 4472              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4473 09f0 0DC0A0E1 		mov	ip, sp
+ 4474              	.LCFI6:
+ 4475              		.cfi_def_cfa_register 12
+ 4476 09f4 10D82DE9 		stmfd	sp!, {r4, fp, ip, lr, pc}
+ 4477 09f8 04B04CE2 		sub	fp, ip, #4
+ 4478              		.cfi_offset 14, -8
+ 4479              		.cfi_offset 13, -12
+ 4480              		.cfi_offset 11, -16
+ 4481              		.cfi_offset 4, -20
+ 4482              	.LCFI7:
+ 4483              		.cfi_def_cfa 11, 4
+ 4484 09fc 2CD04DE2 		sub	sp, sp, #44
+ 4485 0a00 30000BE5 		str	r0, [fp, #-48]
+ 4486 0a04 34100BE5 		str	r1, [fp, #-52]
+ 160:../gestorPantalla.c **** 	int i, j;
+ 161:../gestorPantalla.c **** 	int candidato = 1;
+ 4487              		.loc 1 161 0
+ 4488 0a08 0130A0E3 		mov	r3, #1
+ 4489 0a0c 20300BE5 		str	r3, [fp, #-32]
+ 162:../gestorPantalla.c **** 	for(i=0; i<3; i++) {
+ 4490              		.loc 1 162 0
+ 4491 0a10 0030A0E3 		mov	r3, #0
+ 4492 0a14 18300BE5 		str	r3, [fp, #-24]
+ 4493 0a18 720000EA 		b	.L35
+ 4494              	.L39:
+ 163:../gestorPantalla.c **** 		for(j=0; j<3; j++) {
+ 4495              		.loc 1 163 0
+ 4496 0a1c 0030A0E3 		mov	r3, #0
+ 4497 0a20 1C300BE5 		str	r3, [fp, #-28]
+ 4498 0a24 690000EA 		b	.L36
+ 4499              	.L38:
+ 4500              	.LBB9:
+ 164:../gestorPantalla.c **** 			int x0 = 1+margenIzquierdoSudoku+(y)*sizeOfCell+j*sizeOfCell/3;
+ 4501              		.loc 1 164 0
+ 4502 0a28 D0319FE5 		ldr	r3, .L40
+ 4503 0a2c 003093E5 		ldr	r3, [r3, #0]
+ 4504 0a30 012083E2 		add	r2, r3, #1
+ 4505 0a34 C8319FE5 		ldr	r3, .L40+4
+ 4506 0a38 003093E5 		ldr	r3, [r3, #0]
+ 4507 0a3c 34101BE5 		ldr	r1, [fp, #-52]
+ 4508 0a40 910303E0 		mul	r3, r1, r3
+ 4509 0a44 032082E0 		add	r2, r2, r3
+ 4510 0a48 B4319FE5 		ldr	r3, .L40+4
+ 4511 0a4c 003093E5 		ldr	r3, [r3, #0]
+ 4512 0a50 1C101BE5 		ldr	r1, [fp, #-28]
+ 4513 0a54 910303E0 		mul	r3, r1, r3
+ 4514 0a58 A8119FE5 		ldr	r1, .L40+8
+ 4515 0a5c 9301C1E0 		smull	r0, r1, r3, r1
+ 4516 0a60 C33FA0E1 		mov	r3, r3, asr #31
+ 4517 0a64 013063E0 		rsb	r3, r3, r1
+ 4518 0a68 033082E0 		add	r3, r2, r3
+ 4519 0a6c 24300BE5 		str	r3, [fp, #-36]
+ 165:../gestorPantalla.c **** 			int y0 = 1+margenSuperiorSudoku+(x)*sizeOfCell+i*sizeOfCell/3;
+ 4520              		.loc 1 165 0
+ 4521 0a70 94319FE5 		ldr	r3, .L40+12
+ 4522 0a74 003093E5 		ldr	r3, [r3, #0]
+ 4523 0a78 012083E2 		add	r2, r3, #1
+ 4524 0a7c 80319FE5 		ldr	r3, .L40+4
+ 4525 0a80 003093E5 		ldr	r3, [r3, #0]
+ 4526 0a84 30101BE5 		ldr	r1, [fp, #-48]
+ 4527 0a88 910303E0 		mul	r3, r1, r3
+ 4528 0a8c 032082E0 		add	r2, r2, r3
+ 4529 0a90 6C319FE5 		ldr	r3, .L40+4
+ 4530 0a94 003093E5 		ldr	r3, [r3, #0]
+ 4531 0a98 18101BE5 		ldr	r1, [fp, #-24]
+ 4532 0a9c 910303E0 		mul	r3, r1, r3
+ 4533 0aa0 60119FE5 		ldr	r1, .L40+8
+ 4534 0aa4 9341C1E0 		smull	r4, r1, r3, r1
+ 4535 0aa8 C33FA0E1 		mov	r3, r3, asr #31
+ 4536 0aac 013063E0 		rsb	r3, r3, r1
+ 4537 0ab0 033082E0 		add	r3, r2, r3
+ 4538 0ab4 28300BE5 		str	r3, [fp, #-40]
+ 166:../gestorPantalla.c **** 			if(esCandidato(x, y, candidato)) {
+ 4539              		.loc 1 166 0
+ 4540 0ab8 30001BE5 		ldr	r0, [fp, #-48]
+ 4541 0abc 34101BE5 		ldr	r1, [fp, #-52]
+ 4542 0ac0 20201BE5 		ldr	r2, [fp, #-32]
+ 4543 0ac4 FEFFFFEB 		bl	esCandidato
+ 4544 0ac8 0030A0E1 		mov	r3, r0
+ 4545 0acc 000053E3 		cmp	r3, #0
+ 4546 0ad0 3800000A 		beq	.L37
+ 167:../gestorPantalla.c **** 				LcdClrRect(x0, y0+4, x0+(sizeOfCell/3), y0+4+(sizeOfCell/3), BLACK);
+ 4547              		.loc 1 167 0
+ 4548 0ad4 24301BE5 		ldr	r3, [fp, #-36]
+ 4549 0ad8 0338A0E1 		mov	r3, r3, asl #16
+ 4550 0adc 2308A0E1 		mov	r0, r3, lsr #16
+ 4551 0ae0 28301BE5 		ldr	r3, [fp, #-40]
+ 4552 0ae4 0338A0E1 		mov	r3, r3, asl #16
+ 4553 0ae8 2338A0E1 		mov	r3, r3, lsr #16
+ 4554 0aec 043083E2 		add	r3, r3, #4
+ 4555 0af0 0338A0E1 		mov	r3, r3, asl #16
+ 4556 0af4 2338A0E1 		mov	r3, r3, lsr #16
+ 4557 0af8 0338A0E1 		mov	r3, r3, asl #16
+ 4558 0afc 2318A0E1 		mov	r1, r3, lsr #16
+ 4559 0b00 FC309FE5 		ldr	r3, .L40+4
+ 4560 0b04 003093E5 		ldr	r3, [r3, #0]
+ 4561 0b08 F8209FE5 		ldr	r2, .L40+8
+ 4562 0b0c 93C2C2E0 		smull	ip, r2, r3, r2
+ 4563 0b10 C33FA0E1 		mov	r3, r3, asr #31
+ 4564 0b14 023063E0 		rsb	r3, r3, r2
+ 4565 0b18 0338A0E1 		mov	r3, r3, asl #16
+ 4566 0b1c 2328A0E1 		mov	r2, r3, lsr #16
+ 4567 0b20 24301BE5 		ldr	r3, [fp, #-36]
+ 4568 0b24 0338A0E1 		mov	r3, r3, asl #16
+ 4569 0b28 2338A0E1 		mov	r3, r3, lsr #16
+ 4570 0b2c 033082E0 		add	r3, r2, r3
+ 4571 0b30 0338A0E1 		mov	r3, r3, asl #16
+ 4572 0b34 2338A0E1 		mov	r3, r3, lsr #16
+ 4573 0b38 0338A0E1 		mov	r3, r3, asl #16
+ 4574 0b3c 2328A0E1 		mov	r2, r3, lsr #16
+ 4575 0b40 28301BE5 		ldr	r3, [fp, #-40]
+ 4576 0b44 0338A0E1 		mov	r3, r3, asl #16
+ 4577 0b48 23C8A0E1 		mov	ip, r3, lsr #16
+ 4578 0b4c B0309FE5 		ldr	r3, .L40+4
+ 4579 0b50 003093E5 		ldr	r3, [r3, #0]
+ 4580 0b54 ACE09FE5 		ldr	lr, .L40+8
+ 4581 0b58 934ECEE0 		smull	r4, lr, r3, lr
+ 4582 0b5c C33FA0E1 		mov	r3, r3, asr #31
+ 4583 0b60 0E3063E0 		rsb	r3, r3, lr
+ 4584 0b64 0338A0E1 		mov	r3, r3, asl #16
+ 4585 0b68 2338A0E1 		mov	r3, r3, lsr #16
+ 4586 0b6c 03308CE0 		add	r3, ip, r3
+ 4587 0b70 0338A0E1 		mov	r3, r3, asl #16
+ 4588 0b74 2338A0E1 		mov	r3, r3, lsr #16
+ 4589 0b78 043083E2 		add	r3, r3, #4
+ 4590 0b7c 0338A0E1 		mov	r3, r3, asl #16
+ 4591 0b80 2338A0E1 		mov	r3, r3, lsr #16
+ 4592 0b84 0338A0E1 		mov	r3, r3, asl #16
+ 4593 0b88 2338A0E1 		mov	r3, r3, lsr #16
+ 4594 0b8c 0008A0E1 		mov	r0, r0, asl #16
+ 4595 0b90 4008A0E1 		mov	r0, r0, asr #16
+ 4596 0b94 0118A0E1 		mov	r1, r1, asl #16
+ 4597 0b98 4118A0E1 		mov	r1, r1, asr #16
+ 4598 0b9c 0228A0E1 		mov	r2, r2, asl #16
+ 4599 0ba0 4228A0E1 		mov	r2, r2, asr #16
+ 4600 0ba4 0338A0E1 		mov	r3, r3, asl #16
+ 4601 0ba8 4338A0E1 		mov	r3, r3, asr #16
+ 4602 0bac 0FC0A0E3 		mov	ip, #15
+ 4603 0bb0 00C08DE5 		str	ip, [sp, #0]
+ 4604 0bb4 FEFFFFEB 		bl	LcdClrRect
+ 4605              	.L37:
+ 168:../gestorPantalla.c **** 			}
+ 169:../gestorPantalla.c **** 			candidato++;
+ 4606              		.loc 1 169 0
+ 4607 0bb8 20301BE5 		ldr	r3, [fp, #-32]
+ 4608 0bbc 013083E2 		add	r3, r3, #1
+ 4609 0bc0 20300BE5 		str	r3, [fp, #-32]
+ 4610              	.LBE9:
+ 163:../gestorPantalla.c **** 		for(j=0; j<3; j++) {
+ 4611              		.loc 1 163 0
+ 4612 0bc4 1C301BE5 		ldr	r3, [fp, #-28]
+ 4613 0bc8 013083E2 		add	r3, r3, #1
+ 4614 0bcc 1C300BE5 		str	r3, [fp, #-28]
+ 4615              	.L36:
+ 163:../gestorPantalla.c **** 		for(j=0; j<3; j++) {
+ 4616              		.loc 1 163 0 is_stmt 0 discriminator 1
+ 4617 0bd0 1C301BE5 		ldr	r3, [fp, #-28]
+ 4618 0bd4 020053E3 		cmp	r3, #2
+ 4619 0bd8 92FFFFDA 		ble	.L38
+ 162:../gestorPantalla.c **** 	for(i=0; i<3; i++) {
+ 4620              		.loc 1 162 0 is_stmt 1
+ 4621 0bdc 18301BE5 		ldr	r3, [fp, #-24]
+ 4622 0be0 013083E2 		add	r3, r3, #1
+ 4623 0be4 18300BE5 		str	r3, [fp, #-24]
+ 4624              	.L35:
+ 162:../gestorPantalla.c **** 	for(i=0; i<3; i++) {
+ 4625              		.loc 1 162 0 is_stmt 0 discriminator 1
+ 4626 0be8 18301BE5 		ldr	r3, [fp, #-24]
+ 4627 0bec 020053E3 		cmp	r3, #2
+ 4628 0bf0 89FFFFDA 		ble	.L39
+ 170:../gestorPantalla.c **** 		}
+ 171:../gestorPantalla.c **** 	}
+ 172:../gestorPantalla.c **** }
+ 4629              		.loc 1 172 0 is_stmt 1
+ 4630 0bf4 10D04BE2 		sub	sp, fp, #16
+ 4631 0bf8 10689DE8 		ldmfd	sp, {r4, fp, sp, lr}
+ 4632 0bfc 1EFF2FE1 		bx	lr
+ 4633              	.L41:
+ 4634              		.align	2
+ 4635              	.L40:
+ 4636 0c00 00000000 		.word	margenIzquierdoSudoku
+ 4637 0c04 00000000 		.word	sizeOfCell
+ 4638 0c08 56555555 		.word	1431655766
+ 4639 0c0c 00000000 		.word	margenSuperiorSudoku
+ 4640              		.cfi_endproc
+ 4641              	.LFE3:
+ 4643              		.section	.rodata
+ 4644              		.align	2
+ 4645              	.LC5:
+ 4646 0078 45737461 		.ascii	"Esta seguro de que desea finalizar?\000"
+ 4646      20736567 
+ 4646      75726F20 
+ 4646      64652071 
+ 4646      75652064 
+ 4647              		.align	2
+ 4648              	.LC6:
+ 4649 009c 426F746F 		.ascii	"Boton izquierdo - Cancelar\000"
+ 4649      6E20697A 
+ 4649      71756965 
+ 4649      72646F20 
+ 4649      2D204361 
+ 4650 00b7 00       		.align	2
+ 4651              	.LC7:
+ 4652 00b8 426F746F 		.ascii	"Boton derecho - Aceptar\000"
+ 4652      6E206465 
+ 4652      72656368 
+ 4652      6F202D20 
+ 4652      41636570 
+ 4653              		.text
+ 4654              		.align	2
+ 4655              		.global	mostrarConfirmacionFinal
+ 4657              	mostrarConfirmacionFinal:
+ 4658              	.LFB4:
+ 173:../gestorPantalla.c **** 
+ 174:../gestorPantalla.c **** void mostrarConfirmacionFinal(){
+ 4659              		.loc 1 174 0
+ 4660              		.cfi_startproc
+ 4661              		@ Function supports interworking.
+ 4662              		@ args = 0, pretend = 0, frame = 0
+ 4663              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4664 0c10 0DC0A0E1 		mov	ip, sp
+ 4665              	.LCFI8:
+ 4666              		.cfi_def_cfa_register 12
+ 4667 0c14 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4668 0c18 04B04CE2 		sub	fp, ip, #4
+ 4669              		.cfi_offset 14, -8
+ 4670              		.cfi_offset 13, -12
+ 4671              		.cfi_offset 11, -16
+ 4672              	.LCFI9:
+ 4673              		.cfi_def_cfa 11, 4
+ 175:../gestorPantalla.c **** 	/* clear screen */
+ 176:../gestorPantalla.c **** 	Lcd_Clr();
+ 4674              		.loc 1 176 0
+ 4675 0c1c FEFFFFEB 		bl	Lcd_Clr
+ 177:../gestorPantalla.c **** 	Lcd_Active_Clr();
+ 4676              		.loc 1 177 0
+ 4677 0c20 FEFFFFEB 		bl	Lcd_Active_Clr
+ 178:../gestorPantalla.c **** 
+ 179:../gestorPantalla.c **** 	/* draw rectangle pattern */
+ 180:../gestorPantalla.c ****     #ifdef Eng_v // english version
+ 181:../gestorPantalla.c **** 	Lcd_DspAscII8x16(10,0,DARKGRAY,"Embest S3CEV40 ");
+ 182:../gestorPantalla.c **** 	#else
+ 183:../gestorPantalla.c **** //	Lcd_DspHz16(10,0,DARKGRAY,"英蓓特三星实验评估板");
+ 184:../gestorPantalla.c **** 	#endif
+ 185:../gestorPantalla.c **** 	Lcd_DspAscII8x16(0,45,BLACK,"Esta seguro de que desea finalizar?");
+ 4678              		.loc 1 185 0
+ 4679 0c24 0000A0E3 		mov	r0, #0
+ 4680 0c28 2D10A0E3 		mov	r1, #45
+ 4681 0c2c 0F20A0E3 		mov	r2, #15
+ 4682 0c30 38309FE5 		ldr	r3, .L43
+ 4683 0c34 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 186:../gestorPantalla.c **** 	Lcd_DspAscII8x16(30,75,BLACK,"Boton izquierdo - Cancelar");
+ 4684              		.loc 1 186 0
+ 4685 0c38 1E00A0E3 		mov	r0, #30
+ 4686 0c3c 4B10A0E3 		mov	r1, #75
+ 4687 0c40 0F20A0E3 		mov	r2, #15
+ 4688 0c44 28309FE5 		ldr	r3, .L43+4
+ 4689 0c48 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 187:../gestorPantalla.c **** 	Lcd_DspAscII8x16(30,95,BLACK,"Boton derecho - Aceptar");
+ 4690              		.loc 1 187 0
+ 4691 0c4c 1E00A0E3 		mov	r0, #30
+ 4692 0c50 5F10A0E3 		mov	r1, #95
+ 4693 0c54 0F20A0E3 		mov	r2, #15
+ 4694 0c58 18309FE5 		ldr	r3, .L43+8
+ 4695 0c5c FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 188:../gestorPantalla.c **** 	//Se actualiza la pantalla con la nueva informaci髇
+ 189:../gestorPantalla.c **** 	Lcd_Dma_Trans();
+ 4696              		.loc 1 189 0
+ 4697 0c60 FEFFFFEB 		bl	Lcd_Dma_Trans
+ 190:../gestorPantalla.c **** }
+ 4698              		.loc 1 190 0
+ 4699 0c64 0CD04BE2 		sub	sp, fp, #12
+ 4700 0c68 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4701 0c6c 1EFF2FE1 		bx	lr
+ 4702              	.L44:
+ 4703              		.align	2
+ 4704              	.L43:
+ 4705 0c70 78000000 		.word	.LC5
+ 4706 0c74 9C000000 		.word	.LC6
+ 4707 0c78 B8000000 		.word	.LC7
+ 4708              		.cfi_endproc
+ 4709              	.LFE4:
+ 4711              		.section	.rodata
+ 4712              		.align	2
+ 4713              	.LC8:
+ 4714 00d0 496E7374 		.ascii	"Instrucciones para jugar:\000"
+ 4714      72756363 
+ 4714      696F6E65 
+ 4714      73207061 
+ 4714      7261206A 
+ 4715 00ea 0000     		.align	2
+ 4716              	.LC9:
+ 4717 00ec 5574696C 		.ascii	"Utilice el boton izquierdo para\000"
+ 4717      69636520 
+ 4717      656C2062 
+ 4717      6F746F6E 
+ 4717      20697A71 
+ 4718              		.align	2
+ 4719              	.LC10:
+ 4720 010c 73656C65 		.ascii	"seleccionar filas, columnas y valores\000"
+ 4720      6363696F 
+ 4720      6E617220 
+ 4720      66696C61 
+ 4720      732C2063 
+ 4721 0132 0000     		.align	2
+ 4722              	.LC11:
+ 4723 0134 5574696C 		.ascii	"Utilice el boton derecho para\000"
+ 4723      69636520 
+ 4723      656C2062 
+ 4723      6F746F6E 
+ 4723      20646572 
+ 4724 0152 0000     		.align	2
+ 4725              	.LC12:
+ 4726 0154 636F6E66 		.ascii	"confirmar los datos introducidos\000"
+ 4726      69726D61 
+ 4726      72206C6F 
+ 4726      73206461 
+ 4726      746F7320 
+ 4727 0175 000000   		.text
+ 4728              		.align	2
+ 4729              		.global	mostrarInstrucciones
+ 4731              	mostrarInstrucciones:
+ 4732              	.LFB5:
+ 191:../gestorPantalla.c **** 
+ 192:../gestorPantalla.c **** void mostrarInstrucciones(){
+ 4733              		.loc 1 192 0
+ 4734              		.cfi_startproc
+ 4735              		@ Function supports interworking.
+ 4736              		@ args = 0, pretend = 0, frame = 0
+ 4737              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4738 0c7c 0DC0A0E1 		mov	ip, sp
+ 4739              	.LCFI10:
+ 4740              		.cfi_def_cfa_register 12
+ 4741 0c80 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4742 0c84 04B04CE2 		sub	fp, ip, #4
+ 4743              		.cfi_offset 14, -8
+ 4744              		.cfi_offset 13, -12
+ 4745              		.cfi_offset 11, -16
+ 4746              	.LCFI11:
+ 4747              		.cfi_def_cfa 11, 4
+ 4748 0c88 08D04DE2 		sub	sp, sp, #8
+ 193:../gestorPantalla.c **** 	/* initial LCD controller */
+ 194:../gestorPantalla.c **** 	Lcd_Init();
+ 4749              		.loc 1 194 0
+ 4750 0c8c FEFFFFEB 		bl	Lcd_Init
+ 195:../gestorPantalla.c **** 	/* clear screen */
+ 196:../gestorPantalla.c **** 	Lcd_Clr();
+ 4751              		.loc 1 196 0
+ 4752 0c90 FEFFFFEB 		bl	Lcd_Clr
+ 197:../gestorPantalla.c **** 	Lcd_Active_Clr();
+ 4753              		.loc 1 197 0
+ 4754 0c94 FEFFFFEB 		bl	Lcd_Active_Clr
+ 198:../gestorPantalla.c **** 
+ 199:../gestorPantalla.c **** 	/* draw rectangle pattern */
+ 200:../gestorPantalla.c ****     #ifdef Eng_v // english version
+ 201:../gestorPantalla.c **** 	Lcd_DspAscII8x16(10,0,DARKGRAY,"Embest S3CEV40 ");
+ 202:../gestorPantalla.c **** 	#else
+ 203:../gestorPantalla.c **** //	Lcd_DspHz16(10,0,DARKGRAY,"英蓓特三星实验评估板");
+ 204:../gestorPantalla.c **** 	#endif
+ 205:../gestorPantalla.c **** 	Lcd_DspAscII8x16(0,25,BLACK,"Instrucciones para jugar:");
+ 4755              		.loc 1 205 0
+ 4756 0c98 0000A0E3 		mov	r0, #0
+ 4757 0c9c 1910A0E3 		mov	r1, #25
+ 4758 0ca0 0F20A0E3 		mov	r2, #15
+ 4759 0ca4 90309FE5 		ldr	r3, .L46
+ 4760 0ca8 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 206:../gestorPantalla.c **** 	Lcd_DspAscII8x16(0,55,BLACK,"Utilice el boton izquierdo para");
+ 4761              		.loc 1 206 0
+ 4762 0cac 0000A0E3 		mov	r0, #0
+ 4763 0cb0 3710A0E3 		mov	r1, #55
+ 4764 0cb4 0F20A0E3 		mov	r2, #15
+ 4765 0cb8 80309FE5 		ldr	r3, .L46+4
+ 4766 0cbc FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 207:../gestorPantalla.c **** 	Lcd_DspAscII8x16(0,70,BLACK,"seleccionar filas, columnas y valores");
+ 4767              		.loc 1 207 0
+ 4768 0cc0 0000A0E3 		mov	r0, #0
+ 4769 0cc4 4610A0E3 		mov	r1, #70
+ 4770 0cc8 0F20A0E3 		mov	r2, #15
+ 4771 0ccc 70309FE5 		ldr	r3, .L46+8
+ 4772 0cd0 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 208:../gestorPantalla.c **** 	Lcd_DspAscII8x16(0,105,BLACK,"Utilice el boton derecho para");
+ 4773              		.loc 1 208 0
+ 4774 0cd4 0000A0E3 		mov	r0, #0
+ 4775 0cd8 6910A0E3 		mov	r1, #105
+ 4776 0cdc 0F20A0E3 		mov	r2, #15
+ 4777 0ce0 60309FE5 		ldr	r3, .L46+12
+ 4778 0ce4 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 209:../gestorPantalla.c **** 	Lcd_DspAscII8x16(0,120,BLACK,"confirmar los datos introducidos");
+ 4779              		.loc 1 209 0
+ 4780 0ce8 0000A0E3 		mov	r0, #0
+ 4781 0cec 7810A0E3 		mov	r1, #120
+ 4782 0cf0 0F20A0E3 		mov	r2, #15
+ 4783 0cf4 50309FE5 		ldr	r3, .L46+16
+ 4784 0cf8 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 210:../gestorPantalla.c **** 	Lcd_Draw_HLine(0,320,140,15,3);
+ 4785              		.loc 1 210 0
+ 4786 0cfc 0330A0E3 		mov	r3, #3
+ 4787 0d00 00308DE5 		str	r3, [sp, #0]
+ 4788 0d04 0000A0E3 		mov	r0, #0
+ 4789 0d08 051DA0E3 		mov	r1, #320
+ 4790 0d0c 8C20A0E3 		mov	r2, #140
+ 4791 0d10 0F30A0E3 		mov	r3, #15
+ 4792 0d14 FEFFFFEB 		bl	Lcd_Draw_HLine
+ 211:../gestorPantalla.c **** 	Lcd_DspAscII8x16(0,175,BLACK,"Pulse un boton para jugar");
+ 4793              		.loc 1 211 0
+ 4794 0d18 0000A0E3 		mov	r0, #0
+ 4795 0d1c AF10A0E3 		mov	r1, #175
+ 4796 0d20 0F20A0E3 		mov	r2, #15
+ 4797 0d24 24309FE5 		ldr	r3, .L46+20
+ 4798 0d28 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 212:../gestorPantalla.c **** 	//Se actualiza la pantalla con la nueva informaci髇
+ 213:../gestorPantalla.c **** 	Lcd_Dma_Trans();
+ 4799              		.loc 1 213 0
+ 4800 0d2c FEFFFFEB 		bl	Lcd_Dma_Trans
+ 214:../gestorPantalla.c **** }
+ 4801              		.loc 1 214 0
+ 4802 0d30 0CD04BE2 		sub	sp, fp, #12
+ 4803 0d34 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4804 0d38 1EFF2FE1 		bx	lr
+ 4805              	.L47:
+ 4806              		.align	2
+ 4807              	.L46:
+ 4808 0d3c D0000000 		.word	.LC8
+ 4809 0d40 EC000000 		.word	.LC9
+ 4810 0d44 0C010000 		.word	.LC10
+ 4811 0d48 34010000 		.word	.LC11
+ 4812 0d4c 54010000 		.word	.LC12
+ 4813 0d50 40000000 		.word	.LC1
+ 4814              		.cfi_endproc
+ 4815              	.LFE5:
+ 4817              		.align	2
+ 4818              		.global	setPantalla
+ 4820              	setPantalla:
+ 4821              	.LFB6:
+ 215:../gestorPantalla.c **** 
+ 216:../gestorPantalla.c **** void setPantalla(int idPantalla){
+ 4822              		.loc 1 216 0
+ 4823              		.cfi_startproc
+ 4824              		@ Function supports interworking.
+ 4825              		@ args = 0, pretend = 0, frame = 8
+ 4826              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4827 0d54 0DC0A0E1 		mov	ip, sp
+ 4828              	.LCFI12:
+ 4829              		.cfi_def_cfa_register 12
+ 4830 0d58 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4831 0d5c 04B04CE2 		sub	fp, ip, #4
+ 4832              		.cfi_offset 14, -8
+ 4833              		.cfi_offset 13, -12
+ 4834              		.cfi_offset 11, -16
+ 4835              	.LCFI13:
+ 4836              		.cfi_def_cfa 11, 4
+ 4837 0d60 08D04DE2 		sub	sp, sp, #8
+ 4838 0d64 10000BE5 		str	r0, [fp, #-16]
+ 217:../gestorPantalla.c **** 	idSiguientePantalla = idPantalla;
+ 4839              		.loc 1 217 0
+ 4840 0d68 10309FE5 		ldr	r3, .L49
+ 4841 0d6c 10201BE5 		ldr	r2, [fp, #-16]
+ 4842 0d70 002083E5 		str	r2, [r3, #0]
+ 218:../gestorPantalla.c **** }
+ 4843              		.loc 1 218 0
+ 4844 0d74 0CD04BE2 		sub	sp, fp, #12
+ 4845 0d78 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4846 0d7c 1EFF2FE1 		bx	lr
+ 4847              	.L50:
+ 4848              		.align	2
+ 4849              	.L49:
+ 4850 0d80 00000000 		.word	idSiguientePantalla
+ 4851              		.cfi_endproc
+ 4852              	.LFE6:
+ 4854              		.align	2
+ 4855              		.global	setTiempoCalculo
+ 4857              	setTiempoCalculo:
+ 4858              	.LFB7:
+ 219:../gestorPantalla.c **** 
+ 220:../gestorPantalla.c **** void setTiempoCalculo(uint32_t tiempo){
+ 4859              		.loc 1 220 0
+ 4860              		.cfi_startproc
+ 4861              		@ Function supports interworking.
+ 4862              		@ args = 0, pretend = 0, frame = 8
+ 4863              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4864 0d84 0DC0A0E1 		mov	ip, sp
+ 4865              	.LCFI14:
+ 4866              		.cfi_def_cfa_register 12
+ 4867 0d88 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4868 0d8c 04B04CE2 		sub	fp, ip, #4
+ 4869              		.cfi_offset 14, -8
+ 4870              		.cfi_offset 13, -12
+ 4871              		.cfi_offset 11, -16
+ 4872              	.LCFI15:
+ 4873              		.cfi_def_cfa 11, 4
+ 4874 0d90 08D04DE2 		sub	sp, sp, #8
+ 4875 0d94 10000BE5 		str	r0, [fp, #-16]
+ 221:../gestorPantalla.c **** 	itoa(tiempo, tiempoCalculoEnPantalla);
+ 4876              		.loc 1 221 0
+ 4877 0d98 10301BE5 		ldr	r3, [fp, #-16]
+ 4878 0d9c 0300A0E1 		mov	r0, r3
+ 4879 0da0 0C109FE5 		ldr	r1, .L52
+ 4880 0da4 FEFFFFEB 		bl	itoa
+ 222:../gestorPantalla.c **** }
+ 4881              		.loc 1 222 0
+ 4882 0da8 0CD04BE2 		sub	sp, fp, #12
+ 4883 0dac 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4884 0db0 1EFF2FE1 		bx	lr
+ 4885              	.L53:
+ 4886              		.align	2
+ 4887              	.L52:
+ 4888 0db4 00000000 		.word	tiempoCalculoEnPantalla
+ 4889              		.cfi_endproc
+ 4890              	.LFE7:
+ 4892              		.align	2
+ 4893              		.global	actualizarTiempoTotalEnPantalla
+ 4895              	actualizarTiempoTotalEnPantalla:
+ 4896              	.LFB8:
+ 223:../gestorPantalla.c **** 
+ 224:../gestorPantalla.c **** void actualizarTiempoTotalEnPantalla() {
+ 4897              		.loc 1 224 0
+ 4898              		.cfi_startproc
+ 4899              		@ Function supports interworking.
+ 4900              		@ args = 0, pretend = 0, frame = 0
+ 4901              		@ frame_needed = 1, uses_anonymous_args = 0
+ 4902 0db8 0DC0A0E1 		mov	ip, sp
+ 4903              	.LCFI16:
+ 4904              		.cfi_def_cfa_register 12
+ 4905 0dbc 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 4906 0dc0 04B04CE2 		sub	fp, ip, #4
+ 4907              		.cfi_offset 14, -8
+ 4908              		.cfi_offset 13, -12
+ 4909              		.cfi_offset 11, -16
+ 4910              	.LCFI17:
+ 4911              		.cfi_def_cfa 11, 4
+ 4912 0dc4 08D04DE2 		sub	sp, sp, #8
+ 225:../gestorPantalla.c **** 	if (idSiguientePantalla != pantallaConfirmacionFinal) {
+ 4913              		.loc 1 225 0
+ 4914 0dc8 14319FE5 		ldr	r3, .L56
+ 4915 0dcc 003093E5 		ldr	r3, [r3, #0]
+ 4916 0dd0 010053E3 		cmp	r3, #1
+ 4917 0dd4 3F00000A 		beq	.L54
+ 4918              	.LBB10:
+ 226:../gestorPantalla.c **** 		LcdClrRect(margenIzquierdoSudoku+215, margenSuperiorSudoku+18, LCD_XSIZE, margenSuperiorSudoku+40
+ 4919              		.loc 1 226 0
+ 4920 0dd8 08319FE5 		ldr	r3, .L56+4
+ 4921 0ddc 003093E5 		ldr	r3, [r3, #0]
+ 4922 0de0 0338A0E1 		mov	r3, r3, asl #16
+ 4923 0de4 2338A0E1 		mov	r3, r3, lsr #16
+ 4924 0de8 D73083E2 		add	r3, r3, #215
+ 4925 0dec 0338A0E1 		mov	r3, r3, asl #16
+ 4926 0df0 2338A0E1 		mov	r3, r3, lsr #16
+ 4927 0df4 0338A0E1 		mov	r3, r3, asl #16
+ 4928 0df8 2318A0E1 		mov	r1, r3, lsr #16
+ 4929 0dfc E8309FE5 		ldr	r3, .L56+8
+ 4930 0e00 003093E5 		ldr	r3, [r3, #0]
+ 4931 0e04 0338A0E1 		mov	r3, r3, asl #16
+ 4932 0e08 2338A0E1 		mov	r3, r3, lsr #16
+ 4933 0e0c 123083E2 		add	r3, r3, #18
+ 4934 0e10 0338A0E1 		mov	r3, r3, asl #16
+ 4935 0e14 2338A0E1 		mov	r3, r3, lsr #16
+ 4936 0e18 0338A0E1 		mov	r3, r3, asl #16
+ 4937 0e1c 2328A0E1 		mov	r2, r3, lsr #16
+ 4938 0e20 C4309FE5 		ldr	r3, .L56+8
+ 4939 0e24 003093E5 		ldr	r3, [r3, #0]
+ 4940 0e28 0338A0E1 		mov	r3, r3, asl #16
+ 4941 0e2c 2338A0E1 		mov	r3, r3, lsr #16
+ 4942 0e30 283083E2 		add	r3, r3, #40
+ 4943 0e34 0338A0E1 		mov	r3, r3, asl #16
+ 4944 0e38 2338A0E1 		mov	r3, r3, lsr #16
+ 4945 0e3c 0338A0E1 		mov	r3, r3, asl #16
+ 4946 0e40 2338A0E1 		mov	r3, r3, lsr #16
+ 4947 0e44 0118A0E1 		mov	r1, r1, asl #16
+ 4948 0e48 4118A0E1 		mov	r1, r1, asr #16
+ 4949 0e4c 0228A0E1 		mov	r2, r2, asl #16
+ 4950 0e50 4228A0E1 		mov	r2, r2, asr #16
+ 4951 0e54 0338A0E1 		mov	r3, r3, asl #16
+ 4952 0e58 4338A0E1 		mov	r3, r3, asr #16
+ 4953 0e5c 0000A0E3 		mov	r0, #0
+ 4954 0e60 00008DE5 		str	r0, [sp, #0]
+ 4955 0e64 0100A0E1 		mov	r0, r1
+ 4956 0e68 0210A0E1 		mov	r1, r2
+ 4957 0e6c 052DA0E3 		mov	r2, #320
+ 4958 0e70 FEFFFFEB 		bl	LcdClrRect
+ 227:../gestorPantalla.c **** 		itoa(leerTiempoTimer4(),tiempoTotalEnPantalla);
+ 4959              		.loc 1 227 0
+ 4960 0e74 FEFFFFEB 		bl	leerTiempoTimer4
+ 4961 0e78 0030A0E1 		mov	r3, r0
+ 4962 0e7c 0300A0E1 		mov	r0, r3
+ 4963 0e80 68109FE5 		ldr	r1, .L56+12
+ 4964 0e84 FEFFFFEB 		bl	itoa
+ 228:../gestorPantalla.c **** 		Lcd_DspAscII8x16(margenIzquierdoSudoku+215,margenSuperiorSudoku+20,BLACK,tiempoTotalEnPantalla);
+ 4965              		.loc 1 228 0
+ 4966 0e88 58309FE5 		ldr	r3, .L56+4
+ 4967 0e8c 003093E5 		ldr	r3, [r3, #0]
+ 4968 0e90 0338A0E1 		mov	r3, r3, asl #16
+ 4969 0e94 2338A0E1 		mov	r3, r3, lsr #16
+ 4970 0e98 D73083E2 		add	r3, r3, #215
+ 4971 0e9c 0338A0E1 		mov	r3, r3, asl #16
+ 4972 0ea0 2328A0E1 		mov	r2, r3, lsr #16
+ 4973 0ea4 40309FE5 		ldr	r3, .L56+8
+ 4974 0ea8 003093E5 		ldr	r3, [r3, #0]
+ 4975 0eac 0338A0E1 		mov	r3, r3, asl #16
+ 4976 0eb0 2338A0E1 		mov	r3, r3, lsr #16
+ 4977 0eb4 143083E2 		add	r3, r3, #20
+ 4978 0eb8 0338A0E1 		mov	r3, r3, asl #16
+ 4979 0ebc 2338A0E1 		mov	r3, r3, lsr #16
+ 4980 0ec0 0200A0E1 		mov	r0, r2
+ 4981 0ec4 0310A0E1 		mov	r1, r3
+ 4982 0ec8 0F20A0E3 		mov	r2, #15
+ 4983 0ecc 1C309FE5 		ldr	r3, .L56+12
+ 4984 0ed0 FEFFFFEB 		bl	Lcd_DspAscII8x16
+ 229:../gestorPantalla.c **** 		//Se actualiza la pantalla con la nueva informaci髇
+ 230:../gestorPantalla.c **** 		Lcd_Dma_Trans();
+ 4985              		.loc 1 230 0
+ 4986 0ed4 FEFFFFEB 		bl	Lcd_Dma_Trans
+ 4987              	.L54:
+ 4988              	.LBE10:
+ 231:../gestorPantalla.c **** 	}
+ 232:../gestorPantalla.c **** }
+ 4989              		.loc 1 232 0
+ 4990 0ed8 0CD04BE2 		sub	sp, fp, #12
+ 4991 0edc 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 4992 0ee0 1EFF2FE1 		bx	lr
+ 4993              	.L57:
+ 4994              		.align	2
+ 4995              	.L56:
+ 4996 0ee4 00000000 		.word	idSiguientePantalla
+ 4997 0ee8 00000000 		.word	margenIzquierdoSudoku
+ 4998 0eec 00000000 		.word	margenSuperiorSudoku
+ 4999 0ef0 00000000 		.word	tiempoTotalEnPantalla
+ 5000              		.cfi_endproc
+ 5001              	.LFE8:
+ 5003              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 gestorPantalla.c
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3591   .rodata:00000000 margenIzquierdoLeyenda
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3588   .rodata:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3597   .rodata:00000004 margenSuperiorLeyenda
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3603   .rodata:00000008 margenIzquierdoSudoku
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3609   .rodata:0000000c margenSuperiorSudoku
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3615   .rodata:00000010 sizeOfCell
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3622   .bss:00000000 idSiguientePantalla
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3619   .bss:00000000 $d
+                            *COM*:00000004 leyenda
+                            *COM*:0000000f tiempoCalculoEnPantalla
+                            *COM*:0000000f tiempoTotalEnPantalla
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3635   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3638   .text:00000000 actualizarPantalla
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3721   .text:000000ac $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3745   .text:000000c8 dibujar_sudoku
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4657   .text:00000c10 mostrarConfirmacionFinal
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4731   .text:00000c7c mostrarInstrucciones
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:3742   .text:000000c8 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4113   .text:00000574 $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4132   .text:000005a8 escribirDatos
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4895   .text:00000db8 actualizarTiempoTotalEnPantalla
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4129   .text:000005a8 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4454   .text:000009d8 $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4466   .text:000009f0 colocarCandidatos
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4463   .text:000009f0 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4636   .text:00000c00 $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4654   .text:00000c10 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4705   .text:00000c70 $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4728   .text:00000c7c $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4808   .text:00000d3c $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4817   .text:00000d54 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4820   .text:00000d54 setPantalla
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4850   .text:00000d80 $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4854   .text:00000d84 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4857   .text:00000d84 setTiempoCalculo
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4888   .text:00000db4 $d
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4892   .text:00000db8 $a
+C:\Users\a680669\AppData\Local\Temp\cc3O1pwy.s:4996   .text:00000ee4 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+Lcd_Clr
+Lcd_Active_Clr
+Lcd_DspAscII8x16
+Lcd_Draw_HLine
+Lcd_Draw_VLine
+Lcd_Dma_Trans
+obtenerValor
+esPista
+esError
+LcdClrRect
+esCandidato
+Lcd_Init
+itoa
+leerTiempoTimer4

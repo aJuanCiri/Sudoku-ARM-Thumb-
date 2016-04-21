@@ -1,0 +1,5018 @@
+
+Practica2.elf:     file format elf32-littlearm
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00002d60  0c000000  0c000000  00008000  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         000001b0  0c002d60  0c002d60  0000ad60  2**5
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .bss          00000280  0c002f20  0c002f20  0000af10  2**5
+                  ALLOC
+  3 .ARM.attributes 0000002e  00000000  00000000  0000af10  2**0
+                  CONTENTS, READONLY
+  4 .comment      0000002a  00000000  00000000  0000af3e  2**0
+                  CONTENTS, READONLY
+  5 .debug_info   0000132d  00000000  00000000  0000af68  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_line   00001d3d  00000000  00000000  0000c295  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 00000846  00000000  00000000  0000dfd2  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000670  00000000  00000000  0000e818  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_aranges 00000200  00000000  00000000  0000ee88  2**3
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_macinfo 000483bd  00000000  00000000  0000f088  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_loc    00000764  00000000  00000000  00057445  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 12 .debug_pubnames 00000503  00000000  00000000  00057ba9  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 13 .debug_pubtypes 000000ef  00000000  00000000  000580ac  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 14 .debug_str    000006ce  00000000  00000000  0005819b  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+0c000000 <ENTRY>:
+    .extern Main			/* The main entry of mon program */
+    
+    .text
+
+    ENTRY:
+    b ResetHandler			/* for debug            */
+ c000000:	ea00010a 	b	c000430 <ResetHandler>
+    b HandlerUndef      	/* handlerUndef         */
+ c000004:	ea000042 	b	c000114 <HandlerUndef>
+    b HandlerSWI        	/* SWI interrupt handler*/
+ c000008:	ea000047 	b	c00012c <HandlerSWI>
+    b HandlerPabort     	/* handlerPAbort        */
+ c00000c:	ea000052 	b	c00015c <HandlerPabort>
+    b HandlerDabort     	/* handlerDAbort        */
+ c000010:	ea00004b 	b	c000144 <HandlerDabort>
+    b .                 	/* handlerReserved      */
+ c000014:	eafffffe 	b	c000014 <ENTRY+0x14>
+    b HandlerIRQ
+ c000018:	ea000037 	b	c0000fc <HandlerIRQ>
+    b HandlerFIQ
+ c00001c:	ea000030 	b	c0000e4 <HandlerFIQ>
+
+0c000020 <VECTOR_BRANCH>:
+	#be changed like below, to work-around with H/W bug of S3C44B0X interrupt controller. 
+	# b HandlerIRQ  ->  subs pc,lr,#4
+	# b HandlerIRQ  ->  subs pc,lr,#4
+
+VECTOR_BRANCH:
+    ldr pc,=HandlerEINT0    /*mGA    H/W interrupt vector table  */
+ c000020:	e59ff56c 	ldr	pc, [pc, #1388]	; c000594 <U0+0x14>
+    ldr pc,=HandlerEINT1    /*	                                 */	
+ c000024:	e59ff56c 	ldr	pc, [pc, #1388]	; c000598 <U0+0x18>
+    ldr pc,=HandlerEINT2    /*                                   */  
+ c000028:	e59ff56c 	ldr	pc, [pc, #1388]	; c00059c <U0+0x1c>
+    ldr pc,=HandlerEINT3    /*                                   */  
+ c00002c:	e59ff56c 	ldr	pc, [pc, #1388]	; c0005a0 <U0+0x20>
+    ldr pc,=HandlerEINT4567 /*                                   */  
+ c000030:	e59ff56c 	ldr	pc, [pc, #1388]	; c0005a4 <U0+0x24>
+    ldr pc,=HandlerTICK	    /*mGA                                */   
+ c000034:	e59ff56c 	ldr	pc, [pc, #1388]	; c0005a8 <U0+0x28>
+    b .                                                          
+ c000038:	eafffffe 	b	c000038 <VECTOR_BRANCH+0x18>
+    b .                                                         
+ c00003c:	eafffffe 	b	c00003c <VECTOR_BRANCH+0x1c>
+    ldr pc,=HandlerZDMA0    /*mGB                                */  
+ c000040:	e59ff564 	ldr	pc, [pc, #1380]	; c0005ac <U0+0x2c>
+    ldr pc,=HandlerZDMA1    /*                                   */  
+ c000044:	e59ff564 	ldr	pc, [pc, #1380]	; c0005b0 <U0+0x30>
+    ldr pc,=HandlerBDMA0    /*                                   */  
+ c000048:	e59ff564 	ldr	pc, [pc, #1380]	; c0005b4 <U0+0x34>
+    ldr pc,=HandlerBDMA1    /*                                   */  
+ c00004c:	e59ff564 	ldr	pc, [pc, #1380]	; c0005b8 <U0+0x38>
+    ldr pc,=HandlerWDT	    /*                                   */   
+ c000050:	e59ff564 	ldr	pc, [pc, #1380]	; c0005bc <U0+0x3c>
+    ldr pc,=HandlerUERR01   /*mGB                                */  
+ c000054:	e59ff564 	ldr	pc, [pc, #1380]	; c0005c0 <U0+0x40>
+    b .                                                          
+ c000058:	eafffffe 	b	c000058 <VECTOR_BRANCH+0x38>
+    b .                                                          
+ c00005c:	eafffffe 	b	c00005c <VECTOR_BRANCH+0x3c>
+    ldr pc,=HandlerTIMER0   /*mGC                                */  
+ c000060:	e59ff55c 	ldr	pc, [pc, #1372]	; c0005c4 <U0+0x44>
+    ldr pc,=HandlerTIMER1   /*                                   */  
+ c000064:	e59ff55c 	ldr	pc, [pc, #1372]	; c0005c8 <U0+0x48>
+    ldr pc,=HandlerTIMER2   /*                                   */  
+ c000068:	e59ff55c 	ldr	pc, [pc, #1372]	; c0005cc <U0+0x4c>
+    ldr pc,=HandlerTIMER3   /*                                   */  
+ c00006c:	e59ff55c 	ldr	pc, [pc, #1372]	; c0005d0 <U0+0x50>
+    ldr pc,=HandlerTIMER4   /*                                   */  
+ c000070:	e59ff55c 	ldr	pc, [pc, #1372]	; c0005d4 <U0+0x54>
+    ldr pc,=HandlerTIMER5   /*mGC                                */  
+ c000074:	e59ff55c 	ldr	pc, [pc, #1372]	; c0005d8 <U0+0x58>
+    b .                                                          
+ c000078:	eafffffe 	b	c000078 <VECTOR_BRANCH+0x58>
+    b .                                                          
+ c00007c:	eafffffe 	b	c00007c <VECTOR_BRANCH+0x5c>
+    ldr pc,=HandlerURXD0    /*mGD                                */  
+ c000080:	e59ff554 	ldr	pc, [pc, #1364]	; c0005dc <U0+0x5c>
+    ldr pc,=HandlerURXD1    /*                                   */  
+ c000084:	e59ff554 	ldr	pc, [pc, #1364]	; c0005e0 <U0+0x60>
+    ldr pc,=HandlerIIC	    /*                                   */   
+ c000088:	e59ff554 	ldr	pc, [pc, #1364]	; c0005e4 <U0+0x64>
+    ldr pc,=HandlerSIO	    /*                                   */   
+ c00008c:	e59ff554 	ldr	pc, [pc, #1364]	; c0005e8 <U0+0x68>
+    ldr pc,=HandlerUTXD0    /*                                   */  
+ c000090:	e59ff554 	ldr	pc, [pc, #1364]	; c0005ec <U0+0x6c>
+    ldr pc,=HandlerUTXD1    /*mGD                                */  
+ c000094:	e59ff554 	ldr	pc, [pc, #1364]	; c0005f0 <U0+0x70>
+    b .                                                          
+ c000098:	eafffffe 	b	c000098 <VECTOR_BRANCH+0x78>
+    b .                                                          
+ c00009c:	eafffffe 	b	c00009c <VECTOR_BRANCH+0x7c>
+    ldr pc,=HandlerRTC	    /*mGKA                               */   
+ c0000a0:	e59ff54c 	ldr	pc, [pc, #1356]	; c0005f4 <U0+0x74>
+    b .					    /*                     		         */
+ c0000a4:	eafffffe 	b	c0000a4 <VECTOR_BRANCH+0x84>
+    b .					    /*                     		         */
+ c0000a8:	eafffffe 	b	c0000a8 <VECTOR_BRANCH+0x88>
+    b .					    /*                     		         */
+ c0000ac:	eafffffe 	b	c0000ac <VECTOR_BRANCH+0x8c>
+    b .					    /*                     		         */
+ c0000b0:	eafffffe 	b	c0000b0 <VECTOR_BRANCH+0x90>
+    b .					    /*mGKA                 			     */
+ c0000b4:	eafffffe 	b	c0000b4 <VECTOR_BRANCH+0x94>
+    b .                                                          
+ c0000b8:	eafffffe 	b	c0000b8 <VECTOR_BRANCH+0x98>
+    b .                                                          
+ c0000bc:	eafffffe 	b	c0000bc <VECTOR_BRANCH+0x9c>
+    ldr pc,=HandlerADC	    /*mGKB                               */  
+ c0000c0:	e59ff530 	ldr	pc, [pc, #1328]	; c0005f8 <U0+0x78>
+    b .					    /*                     		         */
+ c0000c4:	eafffffe 	b	c0000c4 <VECTOR_BRANCH+0xa4>
+    b .					    /*                     		         */
+ c0000c8:	eafffffe 	b	c0000c8 <VECTOR_BRANCH+0xa8>
+    b .					    /*                     		         */
+ c0000cc:	eafffffe 	b	c0000cc <VECTOR_BRANCH+0xac>
+    b .					    /*                     		         */
+ c0000d0:	eafffffe 	b	c0000d0 <VECTOR_BRANCH+0xb0>
+    b .					    /*mGKB                 		         */
+ c0000d4:	eafffffe 	b	c0000d4 <VECTOR_BRANCH+0xb4>
+    b .                                                          
+ c0000d8:	eafffffe 	b	c0000d8 <VECTOR_BRANCH+0xb8>
+    b .                                                          
+ c0000dc:	eafffffe 	b	c0000dc <VECTOR_BRANCH+0xbc>
+@0xe0=EnterPWDN                                                 
+    ldr pc,=EnterPWDN
+ c0000e0:	e59ff514 	ldr	pc, [pc, #1300]	; c0005fc <U0+0x7c>
+
+0c0000e4 <HandlerFIQ>:
+               to be dumped into the current section\ 
+               (which is assumed to be the .text section)\ 
+               at the current location (aligned to a word boundary).*/
+   .align
+
+HandlerFIQ:		HANDLER HandleFIQ
+ c0000e4:	e24dd004 	sub	sp, sp, #4
+ c0000e8:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0000ec:	e59f050c 	ldr	r0, [pc, #1292]	; c000600 <U0+0x80>
+ c0000f0:	e5900000 	ldr	r0, [r0]
+ c0000f4:	e58d0004 	str	r0, [sp, #4]
+ c0000f8:	e8bd8001 	pop	{r0, pc}
+
+0c0000fc <HandlerIRQ>:
+HandlerIRQ:		HANDLER HandleIRQ
+ c0000fc:	e24dd004 	sub	sp, sp, #4
+ c000100:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000104:	e59f04f8 	ldr	r0, [pc, #1272]	; c000604 <U0+0x84>
+ c000108:	e5900000 	ldr	r0, [r0]
+ c00010c:	e58d0004 	str	r0, [sp, #4]
+ c000110:	e8bd8001 	pop	{r0, pc}
+
+0c000114 <HandlerUndef>:
+HandlerUndef:	HANDLER HandleUndef
+ c000114:	e24dd004 	sub	sp, sp, #4
+ c000118:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00011c:	e59f04e4 	ldr	r0, [pc, #1252]	; c000608 <U0+0x88>
+ c000120:	e5900000 	ldr	r0, [r0]
+ c000124:	e58d0004 	str	r0, [sp, #4]
+ c000128:	e8bd8001 	pop	{r0, pc}
+
+0c00012c <HandlerSWI>:
+HandlerSWI:		HANDLER HandleSWI
+ c00012c:	e24dd004 	sub	sp, sp, #4
+ c000130:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000134:	e59f04d0 	ldr	r0, [pc, #1232]	; c00060c <U0+0x8c>
+ c000138:	e5900000 	ldr	r0, [r0]
+ c00013c:	e58d0004 	str	r0, [sp, #4]
+ c000140:	e8bd8001 	pop	{r0, pc}
+
+0c000144 <HandlerDabort>:
+HandlerDabort:	HANDLER HandleDabort
+ c000144:	e24dd004 	sub	sp, sp, #4
+ c000148:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00014c:	e59f04bc 	ldr	r0, [pc, #1212]	; c000610 <U0+0x90>
+ c000150:	e5900000 	ldr	r0, [r0]
+ c000154:	e58d0004 	str	r0, [sp, #4]
+ c000158:	e8bd8001 	pop	{r0, pc}
+
+0c00015c <HandlerPabort>:
+HandlerPabort:	HANDLER HandlePabort
+ c00015c:	e24dd004 	sub	sp, sp, #4
+ c000160:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000164:	e59f04a8 	ldr	r0, [pc, #1192]	; c000614 <U0+0x94>
+ c000168:	e5900000 	ldr	r0, [r0]
+ c00016c:	e58d0004 	str	r0, [sp, #4]
+ c000170:	e8bd8001 	pop	{r0, pc}
+
+0c000174 <HandlerADC>:
+HandlerADC:		HANDLER HandleADC
+ c000174:	e24dd004 	sub	sp, sp, #4
+ c000178:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00017c:	e59f0494 	ldr	r0, [pc, #1172]	; c000618 <U0+0x98>
+ c000180:	e5900000 	ldr	r0, [r0]
+ c000184:	e58d0004 	str	r0, [sp, #4]
+ c000188:	e8bd8001 	pop	{r0, pc}
+
+0c00018c <HandlerRTC>:
+HandlerRTC:		HANDLER HandleRTC
+ c00018c:	e24dd004 	sub	sp, sp, #4
+ c000190:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000194:	e59f0480 	ldr	r0, [pc, #1152]	; c00061c <U0+0x9c>
+ c000198:	e5900000 	ldr	r0, [r0]
+ c00019c:	e58d0004 	str	r0, [sp, #4]
+ c0001a0:	e8bd8001 	pop	{r0, pc}
+
+0c0001a4 <HandlerUTXD1>:
+HandlerUTXD1:	HANDLER HandleUTXD1
+ c0001a4:	e24dd004 	sub	sp, sp, #4
+ c0001a8:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0001ac:	e59f046c 	ldr	r0, [pc, #1132]	; c000620 <U0+0xa0>
+ c0001b0:	e5900000 	ldr	r0, [r0]
+ c0001b4:	e58d0004 	str	r0, [sp, #4]
+ c0001b8:	e8bd8001 	pop	{r0, pc}
+
+0c0001bc <HandlerUTXD0>:
+HandlerUTXD0:	HANDLER HandleUTXD0
+ c0001bc:	e24dd004 	sub	sp, sp, #4
+ c0001c0:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0001c4:	e59f0458 	ldr	r0, [pc, #1112]	; c000624 <U0+0xa4>
+ c0001c8:	e5900000 	ldr	r0, [r0]
+ c0001cc:	e58d0004 	str	r0, [sp, #4]
+ c0001d0:	e8bd8001 	pop	{r0, pc}
+
+0c0001d4 <HandlerSIO>:
+HandlerSIO:		HANDLER HandleSIO
+ c0001d4:	e24dd004 	sub	sp, sp, #4
+ c0001d8:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0001dc:	e59f0444 	ldr	r0, [pc, #1092]	; c000628 <U0+0xa8>
+ c0001e0:	e5900000 	ldr	r0, [r0]
+ c0001e4:	e58d0004 	str	r0, [sp, #4]
+ c0001e8:	e8bd8001 	pop	{r0, pc}
+
+0c0001ec <HandlerIIC>:
+HandlerIIC:		HANDLER HandleIIC
+ c0001ec:	e24dd004 	sub	sp, sp, #4
+ c0001f0:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0001f4:	e59f0430 	ldr	r0, [pc, #1072]	; c00062c <U0+0xac>
+ c0001f8:	e5900000 	ldr	r0, [r0]
+ c0001fc:	e58d0004 	str	r0, [sp, #4]
+ c000200:	e8bd8001 	pop	{r0, pc}
+
+0c000204 <HandlerURXD1>:
+HandlerURXD1:	HANDLER HandleURXD1
+ c000204:	e24dd004 	sub	sp, sp, #4
+ c000208:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00020c:	e59f041c 	ldr	r0, [pc, #1052]	; c000630 <U0+0xb0>
+ c000210:	e5900000 	ldr	r0, [r0]
+ c000214:	e58d0004 	str	r0, [sp, #4]
+ c000218:	e8bd8001 	pop	{r0, pc}
+
+0c00021c <HandlerURXD0>:
+HandlerURXD0:	HANDLER HandleURXD0
+ c00021c:	e24dd004 	sub	sp, sp, #4
+ c000220:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000224:	e59f0408 	ldr	r0, [pc, #1032]	; c000634 <U0+0xb4>
+ c000228:	e5900000 	ldr	r0, [r0]
+ c00022c:	e58d0004 	str	r0, [sp, #4]
+ c000230:	e8bd8001 	pop	{r0, pc}
+
+0c000234 <HandlerTIMER5>:
+HandlerTIMER5:	HANDLER HandleTIMER5
+ c000234:	e24dd004 	sub	sp, sp, #4
+ c000238:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00023c:	e59f03f4 	ldr	r0, [pc, #1012]	; c000638 <U0+0xb8>
+ c000240:	e5900000 	ldr	r0, [r0]
+ c000244:	e58d0004 	str	r0, [sp, #4]
+ c000248:	e8bd8001 	pop	{r0, pc}
+
+0c00024c <HandlerTIMER4>:
+HandlerTIMER4:	HANDLER HandleTIMER4
+ c00024c:	e24dd004 	sub	sp, sp, #4
+ c000250:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000254:	e59f03e0 	ldr	r0, [pc, #992]	; c00063c <U0+0xbc>
+ c000258:	e5900000 	ldr	r0, [r0]
+ c00025c:	e58d0004 	str	r0, [sp, #4]
+ c000260:	e8bd8001 	pop	{r0, pc}
+
+0c000264 <HandlerTIMER3>:
+HandlerTIMER3:	HANDLER HandleTIMER3
+ c000264:	e24dd004 	sub	sp, sp, #4
+ c000268:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00026c:	e59f03cc 	ldr	r0, [pc, #972]	; c000640 <U0+0xc0>
+ c000270:	e5900000 	ldr	r0, [r0]
+ c000274:	e58d0004 	str	r0, [sp, #4]
+ c000278:	e8bd8001 	pop	{r0, pc}
+
+0c00027c <HandlerTIMER2>:
+HandlerTIMER2:	HANDLER HandleTIMER2
+ c00027c:	e24dd004 	sub	sp, sp, #4
+ c000280:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000284:	e59f03b8 	ldr	r0, [pc, #952]	; c000644 <U0+0xc4>
+ c000288:	e5900000 	ldr	r0, [r0]
+ c00028c:	e58d0004 	str	r0, [sp, #4]
+ c000290:	e8bd8001 	pop	{r0, pc}
+
+0c000294 <HandlerTIMER1>:
+HandlerTIMER1:	HANDLER HandleTIMER1
+ c000294:	e24dd004 	sub	sp, sp, #4
+ c000298:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00029c:	e59f03a4 	ldr	r0, [pc, #932]	; c000648 <U0+0xc8>
+ c0002a0:	e5900000 	ldr	r0, [r0]
+ c0002a4:	e58d0004 	str	r0, [sp, #4]
+ c0002a8:	e8bd8001 	pop	{r0, pc}
+
+0c0002ac <HandlerTIMER0>:
+HandlerTIMER0:	HANDLER HandleTIMER0
+ c0002ac:	e24dd004 	sub	sp, sp, #4
+ c0002b0:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0002b4:	e59f0390 	ldr	r0, [pc, #912]	; c00064c <U0+0xcc>
+ c0002b8:	e5900000 	ldr	r0, [r0]
+ c0002bc:	e58d0004 	str	r0, [sp, #4]
+ c0002c0:	e8bd8001 	pop	{r0, pc}
+
+0c0002c4 <HandlerUERR01>:
+HandlerUERR01:	HANDLER HandleUERR01
+ c0002c4:	e24dd004 	sub	sp, sp, #4
+ c0002c8:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0002cc:	e59f037c 	ldr	r0, [pc, #892]	; c000650 <U0+0xd0>
+ c0002d0:	e5900000 	ldr	r0, [r0]
+ c0002d4:	e58d0004 	str	r0, [sp, #4]
+ c0002d8:	e8bd8001 	pop	{r0, pc}
+
+0c0002dc <HandlerWDT>:
+HandlerWDT:		HANDLER HandleWDT
+ c0002dc:	e24dd004 	sub	sp, sp, #4
+ c0002e0:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0002e4:	e59f0368 	ldr	r0, [pc, #872]	; c000654 <U0+0xd4>
+ c0002e8:	e5900000 	ldr	r0, [r0]
+ c0002ec:	e58d0004 	str	r0, [sp, #4]
+ c0002f0:	e8bd8001 	pop	{r0, pc}
+
+0c0002f4 <HandlerBDMA1>:
+HandlerBDMA1:	HANDLER HandleBDMA1
+ c0002f4:	e24dd004 	sub	sp, sp, #4
+ c0002f8:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0002fc:	e59f0354 	ldr	r0, [pc, #852]	; c000658 <U0+0xd8>
+ c000300:	e5900000 	ldr	r0, [r0]
+ c000304:	e58d0004 	str	r0, [sp, #4]
+ c000308:	e8bd8001 	pop	{r0, pc}
+
+0c00030c <HandlerBDMA0>:
+HandlerBDMA0:	HANDLER HandleBDMA0
+ c00030c:	e24dd004 	sub	sp, sp, #4
+ c000310:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000314:	e59f0340 	ldr	r0, [pc, #832]	; c00065c <U0+0xdc>
+ c000318:	e5900000 	ldr	r0, [r0]
+ c00031c:	e58d0004 	str	r0, [sp, #4]
+ c000320:	e8bd8001 	pop	{r0, pc}
+
+0c000324 <HandlerZDMA1>:
+HandlerZDMA1:	HANDLER HandleZDMA1
+ c000324:	e24dd004 	sub	sp, sp, #4
+ c000328:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00032c:	e59f032c 	ldr	r0, [pc, #812]	; c000660 <U0+0xe0>
+ c000330:	e5900000 	ldr	r0, [r0]
+ c000334:	e58d0004 	str	r0, [sp, #4]
+ c000338:	e8bd8001 	pop	{r0, pc}
+
+0c00033c <HandlerZDMA0>:
+HandlerZDMA0:	HANDLER HandleZDMA0
+ c00033c:	e24dd004 	sub	sp, sp, #4
+ c000340:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000344:	e59f0318 	ldr	r0, [pc, #792]	; c000664 <U0+0xe4>
+ c000348:	e5900000 	ldr	r0, [r0]
+ c00034c:	e58d0004 	str	r0, [sp, #4]
+ c000350:	e8bd8001 	pop	{r0, pc}
+
+0c000354 <HandlerTICK>:
+HandlerTICK:	HANDLER HandleTICK
+ c000354:	e24dd004 	sub	sp, sp, #4
+ c000358:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00035c:	e59f0304 	ldr	r0, [pc, #772]	; c000668 <U0+0xe8>
+ c000360:	e5900000 	ldr	r0, [r0]
+ c000364:	e58d0004 	str	r0, [sp, #4]
+ c000368:	e8bd8001 	pop	{r0, pc}
+
+0c00036c <HandlerEINT4567>:
+HandlerEINT4567:HANDLER HandleEINT4567
+ c00036c:	e24dd004 	sub	sp, sp, #4
+ c000370:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c000374:	e59f02f0 	ldr	r0, [pc, #752]	; c00066c <U0+0xec>
+ c000378:	e5900000 	ldr	r0, [r0]
+ c00037c:	e58d0004 	str	r0, [sp, #4]
+ c000380:	e8bd8001 	pop	{r0, pc}
+
+0c000384 <HandlerEINT3>:
+HandlerEINT3:	HANDLER HandleEINT3
+ c000384:	e24dd004 	sub	sp, sp, #4
+ c000388:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c00038c:	e59f02dc 	ldr	r0, [pc, #732]	; c000670 <U0+0xf0>
+ c000390:	e5900000 	ldr	r0, [r0]
+ c000394:	e58d0004 	str	r0, [sp, #4]
+ c000398:	e8bd8001 	pop	{r0, pc}
+
+0c00039c <HandlerEINT2>:
+HandlerEINT2:	HANDLER HandleEINT2
+ c00039c:	e24dd004 	sub	sp, sp, #4
+ c0003a0:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0003a4:	e59f02c8 	ldr	r0, [pc, #712]	; c000674 <U0+0xf4>
+ c0003a8:	e5900000 	ldr	r0, [r0]
+ c0003ac:	e58d0004 	str	r0, [sp, #4]
+ c0003b0:	e8bd8001 	pop	{r0, pc}
+
+0c0003b4 <HandlerEINT1>:
+HandlerEINT1:	HANDLER HandleEINT1
+ c0003b4:	e24dd004 	sub	sp, sp, #4
+ c0003b8:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0003bc:	e59f02b4 	ldr	r0, [pc, #692]	; c000678 <U0+0xf8>
+ c0003c0:	e5900000 	ldr	r0, [r0]
+ c0003c4:	e58d0004 	str	r0, [sp, #4]
+ c0003c8:	e8bd8001 	pop	{r0, pc}
+
+0c0003cc <HandlerEINT0>:
+HandlerEINT0:	HANDLER HandleEINT0
+ c0003cc:	e24dd004 	sub	sp, sp, #4
+ c0003d0:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+ c0003d4:	e59f02a0 	ldr	r0, [pc, #672]	; c00067c <U0+0xfc>
+ c0003d8:	e5900000 	ldr	r0, [r0]
+ c0003dc:	e58d0004 	str	r0, [sp, #4]
+ c0003e0:	e8bd8001 	pop	{r0, pc}
+
+0c0003e4 <IsrIRQ>:
+
+#One of the following two routines can be used for non-vectored interrupt.
+
+IsrIRQ:						/* using I_ISPR register. */
+    sub	    sp,sp,#4       	/* reserved for PC	  */
+ c0003e4:	e24dd004 	sub	sp, sp, #4
+    stmfd   sp!,{r8-r9}   
+ c0003e8:	e92d0300 	push	{r8, r9}
+
+#IMPORTANT CAUTION
+# when I_ISPC isn't used properly, I_ISPR can be 0 in this routine.
+
+    ldr	    r9,=I_ISPR
+ c0003ec:	e59f928c 	ldr	r9, [pc, #652]	; c000680 <U0+0x100>
+    ldr	    r9,[r9]
+ c0003f0:	e5999000 	ldr	r9, [r9]
+
+	cmp		r9, #0x0		/* If the IDLE mode work-around is used, 	*/
+ c0003f4:	e3590000 	cmp	r9, #0
+							/* r9 may be 0 sometimes.			*/
+	beq		l2
+ c0003f8:	0a000009 	beq	c000424 <l2>
+
+    mov	    r8,#0x0
+ c0003fc:	e3a08000 	mov	r8, #0
+
+0c000400 <l0>:
+l0:
+    movs    r9,r9,lsr #1
+ c000400:	e1b090a9 	lsrs	r9, r9, #1
+    bcs	    l1
+ c000404:	2a000001 	bcs	c000410 <l1>
+    add	    r8,r8,#4
+ c000408:	e2888004 	add	r8, r8, #4
+    b	    l0
+ c00040c:	eafffffb 	b	c000400 <l0>
+
+0c000410 <l1>:
+
+l1:
+    ldr	    r9,=HandleADC
+ c000410:	e59f9200 	ldr	r9, [pc, #512]	; c000618 <U0+0x98>
+    add	    r9,r9,r8
+ c000414:	e0899008 	add	r9, r9, r8
+    ldr	    r9,[r9]
+ c000418:	e5999000 	ldr	r9, [r9]
+    str	    r9,[sp,#8]
+ c00041c:	e58d9008 	str	r9, [sp, #8]
+    ldmfd   sp!,{r8-r9,pc}
+ c000420:	e8bd8300 	pop	{r8, r9, pc}
+
+0c000424 <l2>:
+
+l2:
+	ldmfd	sp!,{r8-r9}
+ c000424:	e8bd0300 	pop	{r8, r9}
+	add		sp,sp,#4
+ c000428:	e28dd004 	add	sp, sp, #4
+	subs	pc,lr,#4
+ c00042c:	e25ef004 	subs	pc, lr, #4
+
+0c000430 <ResetHandler>:
+
+#****************************************************
+#*	START											*
+#****************************************************
+ResetHandler:
+    ldr	    r0,=WTCON	    	/* watch dog disable*/
+ c000430:	e59f024c 	ldr	r0, [pc, #588]	; c000684 <U0+0x104>
+    ldr	    r1,=0x0 		
+ c000434:	e3a01000 	mov	r1, #0
+    str	    r1,[r0]
+ c000438:	e5801000 	str	r1, [r0]
+
+    ldr	    r0,=INTMSK
+ c00043c:	e59f0244 	ldr	r0, [pc, #580]	; c000688 <U0+0x108>
+    ldr	    r1,=0x07ffffff  	/* all interrupt disable */
+ c000440:	e3e0133e 	mvn	r1, #-134217728	; 0xf8000000
+    str	    r1,[r0]
+ c000444:	e5801000 	str	r1, [r0]
+
+    #****************************************************
+    #*	Set clock control registers						*
+    #****************************************************
+    ldr		r0,=LOCKTIME
+ c000448:	e59f023c 	ldr	r0, [pc, #572]	; c00068c <U0+0x10c>
+    ldr		r1,=0xfff
+ c00044c:	e59f123c 	ldr	r1, [pc, #572]	; c000690 <U0+0x110>
+    str		r1,[r0]
+ c000450:	e5801000 	str	r1, [r0]
+
+.if PLLONSTART
+	ldr		r0,=PLLCON			/* temporary setting of PLL */
+ c000454:	e3a00776 	mov	r0, #30932992	; 0x1d80000
+	ldr		r1,=((M_DIV<<12)+(P_DIV<<4)+S_DIV)	/* Fin=8MHz,Fout=64MHz     */
+ c000458:	e59f1234 	ldr	r1, [pc, #564]	; c000694 <U0+0x114>
+	str		r1,[r0]
+ c00045c:	e5801000 	str	r1, [r0]
+.endif
+
+    ldr	    r0,=CLKCON		
+ c000460:	e59f0230 	ldr	r0, [pc, #560]	; c000698 <U0+0x118>
+    ldr	    r1,=0x7ff8	    	/* All unit block CLK enable */
+ c000464:	e59f1230 	ldr	r1, [pc, #560]	; c00069c <U0+0x11c>
+    str	    r1,[r0]
+ c000468:	e5801000 	str	r1, [r0]
+
+    #****************************************
+    #*  change BDMACON reset value for BDMA *   
+    #****************************************
+    ldr     r0,=BDIDES0      
+ c00046c:	e59f022c 	ldr	r0, [pc, #556]	; c0006a0 <U0+0x120>
+    ldr     r1,=0x40000000   	/* BDIDESn reset value should be 0x40000000 */
+ c000470:	e3a01101 	mov	r1, #1073741824	; 0x40000000
+    str     r1,[r0]
+ c000474:	e5801000 	str	r1, [r0]
+
+    ldr     r0,=BDIDES1      
+ c000478:	e59f0224 	ldr	r0, [pc, #548]	; c0006a4 <U0+0x124>
+    ldr     r1,=0x40000000   	/* BDIDESn reset value should be 0x40000000 */	 
+ c00047c:	e3a01101 	mov	r1, #1073741824	; 0x40000000
+    str     r1,[r0]
+ c000480:	e5801000 	str	r1, [r0]
+
+    #****************************************************
+    #*	Set memory control registers					* 	
+    #****************************************************
+    ldr	    r0,=SMRDATA
+ c000484:	e59f021c 	ldr	r0, [pc, #540]	; c0006a8 <U0+0x128>
+    ldmia   r0,{r1-r13}
+ c000488:	e8903ffe 	ldm	r0, {r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp}
+    ldr	    r0,=0x01c80000  	/* BWSCON Address */
+ c00048c:	e3a00772 	mov	r0, #29884416	; 0x1c80000
+    stmia   r0,{r1-r13}
+ c000490:	e8803ffe 	stm	r0, {r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, sp}
+
+    #;****************************************************
+    #;*	Initialize stacks								* 
+    #;****************************************************
+    ldr	    sp, =SVCStack		/* Why	*/		
+ c000494:	e59fd210 	ldr	sp, [pc, #528]	; c0006ac <U0+0x12c>
+    bl	    InitStacks
+ c000498:	eb000015 	bl	c0004f4 <InitStacks>
+
+    #;****************************************************
+    #;*	Setup IRQ handler								*
+    #;****************************************************
+    ldr	    r0,=HandleIRQ		/* This routine is needed */
+ c00049c:	e59f0160 	ldr	r0, [pc, #352]	; c000604 <U0+0x84>
+    ldr	    r1,=IsrIRQ			/* if there isn't 'subs pc,lr,#4' at 0x18, 0x1c */
+ c0004a0:	e59f1208 	ldr	r1, [pc, #520]	; c0006b0 <U0+0x130>
+    str	    r1,[r0]
+ c0004a4:	e5801000 	str	r1, [r0]
+
+    #********************************************************
+    #*	Copy and paste RW data/zero initialized data	    *
+    #********************************************************
+    LDR	    r0, =Image_RO_Limit	/* Get pointer to ROM data */
+ c0004a8:	e59f0204 	ldr	r0, [pc, #516]	; c0006b4 <U0+0x134>
+    LDR	    r1, =Image_RW_Base	/* and RAM copy	*/
+ c0004ac:	e59f1204 	ldr	r1, [pc, #516]	; c0006b8 <U0+0x138>
+    LDR	    r3, =Image_ZI_Base	
+ c0004b0:	e59f3204 	ldr	r3, [pc, #516]	; c0006bc <U0+0x13c>
+	/* Zero init base => top of initialised data */
+			
+    CMP	    r0, r1	    		/* Check that they are different */
+ c0004b4:	e1500001 	cmp	r0, r1
+    BEQ	    F1
+ c0004b8:	0a000003 	beq	c0004cc <F1>
+
+0c0004bc <F0>:
+F0:
+    CMP	    r1, r3				/* Copy init data                        */
+ c0004bc:	e1510003 	cmp	r1, r3
+    LDRCC   r2, [r0], #4        /* --> LDRCC r2, [r0] + ADD r0, r0, #4	 */
+ c0004c0:	34902004 	ldrcc	r2, [r0], #4
+    STRCC   r2, [r1], #4        /* --> STRCC r2, [r1] + ADD r1, r1, #4   */ 
+ c0004c4:	34812004 	strcc	r2, [r1], #4
+    BCC	    F0
+ c0004c8:	3afffffb 	bcc	c0004bc <F0>
+
+0c0004cc <F1>:
+F1:
+    LDR	    r1, =Image_ZI_Limit	/* Top of zero init segment */
+ c0004cc:	e59f11ec 	ldr	r1, [pc, #492]	; c0006c0 <U0+0x140>
+    MOV	    r2, #0
+ c0004d0:	e3a02000 	mov	r2, #0
+
+0c0004d4 <F2>:
+F2:
+    CMP	    r3, r1	    		/* Zero init */
+ c0004d4:	e1530001 	cmp	r3, r1
+    STRCC   r2, [r3], #4
+ c0004d8:	34832004 	strcc	r2, [r3], #4
+    BCC	    F2
+ c0004dc:	3afffffc 	bcc	c0004d4 <F2>
+
+	MRS	r0, CPSR
+ c0004e0:	e10f0000 	mrs	r0, CPSR
+	BIC	r0, r0, #NOINT /* enable interrupt */
+ c0004e4:	e3c000c0 	bic	r0, r0, #192	; 0xc0
+	MSR	CPSR_cxsf, r0
+ c0004e8:	e12ff000 	msr	CPSR_fsxc, r0
+	/* jump to main() */
+   	BL	Main
+ c0004ec:	eb0004c0 	bl	c0017f4 <Main>
+   	B   .	    
+ c0004f0:	eafffffe 	b	c0004f0 <F2+0x1c>
+
+0c0004f4 <InitStacks>:
+InitStacks:
+	#Don't use DRAM,such as stmfd,ldmfd......
+	#SVCstack is initialized before
+	#Under toolkit ver 2.50, 'msr cpsr,r1' can be used instead of 'msr cpsr_cxsf,r1'
+
+    mrs	    r0,cpsr
+ c0004f4:	e10f0000 	mrs	r0, CPSR
+    bic	    r0,r0,#MODEMASK
+ c0004f8:	e3c0001f 	bic	r0, r0, #31
+    orr	    r1,r0,#UNDEFMODE
+ c0004fc:	e380101b 	orr	r1, r0, #27
+    msr	    cpsr_cxsf,r1		/* UndefMode */
+ c000500:	e12ff001 	msr	CPSR_fsxc, r1
+    ldr	    sp,=UndefStack
+ c000504:	e59fd1b8 	ldr	sp, [pc, #440]	; c0006c4 <U0+0x144>
+	
+    orr	    r1,r0,#ABORTMODE|NOINT
+ c000508:	e38010d7 	orr	r1, r0, #215	; 0xd7
+    msr	    cpsr_cxsf,r1 	    /* AbortMode */	
+ c00050c:	e12ff001 	msr	CPSR_fsxc, r1
+    ldr	    sp,=AbortStack
+ c000510:	e59fd1b0 	ldr	sp, [pc, #432]	; c0006c8 <U0+0x148>
+
+    orr	    r1,r0,#IRQMODE|FIQ_MODE
+ c000514:	e3801092 	orr	r1, r0, #146	; 0x92
+    msr	    cpsr_cxsf,r1 	    /* IRQMode */
+ c000518:	e12ff001 	msr	CPSR_fsxc, r1
+    ldr	    sp,=IRQStack
+ c00051c:	e59fd1a8 	ldr	sp, [pc, #424]	; c0006cc <U0+0x14c>
+	
+    orr	    r1,r0,#FIQMODE|IRQ_MODE
+ c000520:	e3801051 	orr	r1, r0, #81	; 0x51
+    msr	    cpsr_cxsf,r1 	    /* FIQMode */
+ c000524:	e12ff001 	msr	CPSR_fsxc, r1
+    ldr	    sp,=FIQStack
+ c000528:	e59fd1a0 	ldr	sp, [pc, #416]	; c0006d0 <U0+0x150>
+
+    bic	    r0,r0,#MODEMASK
+ c00052c:	e3c0001f 	bic	r0, r0, #31
+    orr	    r1,r0,#SVCMODE
+ c000530:	e3801013 	orr	r1, r0, #19
+    msr	    cpsr_cxsf,r1 	    /* SVCMode */
+ c000534:	e12ff001 	msr	CPSR_fsxc, r1
+    ldr	    sp,=SVCStack
+ c000538:	e59fd16c 	ldr	sp, [pc, #364]	; c0006ac <U0+0x12c>
+
+	#USER mode is not initialized.
+    mov	    pc,lr 				/* The LR register may be not valid for the mode changes. */
+ c00053c:	e1a0f00e 	mov	pc, lr
+
+0c000540 <EnterPWDN>:
+#****************************************************
+#*	The function for entering power down mode		*
+#****************************************************
+#void EnterPWDN(int CLKCON);
+EnterPWDN:
+    mov	    r2,r0               /* r0=CLKCON */
+ c000540:	e1a02000 	mov	r2, r0
+    ldr	    r0,=REFRESH		
+ c000544:	e59f0188 	ldr	r0, [pc, #392]	; c0006d4 <U0+0x154>
+    ldr	    r3,[r0]
+ c000548:	e5903000 	ldr	r3, [r0]
+    mov	    r1, r3
+ c00054c:	e1a01003 	mov	r1, r3
+    orr	    r1, r1, #0x400000   /* self-refresh enable */
+ c000550:	e3811501 	orr	r1, r1, #4194304	; 0x400000
+    str	    r1, [r0]
+ c000554:	e5801000 	str	r1, [r0]
+
+    nop     /* Wait until self-refresh is issued. May not be needed. */
+ c000558:	e1a00000 	nop			; (mov r0, r0)
+    nop     /* If the other bus master holds the bus, ... */
+ c00055c:	e1a00000 	nop			; (mov r0, r0)
+    nop	    /* mov r0, r0 */
+ c000560:	e1a00000 	nop			; (mov r0, r0)
+    nop
+ c000564:	e1a00000 	nop			; (mov r0, r0)
+    nop
+ c000568:	e1a00000 	nop			; (mov r0, r0)
+    nop
+ c00056c:	e1a00000 	nop			; (mov r0, r0)
+    nop
+ c000570:	e1a00000 	nop			; (mov r0, r0)
+
+#enter POWERDN mode
+    ldr	    r0,=CLKCON
+ c000574:	e59f011c 	ldr	r0, [pc, #284]	; c000698 <U0+0x118>
+    str	    r2,[r0]
+ c000578:	e5802000 	str	r2, [r0]
+
+#wait until enter SL_IDLE,STOP mode and until wake-up
+    ldr	    r0,=0x10
+ c00057c:	e3a00010 	mov	r0, #16
+
+0c000580 <U0>:
+U0: subs    r0,r0,#1
+ c000580:	e2500001 	subs	r0, r0, #1
+    bne	    U0
+ c000584:	1afffffd 	bne	c000580 <U0>
+
+#exit from DRAM/SDRAM self refresh mode.
+    ldr	    r0,=REFRESH
+ c000588:	e59f0144 	ldr	r0, [pc, #324]	; c0006d4 <U0+0x154>
+    str	    r3,[r0]
+ c00058c:	e5803000 	str	r3, [r0]
+    mov	    pc,lr
+ c000590:	e1a0f00e 	mov	pc, lr
+ c000594:	0c0003cc 	.word	0x0c0003cc
+ c000598:	0c0003b4 	.word	0x0c0003b4
+ c00059c:	0c00039c 	.word	0x0c00039c
+ c0005a0:	0c000384 	.word	0x0c000384
+ c0005a4:	0c00036c 	.word	0x0c00036c
+ c0005a8:	0c000354 	.word	0x0c000354
+ c0005ac:	0c00033c 	.word	0x0c00033c
+ c0005b0:	0c000324 	.word	0x0c000324
+ c0005b4:	0c00030c 	.word	0x0c00030c
+ c0005b8:	0c0002f4 	.word	0x0c0002f4
+ c0005bc:	0c0002dc 	.word	0x0c0002dc
+ c0005c0:	0c0002c4 	.word	0x0c0002c4
+ c0005c4:	0c0002ac 	.word	0x0c0002ac
+ c0005c8:	0c000294 	.word	0x0c000294
+ c0005cc:	0c00027c 	.word	0x0c00027c
+ c0005d0:	0c000264 	.word	0x0c000264
+ c0005d4:	0c00024c 	.word	0x0c00024c
+ c0005d8:	0c000234 	.word	0x0c000234
+ c0005dc:	0c00021c 	.word	0x0c00021c
+ c0005e0:	0c000204 	.word	0x0c000204
+ c0005e4:	0c0001ec 	.word	0x0c0001ec
+ c0005e8:	0c0001d4 	.word	0x0c0001d4
+ c0005ec:	0c0001bc 	.word	0x0c0001bc
+ c0005f0:	0c0001a4 	.word	0x0c0001a4
+ c0005f4:	0c00018c 	.word	0x0c00018c
+ c0005f8:	0c000174 	.word	0x0c000174
+ c0005fc:	0c000540 	.word	0x0c000540
+ c000600:	0c7fff1c 	.word	0x0c7fff1c
+ c000604:	0c7fff18 	.word	0x0c7fff18
+ c000608:	0c7fff04 	.word	0x0c7fff04
+ c00060c:	0c7fff08 	.word	0x0c7fff08
+ c000610:	0c7fff10 	.word	0x0c7fff10
+ c000614:	0c7fff0c 	.word	0x0c7fff0c
+ c000618:	0c7fff20 	.word	0x0c7fff20
+ c00061c:	0c7fff24 	.word	0x0c7fff24
+ c000620:	0c7fff28 	.word	0x0c7fff28
+ c000624:	0c7fff2c 	.word	0x0c7fff2c
+ c000628:	0c7fff30 	.word	0x0c7fff30
+ c00062c:	0c7fff34 	.word	0x0c7fff34
+ c000630:	0c7fff38 	.word	0x0c7fff38
+ c000634:	0c7fff3c 	.word	0x0c7fff3c
+ c000638:	0c7fff40 	.word	0x0c7fff40
+ c00063c:	0c7fff44 	.word	0x0c7fff44
+ c000640:	0c7fff48 	.word	0x0c7fff48
+ c000644:	0c7fff4c 	.word	0x0c7fff4c
+ c000648:	0c7fff50 	.word	0x0c7fff50
+ c00064c:	0c7fff54 	.word	0x0c7fff54
+ c000650:	0c7fff58 	.word	0x0c7fff58
+ c000654:	0c7fff5c 	.word	0x0c7fff5c
+ c000658:	0c7fff60 	.word	0x0c7fff60
+ c00065c:	0c7fff64 	.word	0x0c7fff64
+ c000660:	0c7fff68 	.word	0x0c7fff68
+ c000664:	0c7fff6c 	.word	0x0c7fff6c
+ c000668:	0c7fff70 	.word	0x0c7fff70
+ c00066c:	0c7fff74 	.word	0x0c7fff74
+ c000670:	0c7fff78 	.word	0x0c7fff78
+ c000674:	0c7fff7c 	.word	0x0c7fff7c
+ c000678:	0c7fff80 	.word	0x0c7fff80
+ c00067c:	0c7fff84 	.word	0x0c7fff84
+ c000680:	01e00020 	.word	0x01e00020
+ c000684:	01d30000 	.word	0x01d30000
+ c000688:	01e0000c 	.word	0x01e0000c
+ c00068c:	01d8000c 	.word	0x01d8000c
+ c000690:	00000fff 	.word	0x00000fff
+ c000694:	00038021 	.word	0x00038021
+ c000698:	01d80004 	.word	0x01d80004
+ c00069c:	00007ff8 	.word	0x00007ff8
+ c0006a0:	01f80008 	.word	0x01f80008
+ c0006a4:	01f80028 	.word	0x01f80028
+ c0006a8:	0c0006d8 	.word	0x0c0006d8
+ c0006ac:	0c7ff100 	.word	0x0c7ff100
+ c0006b0:	0c0003e4 	.word	0x0c0003e4
+ c0006b4:	0c002d60 	.word	0x0c002d60
+ c0006b8:	0c002d60 	.word	0x0c002d60
+ c0006bc:	0c002f10 	.word	0x0c002f10
+ c0006c0:	0c0031a0 	.word	0x0c0031a0
+ c0006c4:	0c7ff200 	.word	0x0c7ff200
+ c0006c8:	0c7ff300 	.word	0x0c7ff300
+ c0006cc:	0c7ff400 	.word	0x0c7ff400
+ c0006d0:	0c7ff500 	.word	0x0c7ff500
+ c0006d4:	01c80024 	.word	0x01c80024
+
+0c0006d8 <SMRDATA>:
+ c0006d8:	11110102 	.word	0x11110102
+ c0006dc:	00000600 	.word	0x00000600
+ c0006e0:	00007ffc 	.word	0x00007ffc
+ c0006e4:	00007ffc 	.word	0x00007ffc
+ c0006e8:	00007ffc 	.word	0x00007ffc
+ c0006ec:	00007ffc 	.word	0x00007ffc
+ c0006f0:	00007ffc 	.word	0x00007ffc
+ c0006f4:	00018000 	.word	0x00018000
+ c0006f8:	00018000 	.word	0x00018000
+ c0006fc:	00860459 	.word	0x00860459
+ c000700:	00000010 	.word	0x00000010
+ c000704:	00000020 	.word	0x00000020
+ c000708:	00000020 	.word	0x00000020
+
+0c00070c <Delay>:
+void Delay(int time)
+// time=0: adjust the Delay function by WatchDog timer
+// time>0: the number of loop time
+// 100us resolution
+// Delay(10) -> 10*100us resolution
+{
+ c00070c:	e1a0c00d 	mov	ip, sp
+ c000710:	e92dd800 	push	{fp, ip, lr, pc}
+ c000714:	e24cb004 	sub	fp, ip, #4
+ c000718:	e24dd010 	sub	sp, sp, #16
+ c00071c:	e50b0018 	str	r0, [fp, #-24]	; 0xffffffe8
+	int i,adjust = 0;
+ c000720:	e3a03000 	mov	r3, #0
+ c000724:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+	if (time == 0)
+ c000728:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c00072c:	e3530000 	cmp	r3, #0
+ c000730:	1a000021 	bne	c0007bc <Delay+0xb0>
+	{
+		time = 200;
+ c000734:	e3a030c8 	mov	r3, #200	; 0xc8
+ c000738:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+		adjust = 1;
+ c00073c:	e3a03001 	mov	r3, #1
+ c000740:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+		delayLoopCount = 400;
+ c000744:	e59f30d8 	ldr	r3, [pc, #216]	; c000824 <Delay+0x118>
+ c000748:	e3a02e19 	mov	r2, #400	; 0x190
+ c00074c:	e5832000 	str	r2, [r3]
+		rWTCON = ((MCLK/1000000 - 1)<<8) | (2<<3);	// 1M/64,Watch-dog,nRESET,interrupt disable//
+ c000750:	e59f30d0 	ldr	r3, [pc, #208]	; c000828 <Delay+0x11c>
+ c000754:	e59f20d0 	ldr	r2, [pc, #208]	; c00082c <Delay+0x120>
+ c000758:	e5832000 	str	r2, [r3]
+		rWTDAT = 0xffff;
+ c00075c:	e59f30cc 	ldr	r3, [pc, #204]	; c000830 <Delay+0x124>
+ c000760:	e59f20cc 	ldr	r2, [pc, #204]	; c000834 <Delay+0x128>
+ c000764:	e5832000 	str	r2, [r3]
+		rWTCNT = 0xffff;
+ c000768:	e59f30c8 	ldr	r3, [pc, #200]	; c000838 <Delay+0x12c>
+ c00076c:	e59f20c0 	ldr	r2, [pc, #192]	; c000834 <Delay+0x128>
+ c000770:	e5832000 	str	r2, [r3]
+		rWTCON = ((MCLK/1000000 - 1)<<8)|(2<<3)|(1<<5); // 1M/64,Watch-dog enable,nRESET,interrupt disable //
+ c000774:	e59f30ac 	ldr	r3, [pc, #172]	; c000828 <Delay+0x11c>
+ c000778:	e59f20bc 	ldr	r2, [pc, #188]	; c00083c <Delay+0x130>
+ c00077c:	e5832000 	str	r2, [r3]
+	}
+	for (; time>0; time--)
+ c000780:	ea00000d 	b	c0007bc <Delay+0xb0>
+		for (i = 0; i < delayLoopCount; i++);
+ c000784:	e3a03000 	mov	r3, #0
+ c000788:	e50b3010 	str	r3, [fp, #-16]
+ c00078c:	ea000002 	b	c00079c <Delay+0x90>
+ c000790:	e51b3010 	ldr	r3, [fp, #-16]
+ c000794:	e2833001 	add	r3, r3, #1
+ c000798:	e50b3010 	str	r3, [fp, #-16]
+ c00079c:	e59f3080 	ldr	r3, [pc, #128]	; c000824 <Delay+0x118>
+ c0007a0:	e5933000 	ldr	r3, [r3]
+ c0007a4:	e51b2010 	ldr	r2, [fp, #-16]
+ c0007a8:	e1520003 	cmp	r2, r3
+ c0007ac:	bafffff7 	blt	c000790 <Delay+0x84>
+		rWTCON = ((MCLK/1000000 - 1)<<8) | (2<<3);	// 1M/64,Watch-dog,nRESET,interrupt disable//
+		rWTDAT = 0xffff;
+		rWTCNT = 0xffff;
+		rWTCON = ((MCLK/1000000 - 1)<<8)|(2<<3)|(1<<5); // 1M/64,Watch-dog enable,nRESET,interrupt disable //
+	}
+	for (; time>0; time--)
+ c0007b0:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c0007b4:	e2433001 	sub	r3, r3, #1
+ c0007b8:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+ c0007bc:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c0007c0:	e3530000 	cmp	r3, #0
+ c0007c4:	caffffee 	bgt	c000784 <Delay+0x78>
+		for (i = 0; i < delayLoopCount; i++);
+	if (adjust == 1)
+ c0007c8:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c0007cc:	e3530001 	cmp	r3, #1
+ c0007d0:	1a000010 	bne	c000818 <Delay+0x10c>
+	{
+		rWTCON = ((MCLK/1000000 - 1)<<8)|(2<<3);
+ c0007d4:	e59f304c 	ldr	r3, [pc, #76]	; c000828 <Delay+0x11c>
+ c0007d8:	e59f204c 	ldr	r2, [pc, #76]	; c00082c <Delay+0x120>
+ c0007dc:	e5832000 	str	r2, [r3]
+		i = 0xffff - rWTCNT;   //  1count/16us?????????//
+ c0007e0:	e59f3050 	ldr	r3, [pc, #80]	; c000838 <Delay+0x12c>
+ c0007e4:	e5933000 	ldr	r3, [r3]
+ c0007e8:	e2633cff 	rsb	r3, r3, #65280	; 0xff00
+ c0007ec:	e28330ff 	add	r3, r3, #255	; 0xff
+ c0007f0:	e50b3010 	str	r3, [fp, #-16]
+		delayLoopCount = 8000000/(i*64);	//400*100/(i*64/200)   //
+ c0007f4:	e51b3010 	ldr	r3, [fp, #-16]
+ c0007f8:	e1a03303 	lsl	r3, r3, #6
+ c0007fc:	e59f003c 	ldr	r0, [pc, #60]	; c000840 <Delay+0x134>
+ c000800:	e1a01003 	mov	r1, r3
+ c000804:	eb000902 	bl	c002c14 <__aeabi_idiv>
+ c000808:	e1a03000 	mov	r3, r0
+ c00080c:	e1a02003 	mov	r2, r3
+ c000810:	e59f300c 	ldr	r3, [pc, #12]	; c000824 <Delay+0x118>
+ c000814:	e5832000 	str	r2, [r3]
+	}
+}
+ c000818:	e24bd00c 	sub	sp, fp, #12
+ c00081c:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000820:	e12fff1e 	bx	lr
+ c000824:	0c002d70 	.word	0x0c002d70
+ c000828:	01d30000 	.word	0x01d30000
+ c00082c:	00003f10 	.word	0x00003f10
+ c000830:	01d30004 	.word	0x01d30004
+ c000834:	0000ffff 	.word	0x0000ffff
+ c000838:	01d30008 	.word	0x01d30008
+ c00083c:	00003f30 	.word	0x00003f30
+ c000840:	007a1200 	.word	0x007a1200
+
+0c000844 <DelayMs>:
+
+void DelayMs(int ms_time)
+{
+ c000844:	e1a0c00d 	mov	ip, sp
+ c000848:	e92dd800 	push	{fp, ip, lr, pc}
+ c00084c:	e24cb004 	sub	fp, ip, #4
+ c000850:	e24dd010 	sub	sp, sp, #16
+ c000854:	e50b0018 	str	r0, [fp, #-24]	; 0xffffffe8
+	int i;
+
+	for (i = 0; i < 1000*ms_time ; i++)
+ c000858:	e3a03000 	mov	r3, #0
+ c00085c:	e50b3010 	str	r3, [fp, #-16]
+ c000860:	ea000002 	b	c000870 <DelayMs+0x2c>
+ c000864:	e51b3010 	ldr	r3, [fp, #-16]
+ c000868:	e2833001 	add	r3, r3, #1
+ c00086c:	e50b3010 	str	r3, [fp, #-16]
+ c000870:	e51b2018 	ldr	r2, [fp, #-24]	; 0xffffffe8
+ c000874:	e1a03002 	mov	r3, r2
+ c000878:	e1a03283 	lsl	r3, r3, #5
+ c00087c:	e0623003 	rsb	r3, r2, r3
+ c000880:	e1a03103 	lsl	r3, r3, #2
+ c000884:	e0833002 	add	r3, r3, r2
+ c000888:	e1a03183 	lsl	r3, r3, #3
+ c00088c:	e1a02003 	mov	r2, r3
+ c000890:	e51b3010 	ldr	r3, [fp, #-16]
+ c000894:	e1520003 	cmp	r2, r3
+ c000898:	cafffff1 	bgt	c000864 <DelayMs+0x20>
+		;
+}
+ c00089c:	e24bd00c 	sub	sp, fp, #12
+ c0008a0:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0008a4:	e12fff1e 	bx	lr
+
+0c0008a8 <Port_Init>:
+
+//------------------------PORTS------------------------------//
+void Port_Init(void)
+{
+ c0008a8:	e1a0c00d 	mov	ip, sp
+ c0008ac:	e92dd800 	push	{fp, ip, lr, pc}
+ c0008b0:	e24cb004 	sub	fp, ip, #4
+
+	// PORT A GROUP
+	// BIT 	9	8	7	6	5	4	3	2	1	0
+	// 		A24	A23	A22	A21	A20	A19	A18	A17	A16	A0
+	//		0	1	1	1	1	1	1	1	1	1
+	rPCONA = 0x1ff;
+ c0008b4:	e59f3100 	ldr	r3, [pc, #256]	; c0009bc <Port_Init+0x114>
+ c0008b8:	e59f2100 	ldr	r2, [pc, #256]	; c0009c0 <Port_Init+0x118>
+ c0008bc:	e5832000 	str	r2, [r3]
+	// PORT B GROUP
+	// BIT 	10		9		8		7		6		5		4		3		2		1		0
+	//		/CS5	/CS4	/CS3	/CS2	/CS1	GPB5	GPB4	/SRAS	/SCAS	SCLK	SCKE
+	//		EXT		NIC		USB		IDE		SMC		NC		NC		Sdram	Sdram	Sdram	Sdram
+	//      1, 		1,   	1,   	1,    	1,    	0,       0,     1,    	1,    	1,   	1
+	rPDATB = 0x7ff;
+ c0008c0:	e59f30fc 	ldr	r3, [pc, #252]	; c0009c4 <Port_Init+0x11c>
+ c0008c4:	e59f20fc 	ldr	r2, [pc, #252]	; c0009c8 <Port_Init+0x120>
+ c0008c8:	e5832000 	str	r2, [r3]
+	rPCONB = 0x1cf;			// P9-LED1 P10-LED2
+ c0008cc:	e59f30f8 	ldr	r3, [pc, #248]	; c0009cc <Port_Init+0x124>
+ c0008d0:	e59f20f8 	ldr	r2, [pc, #248]	; c0009d0 <Port_Init+0x128>
+ c0008d4:	e5832000 	str	r2, [r3]
+
+	//  PC7		6		5		4		3		2		1		0
+	//   I		I		I		I		I		I		I		I
+	//   NC		NC		NC		NC		IISCLK	IISDI	IISDO	IISLRCK
+	//   00		00		00		00		11		11		11		11
+	rPDATC = 0xff00;
+ c0008d8:	e59f30f4 	ldr	r3, [pc, #244]	; c0009d4 <Port_Init+0x12c>
+ c0008dc:	e3a02cff 	mov	r2, #65280	; 0xff00
+ c0008e0:	e5832000 	str	r2, [r3]
+	rPCONC = 0x0ff0ffff;
+ c0008e4:	e59f30ec 	ldr	r3, [pc, #236]	; c0009d8 <Port_Init+0x130>
+ c0008e8:	e59f20ec 	ldr	r2, [pc, #236]	; c0009dc <Port_Init+0x134>
+ c0008ec:	e5832000 	str	r2, [r3]
+	rPUPC  = 0x30ff;	//PULL UP RESISTOR should be enabled to I/O
+ c0008f0:	e59f30e8 	ldr	r3, [pc, #232]	; c0009e0 <Port_Init+0x138>
+ c0008f4:	e59f20e8 	ldr	r2, [pc, #232]	; c0009e4 <Port_Init+0x13c>
+ c0008f8:	e5832000 	str	r2, [r3]
+	// PORT D GROUP
+	// PORT D GROUP(I/O OR LCD)
+	// BIT7		6		5		4		3		2		1		0
+	//	VF		VM		VLINE	VCLK	VD3		VD2		VD1		VD0
+	//	00		00		00		00		00		00		00		00
+	rPDATD= 0xff;
+ c0008fc:	e59f30e4 	ldr	r3, [pc, #228]	; c0009e8 <Port_Init+0x140>
+ c000900:	e3a020ff 	mov	r2, #255	; 0xff
+ c000904:	e5832000 	str	r2, [r3]
+	rPCOND= 0xaaaa;
+ c000908:	e59f30dc 	ldr	r3, [pc, #220]	; c0009ec <Port_Init+0x144>
+ c00090c:	e59f20dc 	ldr	r2, [pc, #220]	; c0009f0 <Port_Init+0x148>
+ c000910:	e5832000 	str	r2, [r3]
+	rPUPD = 0x0;
+ c000914:	e59f30d8 	ldr	r3, [pc, #216]	; c0009f4 <Port_Init+0x14c>
+ c000918:	e3a02000 	mov	r2, #0
+ c00091c:	e5832000 	str	r2, [r3]
+
+	// PORT E GROUP
+	// Bit	8		7		6		5		4		3		2		1		0
+	//  	CODECLK	LED4	LED5	LED6	LED7	BEEP	RXD0	TXD0	LcdDisp
+	//  	10		01		01		01		01		01		10		10		01
+	rPDATE	= 0x1ff;
+ c000920:	e59f30d0 	ldr	r3, [pc, #208]	; c0009f8 <Port_Init+0x150>
+ c000924:	e59f2094 	ldr	r2, [pc, #148]	; c0009c0 <Port_Init+0x118>
+ c000928:	e5832000 	str	r2, [r3]
+	rPCONE	= 0x25529;
+ c00092c:	e59f30c8 	ldr	r3, [pc, #200]	; c0009fc <Port_Init+0x154>
+ c000930:	e59f20c8 	ldr	r2, [pc, #200]	; c000a00 <Port_Init+0x158>
+ c000934:	e5832000 	str	r2, [r3]
+	rPUPE	= 0x6;
+ c000938:	e59f30c4 	ldr	r3, [pc, #196]	; c000a04 <Port_Init+0x15c>
+ c00093c:	e3a02006 	mov	r2, #6
+ c000940:	e5832000 	str	r2, [r3]
+
+	// PORT F GROUP
+	// Bit8		7		6		5		 4		3		2		1		0
+	// IISCLK	IISDI	IISDO	IISLRCK	Input	Input	Input	IICSDA	IICSCL
+	// 100		100		100		100		00		00		00		10		10
+	rPDATF = 0x0;
+ c000944:	e59f30bc 	ldr	r3, [pc, #188]	; c000a08 <Port_Init+0x160>
+ c000948:	e3a02000 	mov	r2, #0
+ c00094c:	e5832000 	str	r2, [r3]
+	rPCONF = 0x252a;
+ c000950:	e59f30b4 	ldr	r3, [pc, #180]	; c000a0c <Port_Init+0x164>
+ c000954:	e59f20b4 	ldr	r2, [pc, #180]	; c000a10 <Port_Init+0x168>
+ c000958:	e5832000 	str	r2, [r3]
+	rPUPF  = 0x0;
+ c00095c:	e59f30b0 	ldr	r3, [pc, #176]	; c000a14 <Port_Init+0x16c>
+ c000960:	e3a02000 	mov	r2, #0
+ c000964:	e5832000 	str	r2, [r3]
+	// PORT G GROUP
+	// BIT7		6		5		4		3		2		1		0
+	// 	INT7	INT6	INT5	INT4	INT3	INT2	INT1	INT0
+	//	S3		S4		S5		S6		NIC		EXT		IDE		USB
+	//	11      11      11      11      11      11      11      11
+	rPDATG = 0xff;
+ c000968:	e59f30a8 	ldr	r3, [pc, #168]	; c000a18 <Port_Init+0x170>
+ c00096c:	e3a020ff 	mov	r2, #255	; 0xff
+ c000970:	e5832000 	str	r2, [r3]
+	rPCONG = 0xffff;
+ c000974:	e59f30a0 	ldr	r3, [pc, #160]	; c000a1c <Port_Init+0x174>
+ c000978:	e59f20a0 	ldr	r2, [pc, #160]	; c000a20 <Port_Init+0x178>
+ c00097c:	e5832000 	str	r2, [r3]
+	rPUPG  = 0x0;		//pull-up portG enabled
+ c000980:	e59f309c 	ldr	r3, [pc, #156]	; c000a24 <Port_Init+0x17c>
+ c000984:	e3a02000 	mov	r2, #0
+ c000988:	e5832000 	str	r2, [r3]
+	rSPUCR = 0x7;  		//D15-D0 pull-up disable
+ c00098c:	e59f3094 	ldr	r3, [pc, #148]	; c000a28 <Port_Init+0x180>
+ c000990:	e3a02007 	mov	r2, #7
+ c000994:	e5832000 	str	r2, [r3]
+
+	/* Non Cache area */
+	rNCACHBE0 = ((Non_Cache_End>>12)<<16) | (Non_Cache_Start>>12);
+ c000998:	e59f308c 	ldr	r3, [pc, #140]	; c000a2c <Port_Init+0x184>
+ c00099c:	e59f208c 	ldr	r2, [pc, #140]	; c000a30 <Port_Init+0x188>
+ c0009a0:	e5832000 	str	r2, [r3]
+
+	/* Low level default */
+	rEXTINT = 0x0;
+ c0009a4:	e59f3088 	ldr	r3, [pc, #136]	; c000a34 <Port_Init+0x18c>
+ c0009a8:	e3a02000 	mov	r2, #0
+ c0009ac:	e5832000 	str	r2, [r3]
+}
+ c0009b0:	e24bd00c 	sub	sp, fp, #12
+ c0009b4:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0009b8:	e12fff1e 	bx	lr
+ c0009bc:	01d20000 	.word	0x01d20000
+ c0009c0:	000001ff 	.word	0x000001ff
+ c0009c4:	01d2000c 	.word	0x01d2000c
+ c0009c8:	000007ff 	.word	0x000007ff
+ c0009cc:	01d20008 	.word	0x01d20008
+ c0009d0:	000001cf 	.word	0x000001cf
+ c0009d4:	01d20014 	.word	0x01d20014
+ c0009d8:	01d20010 	.word	0x01d20010
+ c0009dc:	0ff0ffff 	.word	0x0ff0ffff
+ c0009e0:	01d20018 	.word	0x01d20018
+ c0009e4:	000030ff 	.word	0x000030ff
+ c0009e8:	01d20020 	.word	0x01d20020
+ c0009ec:	01d2001c 	.word	0x01d2001c
+ c0009f0:	0000aaaa 	.word	0x0000aaaa
+ c0009f4:	01d20024 	.word	0x01d20024
+ c0009f8:	01d2002c 	.word	0x01d2002c
+ c0009fc:	01d20028 	.word	0x01d20028
+ c000a00:	00025529 	.word	0x00025529
+ c000a04:	01d20030 	.word	0x01d20030
+ c000a08:	01d20038 	.word	0x01d20038
+ c000a0c:	01d20034 	.word	0x01d20034
+ c000a10:	0000252a 	.word	0x0000252a
+ c000a14:	01d2003c 	.word	0x01d2003c
+ c000a18:	01d20044 	.word	0x01d20044
+ c000a1c:	01d20040 	.word	0x01d20040
+ c000a20:	0000ffff 	.word	0x0000ffff
+ c000a24:	01d20048 	.word	0x01d20048
+ c000a28:	01d2004c 	.word	0x01d2004c
+ c000a2c:	01c00004 	.word	0x01c00004
+ c000a30:	c0002000 	.word	0xc0002000
+ c000a34:	01d20050 	.word	0x01d20050
+
+0c000a38 <malloc>:
+
+//--------------------------------HEAP---------------------------------//
+void *malloc(unsigned nbyte)
+/* Very simple; Use malloc() & free() like Stack */
+// void *mallocPt=Image$$RW$$Limit;
+{
+ c000a38:	e1a0c00d 	mov	ip, sp
+ c000a3c:	e92dd800 	push	{fp, ip, lr, pc}
+ c000a40:	e24cb004 	sub	fp, ip, #4
+ c000a44:	e24dd010 	sub	sp, sp, #16
+ c000a48:	e50b0018 	str	r0, [fp, #-24]	; 0xffffffe8
+	void *returnPt = mallocPt;
+ c000a4c:	e59f307c 	ldr	r3, [pc, #124]	; c000ad0 <malloc+0x98>
+ c000a50:	e5933000 	ldr	r3, [r3]
+ c000a54:	e50b3010 	str	r3, [fp, #-16]
+
+	mallocPt = (int *) mallocPt +nbyte/4 + ((nbyte%4)>0); //to align 4byte
+ c000a58:	e59f3070 	ldr	r3, [pc, #112]	; c000ad0 <malloc+0x98>
+ c000a5c:	e5932000 	ldr	r2, [r3]
+ c000a60:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c000a64:	e1a01123 	lsr	r1, r3, #2
+ c000a68:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c000a6c:	e2033003 	and	r3, r3, #3
+ c000a70:	e3530000 	cmp	r3, #0
+ c000a74:	03a03000 	moveq	r3, #0
+ c000a78:	13a03001 	movne	r3, #1
+ c000a7c:	e0813003 	add	r3, r1, r3
+ c000a80:	e1a03103 	lsl	r3, r3, #2
+ c000a84:	e0822003 	add	r2, r2, r3
+ c000a88:	e59f3040 	ldr	r3, [pc, #64]	; c000ad0 <malloc+0x98>
+ c000a8c:	e5832000 	str	r2, [r3]
+
+	if ((int)mallocPt > HEAPEND)
+ c000a90:	e59f3038 	ldr	r3, [pc, #56]	; c000ad0 <malloc+0x98>
+ c000a94:	e5933000 	ldr	r3, [r3]
+ c000a98:	e1a02003 	mov	r2, r3
+ c000a9c:	e59f3030 	ldr	r3, [pc, #48]	; c000ad4 <malloc+0x9c>
+ c000aa0:	e1520003 	cmp	r2, r3
+ c000aa4:	da000004 	ble	c000abc <malloc+0x84>
+	{
+		mallocPt = returnPt;
+ c000aa8:	e59f3020 	ldr	r3, [pc, #32]	; c000ad0 <malloc+0x98>
+ c000aac:	e51b2010 	ldr	r2, [fp, #-16]
+ c000ab0:	e5832000 	str	r2, [r3]
+		return NULL;
+ c000ab4:	e3a03000 	mov	r3, #0
+ c000ab8:	ea000000 	b	c000ac0 <malloc+0x88>
+	}
+	return returnPt;
+ c000abc:	e51b3010 	ldr	r3, [fp, #-16]
+}
+ c000ac0:	e1a00003 	mov	r0, r3
+ c000ac4:	e24bd00c 	sub	sp, fp, #12
+ c000ac8:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000acc:	e12fff1e 	bx	lr
+ c000ad0:	0c002d68 	.word	0x0c002d68
+ c000ad4:	0c7ff000 	.word	0x0c7ff000
+
+0c000ad8 <free>:
+
+void free(void *pt)
+{
+ c000ad8:	e1a0c00d 	mov	ip, sp
+ c000adc:	e92dd800 	push	{fp, ip, lr, pc}
+ c000ae0:	e24cb004 	sub	fp, ip, #4
+ c000ae4:	e24dd008 	sub	sp, sp, #8
+ c000ae8:	e50b0010 	str	r0, [fp, #-16]
+	mallocPt = pt;
+ c000aec:	e59f3010 	ldr	r3, [pc, #16]	; c000b04 <free+0x2c>
+ c000af0:	e51b2010 	ldr	r2, [fp, #-16]
+ c000af4:	e5832000 	str	r2, [r3]
+}
+ c000af8:	e24bd00c 	sub	sp, fp, #12
+ c000afc:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000b00:	e12fff1e 	bx	lr
+ c000b04:	0c002d68 	.word	0x0c002d68
+
+0c000b08 <sys_init>:
+
+//--------------------------------INIT---------------------------------//
+void sys_init()// Interrupt & Port
+{
+ c000b08:	e1a0c00d 	mov	ip, sp
+ c000b0c:	e92dd800 	push	{fp, ip, lr, pc}
+ c000b10:	e24cb004 	sub	fp, ip, #4
+	/* enable interrupt */
+	rINTMOD = 0x0;
+ c000b14:	e59f304c 	ldr	r3, [pc, #76]	; c000b68 <sys_init+0x60>
+ c000b18:	e3a02000 	mov	r2, #0
+ c000b1c:	e5832000 	str	r2, [r3]
+	rINTCON = 0x1;
+ c000b20:	e3a0361e 	mov	r3, #31457280	; 0x1e00000
+ c000b24:	e3a02001 	mov	r2, #1
+ c000b28:	e5832000 	str	r2, [r3]
+	rINTMSK = ~(BIT_GLOBAL);
+ c000b2c:	e59f3038 	ldr	r3, [pc, #56]	; c000b6c <sys_init+0x64>
+ c000b30:	e3e02301 	mvn	r2, #67108864	; 0x4000000
+ c000b34:	e5832000 	str	r2, [r3]
+	rI_ISPC = 0xffffffff;			/* clear all interrupt pend	*/
+ c000b38:	e59f3030 	ldr	r3, [pc, #48]	; c000b70 <sys_init+0x68>
+ c000b3c:	e3e02000 	mvn	r2, #0
+ c000b40:	e5832000 	str	r2, [r3]
+	rEXTINTPND = 0xf;				// clear EXTINTPND reg
+ c000b44:	e59f3028 	ldr	r3, [pc, #40]	; c000b74 <sys_init+0x6c>
+ c000b48:	e3a0200f 	mov	r2, #15
+ c000b4c:	e5832000 	str	r2, [r3]
+	Port_Init();					/* Initial 44B0X's I/O port */
+ c000b50:	ebffff54 	bl	c0008a8 <Port_Init>
+	Delay(0);						/* delay time				*/
+ c000b54:	e3a00000 	mov	r0, #0
+ c000b58:	ebfffeeb 	bl	c00070c <Delay>
+}
+ c000b5c:	e24bd00c 	sub	sp, fp, #12
+ c000b60:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000b64:	e12fff1e 	bx	lr
+ c000b68:	01e00008 	.word	0x01e00008
+ c000b6c:	01e0000c 	.word	0x01e0000c
+ c000b70:	01e00024 	.word	0x01e00024
+ c000b74:	01d20054 	.word	0x01d20054
+
+0c000b78 <D8Led_init>:
+void D8Led_symbol(int value);	// Función que muestra un símbolo en el display.
+
+/*--- código de las funciones ---*/
+// Inicializa el display.
+void D8Led_init(void)
+{
+ c000b78:	e1a0c00d 	mov	ip, sp
+ c000b7c:	e92dd800 	push	{fp, ip, lr, pc}
+ c000b80:	e24cb004 	sub	fp, ip, #4
+	/* Estado inicial del display con todos los segmentos iluminados
+	   (buscar en los ficheros de cabera la direccion implicada) */
+	LED8ADDR = cero;
+ c000b84:	e3a03785 	mov	r3, #34865152	; 0x2140000
+ c000b88:	e3a02012 	mov	r2, #18
+ c000b8c:	e5c32000 	strb	r2, [r3]
+}
+ c000b90:	e24bd00c 	sub	sp, fp, #12
+ c000b94:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000b98:	e12fff1e 	bx	lr
+
+0c000b9c <D8Led_symbol>:
+
+// Muestra el elemento value de la tabla de segmentos en el display.
+void D8Led_symbol(int value)
+{
+ c000b9c:	e1a0c00d 	mov	ip, sp
+ c000ba0:	e92dd800 	push	{fp, ip, lr, pc}
+ c000ba4:	e24cb004 	sub	fp, ip, #4
+ c000ba8:	e24dd008 	sub	sp, sp, #8
+ c000bac:	e50b0010 	str	r0, [fp, #-16]
+	/* muestra el Symbol[value] en el display (analogo al caso anterior) */
+	if ((value >= 0) && (value < size_8led)) {	// Comprueba que el valor está dentro del rango.
+ c000bb0:	e51b3010 	ldr	r3, [fp, #-16]
+ c000bb4:	e3530000 	cmp	r3, #0
+ c000bb8:	ba000008 	blt	c000be0 <D8Led_symbol+0x44>
+ c000bbc:	e51b3010 	ldr	r3, [fp, #-16]
+ c000bc0:	e3530010 	cmp	r3, #16
+ c000bc4:	ca000005 	bgt	c000be0 <D8Led_symbol+0x44>
+		LED8ADDR = Symbol[value];
+ c000bc8:	e3a03785 	mov	r3, #34865152	; 0x2140000
+ c000bcc:	e59f2018 	ldr	r2, [pc, #24]	; c000bec <D8Led_symbol+0x50>
+ c000bd0:	e51b1010 	ldr	r1, [fp, #-16]
+ c000bd4:	e7922101 	ldr	r2, [r2, r1, lsl #2]
+ c000bd8:	e20220ff 	and	r2, r2, #255	; 0xff
+ c000bdc:	e5c32000 	strb	r2, [r3]
+	}
+}
+ c000be0:	e24bd00c 	sub	sp, fp, #12
+ c000be4:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000be8:	e12fff1e 	bx	lr
+ c000bec:	0c002d74 	.word	0x0c002d74
+
+0c000bf0 <Eint4567_init>:
+void Eint4567_init(void);
+
+/*--- codigo de funciones ---*/
+// Función que inicializa los pulsadores.
+void Eint4567_init(void)
+{
+ c000bf0:	e1a0c00d 	mov	ip, sp
+ c000bf4:	e92dd800 	push	{fp, ip, lr, pc}
+ c000bf8:	e24cb004 	sub	fp, ip, #4
+	/* Configuracion del controlador de interrupciones. Estos registros están definidos en 44b.h */
+	rI_ISPC    = 0x3ffffff;	// Borra INTPND escribiendo 1s en I_ISPC
+ c000bfc:	e59f308c 	ldr	r3, [pc, #140]	; c000c90 <Eint4567_init+0xa0>
+ c000c00:	e3e0233f 	mvn	r2, #-67108864	; 0xfc000000
+ c000c04:	e5832000 	str	r2, [r3]
+	rEXTINTPND = 0xf;       // Borra EXTINTPND escribiendo 1s en el propio registro
+ c000c08:	e59f3084 	ldr	r3, [pc, #132]	; c000c94 <Eint4567_init+0xa4>
+ c000c0c:	e3a0200f 	mov	r2, #15
+ c000c10:	e5832000 	str	r2, [r3]
+	rINTMSK    &= ~(BIT_EINT4567); // Enmascara todas las lineas excepto eint4567.
+ c000c14:	e59f307c 	ldr	r3, [pc, #124]	; c000c98 <Eint4567_init+0xa8>
+ c000c18:	e59f2078 	ldr	r2, [pc, #120]	; c000c98 <Eint4567_init+0xa8>
+ c000c1c:	e5922000 	ldr	r2, [r2]
+ c000c20:	e3c22602 	bic	r2, r2, #2097152	; 0x200000
+ c000c24:	e5832000 	str	r2, [r3]
+
+	/* Establece la rutina de servicio para Eint4567 */
+	pISR_EINT4567 = (int)Eint4567_ISR;
+ c000c28:	e59f306c 	ldr	r3, [pc, #108]	; c000c9c <Eint4567_init+0xac>
+ c000c2c:	e59f206c 	ldr	r2, [pc, #108]	; c000ca0 <Eint4567_init+0xb0>
+ c000c30:	e5832000 	str	r2, [r3]
+
+	/* Configuracion del puerto G */
+	rPCONG  = 0xffff;        			// Establece la funcion de los pines (EINT0-7)
+ c000c34:	e59f3068 	ldr	r3, [pc, #104]	; c000ca4 <Eint4567_init+0xb4>
+ c000c38:	e59f2068 	ldr	r2, [pc, #104]	; c000ca8 <Eint4567_init+0xb8>
+ c000c3c:	e5832000 	str	r2, [r3]
+	rPUPG   = 0x0;                  	// Habilita el "pull up" del puerto
+ c000c40:	e59f3064 	ldr	r3, [pc, #100]	; c000cac <Eint4567_init+0xbc>
+ c000c44:	e3a02000 	mov	r2, #0
+ c000c48:	e5832000 	str	r2, [r3]
+	rEXTINT = rEXTINT | 0x22222222;     // Configura las lineas de int. como de flanco de bajada
+ c000c4c:	e59f205c 	ldr	r2, [pc, #92]	; c000cb0 <Eint4567_init+0xc0>
+ c000c50:	e59f3058 	ldr	r3, [pc, #88]	; c000cb0 <Eint4567_init+0xc0>
+ c000c54:	e5931000 	ldr	r1, [r3]
+ c000c58:	e59f3054 	ldr	r3, [pc, #84]	; c000cb4 <Eint4567_init+0xc4>
+ c000c5c:	e1813003 	orr	r3, r1, r3
+ c000c60:	e5823000 	str	r3, [r2]
+
+	/* Por precaucion, se vuelven a borrar los bits de INTPND y EXTINTPND */
+	rI_ISPC    |= (BIT_EINT4567);
+ c000c64:	e59f3024 	ldr	r3, [pc, #36]	; c000c90 <Eint4567_init+0xa0>
+ c000c68:	e59f2020 	ldr	r2, [pc, #32]	; c000c90 <Eint4567_init+0xa0>
+ c000c6c:	e5922000 	ldr	r2, [r2]
+ c000c70:	e3822602 	orr	r2, r2, #2097152	; 0x200000
+ c000c74:	e5832000 	str	r2, [r3]
+	rEXTINTPND = 0xf;
+ c000c78:	e59f3014 	ldr	r3, [pc, #20]	; c000c94 <Eint4567_init+0xa4>
+ c000c7c:	e3a0200f 	mov	r2, #15
+ c000c80:	e5832000 	str	r2, [r3]
+}
+ c000c84:	e24bd00c 	sub	sp, fp, #12
+ c000c88:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000c8c:	e12fff1e 	bx	lr
+ c000c90:	01e00024 	.word	0x01e00024
+ c000c94:	01d20054 	.word	0x01d20054
+ c000c98:	01e0000c 	.word	0x01e0000c
+ c000c9c:	0c7fff74 	.word	0x0c7fff74
+ c000ca0:	0c000cb8 	.word	0x0c000cb8
+ c000ca4:	01d20040 	.word	0x01d20040
+ c000ca8:	0000ffff 	.word	0x0000ffff
+ c000cac:	01d20048 	.word	0x01d20048
+ c000cb0:	01d20050 	.word	0x01d20050
+ c000cb4:	22222222 	.word	0x22222222
+
+0c000cb8 <Eint4567_ISR>:
+/* Gestión de la interrupción de la pulsación de un botón
+ * Si se pulsa el botón izquierdo o el botón derecho, informa
+ * al gestor de rebotes y al gestor de sudokus de la acción.
+ */
+void Eint4567_ISR(void)
+{
+ c000cb8:	e52dc004 	push	{ip}		; (str ip, [sp, #-4]!)
+ c000cbc:	e1a0c00d 	mov	ip, sp
+ c000cc0:	e92dd80f 	push	{r0, r1, r2, r3, fp, ip, lr, pc}
+ c000cc4:	e24cb004 	sub	fp, ip, #4
+ c000cc8:	e24dd008 	sub	sp, sp, #8
+	int which_int = rEXTINTPND;
+ c000ccc:	e59f30a0 	ldr	r3, [pc, #160]	; c000d74 <Eint4567_ISR+0xbc>
+ c000cd0:	e5933000 	ldr	r3, [r3]
+ c000cd4:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	switch (which_int)
+ c000cd8:	e51b3020 	ldr	r3, [fp, #-32]	; 0xffffffe0
+ c000cdc:	e3530004 	cmp	r3, #4
+ c000ce0:	0a000002 	beq	c000cf0 <Eint4567_ISR+0x38>
+ c000ce4:	e3530008 	cmp	r3, #8
+ c000ce8:	0a000008 	beq	c000d10 <Eint4567_ISR+0x58>
+			gestionarRebotesPulsacion(botonDerMascara);		//informa al gestor de rebotes de la pulsación
+			gestionarSudoku(botonDerecho);					//informa al gestor de sudoku de la pulsación
+			push_debug(interrupcionBoton, botonDerecho);	//Apilamos la interrupción de pulsación con botón derecho (8)
+			break;
+		default:	// Si es cualquier otro botón, se ignora.
+			break;
+ c000cec:	ea00000f 	b	c000d30 <Eint4567_ISR+0x78>
+{
+	int which_int = rEXTINTPND;
+	switch (which_int)
+	{
+		case 4:		// En caso de que sea el botón izquierdo
+			gestionarRebotesPulsacion(botonIzqMascara);		//informa al gestor de rebotes de la pulsación
+ c000cf0:	e3a00006 	mov	r0, #6
+ c000cf4:	eb0000ea 	bl	c0010a4 <gestionarRebotesPulsacion>
+			gestionarSudoku(botonIzquierdo);				//informa al gestor de sudoku de la pulsación
+ c000cf8:	e3a00000 	mov	r0, #0
+ c000cfc:	eb000131 	bl	c0011c8 <gestionarSudoku>
+			push_debug(interrupcionBoton, botonIzquierdo);	//Apilamos la interrupción de pulsación con botón izquierdo (4)
+ c000d00:	e3a0000a 	mov	r0, #10
+ c000d04:	e3a01000 	mov	r1, #0
+ c000d08:	eb0002c3 	bl	c00181c <push_debug>
+			break;
+ c000d0c:	ea000007 	b	c000d30 <Eint4567_ISR+0x78>
+		case 8:		// En caso de que sea el botón derecho
+			gestionarRebotesPulsacion(botonDerMascara);		//informa al gestor de rebotes de la pulsación
+ c000d10:	e3a00007 	mov	r0, #7
+ c000d14:	eb0000e2 	bl	c0010a4 <gestionarRebotesPulsacion>
+			gestionarSudoku(botonDerecho);					//informa al gestor de sudoku de la pulsación
+ c000d18:	e3a00001 	mov	r0, #1
+ c000d1c:	eb000129 	bl	c0011c8 <gestionarSudoku>
+			push_debug(interrupcionBoton, botonDerecho);	//Apilamos la interrupción de pulsación con botón derecho (8)
+ c000d20:	e3a0000a 	mov	r0, #10
+ c000d24:	e3a01001 	mov	r1, #1
+ c000d28:	eb0002bb 	bl	c00181c <push_debug>
+			break;
+ c000d2c:	e1a00000 	nop			; (mov r0, r0)
+		default:	// Si es cualquier otro botón, se ignora.
+			break;
+	}
+	rINTMSK  |= (BIT_EINT4567);		//Desactivamos la ISR
+ c000d30:	e59f3040 	ldr	r3, [pc, #64]	; c000d78 <Eint4567_ISR+0xc0>
+ c000d34:	e59f203c 	ldr	r2, [pc, #60]	; c000d78 <Eint4567_ISR+0xc0>
+ c000d38:	e5922000 	ldr	r2, [r2]
+ c000d3c:	e3822602 	orr	r2, r2, #2097152	; 0x200000
+ c000d40:	e5832000 	str	r2, [r3]
+	/* Finalizar ISR */
+	rEXTINTPND = 0xf;				// Borra los bits en EXTINTPND.
+ c000d44:	e59f3028 	ldr	r3, [pc, #40]	; c000d74 <Eint4567_ISR+0xbc>
+ c000d48:	e3a0200f 	mov	r2, #15
+ c000d4c:	e5832000 	str	r2, [r3]
+	rI_ISPC   |= BIT_EINT4567;		// Borra el bit pendiente en INTPND.
+ c000d50:	e59f3024 	ldr	r3, [pc, #36]	; c000d7c <Eint4567_ISR+0xc4>
+ c000d54:	e59f2020 	ldr	r2, [pc, #32]	; c000d7c <Eint4567_ISR+0xc4>
+ c000d58:	e5922000 	ldr	r2, [r2]
+ c000d5c:	e3822602 	orr	r2, r2, #2097152	; 0x200000
+ c000d60:	e5832000 	str	r2, [r3]
+}
+ c000d64:	e24bd01c 	sub	sp, fp, #28
+ c000d68:	e89d680f 	ldm	sp, {r0, r1, r2, r3, fp, sp, lr}
+ c000d6c:	e49dc004 	pop	{ip}		; (ldr ip, [sp], #4)
+ c000d70:	e25ef004 	subs	pc, lr, #4
+ c000d74:	01d20054 	.word	0x01d20054
+ c000d78:	01e0000c 	.word	0x01e0000c
+ c000d7c:	01e00024 	.word	0x01e00024
+
+0c000d80 <Data_abort_test>:
+.text
+
+.global Data_abort_test
+
+Data_abort_test:
+	PUSH {lr}				/* Guarda la dirección desde la que se ha saltado */
+ c000d80:	e52de004 	push	{lr}		; (str lr, [sp, #-4]!)
+	ldr r0, =0x4001			/* Apuntamos a una @memoria impar */
+ c000d84:	e59f000c 	ldr	r0, [pc, #12]	; c000d98 <fin+0x4>
+	mov r1, #2				/* r1 = 2 */
+ c000d88:	e3a01002 	mov	r1, #2
+	str r2, [r0]			/* Guardamos en @r2 el valor de r1 */
+ c000d8c:	e5802000 	str	r2, [r0]
+	POP {lr}				/* Direccion de retorno */
+ c000d90:	e49de004 	pop	{lr}		; (ldr lr, [sp], #4)
+
+0c000d94 <fin>:
+
+fin: B .
+ c000d94:	eafffffe 	b	c000d94 <fin>
+ c000d98:	00004001 	.word	0x00004001
+
+0c000d9c <gestionGlobal>:
+void gestionGlobal(void) __attribute__((interrupt("ABORT")));
+void gestionGlobal(void) __attribute__((interrupt("UNDEF")));
+void gestionGlobal(void) __attribute__((interrupt("ABORT")));
+/*--- codigo de funciones ---*/
+
+void gestionGlobal(void){
+ c000d9c:	e52dc004 	push	{ip}		; (str ip, [sp, #-4]!)
+ c000da0:	e1a0c00d 	mov	ip, sp
+ c000da4:	e92dd81f 	push	{r0, r1, r2, r3, r4, fp, ip, lr, pc}
+ c000da8:	e24cb004 	sub	fp, ip, #4
+ c000dac:	e24dd00c 	sub	sp, sp, #12
+	uint32_t direccion;
+	uint32_t tipo;
+	asm ("mov %0, lr;" : "=r" (direccion));
+ c000db0:	e1a0400e 	mov	r4, lr
+ c000db4:	e50b4028 	str	r4, [fp, #-40]	; 0xffffffd8
+	asm ("mrs %0, cpsr;" : "=r" (tipo));   //tipo = cpsr
+ c000db8:	e10f4000 	mrs	r4, CPSR
+ c000dbc:	e50b402c 	str	r4, [fp, #-44]	; 0xffffffd4
+	switch(tipo&0x1F){  //compara con el modo (con los ultimos 5 bits)
+ c000dc0:	e51b302c 	ldr	r3, [fp, #-44]	; 0xffffffd4
+ c000dc4:	e203301f 	and	r3, r3, #31
+ c000dc8:	e3530017 	cmp	r3, #23
+ c000dcc:	0a000008 	beq	c000df4 <gestionGlobal+0x58>
+ c000dd0:	e353001b 	cmp	r3, #27
+ c000dd4:	1a00000d 	bne	c000e10 <gestionGlobal+0x74>
+		case 0x1B:  //undefined
+			push_debug(1,direccion);
+ c000dd8:	e51b3028 	ldr	r3, [fp, #-40]	; 0xffffffd8
+ c000ddc:	e3a00001 	mov	r0, #1
+ c000de0:	e1a01003 	mov	r1, r3
+ c000de4:	eb00028c 	bl	c00181c <push_debug>
+			avisoExcepcion(1);
+ c000de8:	e3a00001 	mov	r0, #1
+ c000dec:	eb00000b 	bl	c000e20 <avisoExcepcion>
+			break;
+ c000df0:	ea000006 	b	c000e10 <gestionGlobal+0x74>
+		case 0x17:  //abort --> en data lr = lr+8, en prefetch lr = lr+4
+			push_debug(2,direccion);
+ c000df4:	e51b3028 	ldr	r3, [fp, #-40]	; 0xffffffd8
+ c000df8:	e3a00002 	mov	r0, #2
+ c000dfc:	e1a01003 	mov	r1, r3
+ c000e00:	eb000285 	bl	c00181c <push_debug>
+			avisoExcepcion(2);
+ c000e04:	e3a00002 	mov	r0, #2
+ c000e08:	eb000004 	bl	c000e20 <avisoExcepcion>
+			break;
+ c000e0c:	e1a00000 	nop			; (mov r0, r0)
+	}
+
+}
+ c000e10:	e24bd020 	sub	sp, fp, #32
+ c000e14:	e89d681f 	ldm	sp, {r0, r1, r2, r3, r4, fp, sp, lr}
+ c000e18:	e49dc004 	pop	{ip}		; (ldr ip, [sp], #4)
+ c000e1c:	e1b0f00e 	movs	pc, lr
+
+0c000e20 <avisoExcepcion>:
+
+/* Avisa de que ha ocurrido una excepcion mostrando el nÃºmero de la excepciÃ³n */
+void avisoExcepcion(int tipo){
+ c000e20:	e1a0c00d 	mov	ip, sp
+ c000e24:	e92dd800 	push	{fp, ip, lr, pc}
+ c000e28:	e24cb004 	sub	fp, ip, #4
+ c000e2c:	e24dd010 	sub	sp, sp, #16
+ c000e30:	e50b0018 	str	r0, [fp, #-24]	; 0xffffffe8
+	int paridad = 0;				//Cuando sea par mostrara el dato, impar se apagara
+ c000e34:	e3a03000 	mov	r3, #0
+ c000e38:	e50b3010 	str	r3, [fp, #-16]
+	while(1){
+		if(paridad%2==0){			//Par = muestra codigo de error
+ c000e3c:	e51b3010 	ldr	r3, [fp, #-16]
+ c000e40:	e2033001 	and	r3, r3, #1
+ c000e44:	e3530000 	cmp	r3, #0
+ c000e48:	1a000002 	bne	c000e58 <avisoExcepcion+0x38>
+			D8Led_symbol(tipo);
+ c000e4c:	e51b0018 	ldr	r0, [fp, #-24]	; 0xffffffe8
+ c000e50:	ebffff51 	bl	c000b9c <D8Led_symbol>
+ c000e54:	ea000001 	b	c000e60 <avisoExcepcion+0x40>
+		}else{						//Impar = se apaga para parpadear
+			D8Led_symbol(16);
+ c000e58:	e3a00010 	mov	r0, #16
+ c000e5c:	ebffff4e 	bl	c000b9c <D8Led_symbol>
+		}
+		paridad++;
+ c000e60:	e51b3010 	ldr	r3, [fp, #-16]
+ c000e64:	e2833001 	add	r3, r3, #1
+ c000e68:	e50b3010 	str	r3, [fp, #-16]
+		Delay(5000);
+ c000e6c:	e59f0004 	ldr	r0, [pc, #4]	; c000e78 <avisoExcepcion+0x58>
+ c000e70:	ebfffe25 	bl	c00070c <Delay>
+	}
+ c000e74:	eafffff0 	b	c000e3c <avisoExcepcion+0x1c>
+ c000e78:	00001388 	.word	0x00001388
+
+0c000e7c <init_excep>:
+}
+
+void init_excep() {
+ c000e7c:	e1a0c00d 	mov	ip, sp
+ c000e80:	e92dd800 	push	{fp, ip, lr, pc}
+ c000e84:	e24cb004 	sub	fp, ip, #4
+	pISR_DABORT = (unsigned) gestionGlobal;
+ c000e88:	e59f3028 	ldr	r3, [pc, #40]	; c000eb8 <init_excep+0x3c>
+ c000e8c:	e59f2028 	ldr	r2, [pc, #40]	; c000ebc <init_excep+0x40>
+ c000e90:	e5832000 	str	r2, [r3]
+	pISR_UNDEF = (unsigned) gestionGlobal;
+ c000e94:	e59f3024 	ldr	r3, [pc, #36]	; c000ec0 <init_excep+0x44>
+ c000e98:	e59f201c 	ldr	r2, [pc, #28]	; c000ebc <init_excep+0x40>
+ c000e9c:	e5832000 	str	r2, [r3]
+	pISR_PABORT = (unsigned) gestionGlobal;
+ c000ea0:	e59f301c 	ldr	r3, [pc, #28]	; c000ec4 <init_excep+0x48>
+ c000ea4:	e59f2010 	ldr	r2, [pc, #16]	; c000ebc <init_excep+0x40>
+ c000ea8:	e5832000 	str	r2, [r3]
+}
+ c000eac:	e24bd00c 	sub	sp, fp, #12
+ c000eb0:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c000eb4:	e12fff1e 	bx	lr
+ c000eb8:	0c7fff10 	.word	0x0c7fff10
+ c000ebc:	0c000d9c 	.word	0x0c000d9c
+ c000ec0:	0c7fff04 	.word	0x0c7fff04
+ c000ec4:	0c7fff0c 	.word	0x0c7fff0c
+
+0c000ec8 <timer0_ISR>:
+void timer0_init(int);
+
+/*--- codigo de las funciones ---*/
+// Rutina de captura de una interrupción del timer.
+void timer0_ISR(void)
+{
+ c000ec8:	e52dc004 	push	{ip}		; (str ip, [sp, #-4]!)
+ c000ecc:	e1a0c00d 	mov	ip, sp
+ c000ed0:	e92dd80f 	push	{r0, r1, r2, r3, fp, ip, lr, pc}
+ c000ed4:	e24cb004 	sub	fp, ip, #4
+	/* Si el botón se estaba soltando, actualiza el estado como sinPulsar
+	 * y reinicia los valores del timer además de los botones.
+	 * Si esta pulsado, solicita al timer0 que le avise en [tiempoSiguePulsado] ms
+	 */
+	if(estado == Soltando){ //estado2
+ c000ed8:	e59f319c 	ldr	r3, [pc, #412]	; c00107c <timer0_ISR+0x1b4>
+ c000edc:	e5933000 	ldr	r3, [r3]
+ c000ee0:	e3530002 	cmp	r3, #2
+ c000ee4:	1a000016 	bne	c000f44 <timer0_ISR+0x7c>
+		estado = SinPulsar;  //va a estado0
+ c000ee8:	e59f318c 	ldr	r3, [pc, #396]	; c00107c <timer0_ISR+0x1b4>
+ c000eec:	e3a02000 	mov	r2, #0
+ c000ef0:	e5832000 	str	r2, [r3]
+		//Se reinician las variables empleadas para el control de la opción de
+		//mantener pulsado los botones
+		haLlegadoA500ms = false;
+ c000ef4:	e59f3184 	ldr	r3, [pc, #388]	; c001080 <timer0_ISR+0x1b8>
+ c000ef8:	e3a02000 	mov	r2, #0
+ c000efc:	e5832000 	str	r2, [r3]
+		veces10ms = 0;
+ c000f00:	e59f317c 	ldr	r3, [pc, #380]	; c001084 <timer0_ISR+0x1bc>
+ c000f04:	e3a02000 	mov	r2, #0
+ c000f08:	e5832000 	str	r2, [r3]
+		//Se reinician los botones
+		rINTMSK    &= ~(BIT_EINT4567); // Enmascara todas las lineas excepto eint4567.
+ c000f0c:	e59f3174 	ldr	r3, [pc, #372]	; c001088 <timer0_ISR+0x1c0>
+ c000f10:	e59f2170 	ldr	r2, [pc, #368]	; c001088 <timer0_ISR+0x1c0>
+ c000f14:	e5922000 	ldr	r2, [r2]
+ c000f18:	e3c22602 	bic	r2, r2, #2097152	; 0x200000
+ c000f1c:	e5832000 	str	r2, [r3]
+		/* Por precaucion, se vuelven a borrar los bits de INTPND y EXTINTPND */
+		rI_ISPC    |= (BIT_EINT4567);
+ c000f20:	e59f3164 	ldr	r3, [pc, #356]	; c00108c <timer0_ISR+0x1c4>
+ c000f24:	e59f2160 	ldr	r2, [pc, #352]	; c00108c <timer0_ISR+0x1c4>
+ c000f28:	e5922000 	ldr	r2, [r2]
+ c000f2c:	e3822602 	orr	r2, r2, #2097152	; 0x200000
+ c000f30:	e5832000 	str	r2, [r3]
+		rEXTINTPND = 0xf;
+ c000f34:	e59f3154 	ldr	r3, [pc, #340]	; c001090 <timer0_ISR+0x1c8>
+ c000f38:	e3a0200f 	mov	r2, #15
+ c000f3c:	e5832000 	str	r2, [r3]
+ c000f40:	ea000044 	b	c001058 <timer0_ISR+0x190>
+	}
+	//Si se ha soltado el botón
+	/*else estado es Pulsado*/
+	else if(rPDATG & (1<<botonPulsado)){
+ c000f44:	e59f3148 	ldr	r3, [pc, #328]	; c001094 <timer0_ISR+0x1cc>
+ c000f48:	e5932000 	ldr	r2, [r3]
+ c000f4c:	e59f3144 	ldr	r3, [pc, #324]	; c001098 <timer0_ISR+0x1d0>
+ c000f50:	e5933000 	ldr	r3, [r3]
+ c000f54:	e3a01001 	mov	r1, #1
+ c000f58:	e1a03311 	lsl	r3, r1, r3
+ c000f5c:	e0023003 	and	r3, r2, r3
+ c000f60:	e3530000 	cmp	r3, #0
+ c000f64:	0a000007 	beq	c000f88 <timer0_ISR+0xc0>
+		timer0_init(tiempoAlPulsar_Soltar);
+ c000f68:	e59f312c 	ldr	r3, [pc, #300]	; c00109c <timer0_ISR+0x1d4>
+ c000f6c:	e5933000 	ldr	r3, [r3]
+ c000f70:	e1a00003 	mov	r0, r3
+ c000f74:	eb00005f 	bl	c0010f8 <timer0_init>
+		estado = Soltando;
+ c000f78:	e59f30fc 	ldr	r3, [pc, #252]	; c00107c <timer0_ISR+0x1b4>
+ c000f7c:	e3a02002 	mov	r2, #2
+ c000f80:	e5832000 	str	r2, [r3]
+ c000f84:	ea000033 	b	c001058 <timer0_ISR+0x190>
+	}
+	//Si se mantiene pulsado
+	else if(!(rPDATG & (1<<botonPulsado))){ //estado1
+ c000f88:	e59f3104 	ldr	r3, [pc, #260]	; c001094 <timer0_ISR+0x1cc>
+ c000f8c:	e5932000 	ldr	r2, [r3]
+ c000f90:	e59f3100 	ldr	r3, [pc, #256]	; c001098 <timer0_ISR+0x1d0>
+ c000f94:	e5933000 	ldr	r3, [r3]
+ c000f98:	e3a01001 	mov	r1, #1
+ c000f9c:	e1a03311 	lsl	r3, r1, r3
+ c000fa0:	e0023003 	and	r3, r2, r3
+ c000fa4:	e3530000 	cmp	r3, #0
+ c000fa8:	1a00002a 	bne	c001058 <timer0_ISR+0x190>
+		//Si se pulsa el botón de selección y se esta manteniendo
+		if(botonPulsado==botonIzqMascara){
+ c000fac:	e59f30e4 	ldr	r3, [pc, #228]	; c001098 <timer0_ISR+0x1d0>
+ c000fb0:	e5933000 	ldr	r3, [r3]
+ c000fb4:	e3530006 	cmp	r3, #6
+ c000fb8:	1a000022 	bne	c001048 <timer0_ISR+0x180>
+			veces10ms++;
+ c000fbc:	e59f30c0 	ldr	r3, [pc, #192]	; c001084 <timer0_ISR+0x1bc>
+ c000fc0:	e5933000 	ldr	r3, [r3]
+ c000fc4:	e2832001 	add	r2, r3, #1
+ c000fc8:	e59f30b4 	ldr	r3, [pc, #180]	; c001084 <timer0_ISR+0x1bc>
+ c000fcc:	e5832000 	str	r2, [r3]
+			//Si lleva 500ms asi se informa al gestor del sudoku
+			if(!haLlegadoA500ms && veces10ms==50){
+ c000fd0:	e59f30a8 	ldr	r3, [pc, #168]	; c001080 <timer0_ISR+0x1b8>
+ c000fd4:	e5933000 	ldr	r3, [r3]
+ c000fd8:	e3530000 	cmp	r3, #0
+ c000fdc:	1a00000c 	bne	c001014 <timer0_ISR+0x14c>
+ c000fe0:	e59f309c 	ldr	r3, [pc, #156]	; c001084 <timer0_ISR+0x1bc>
+ c000fe4:	e5933000 	ldr	r3, [r3]
+ c000fe8:	e3530032 	cmp	r3, #50	; 0x32
+ c000fec:	1a000008 	bne	c001014 <timer0_ISR+0x14c>
+				haLlegadoA500ms = true;
+ c000ff0:	e59f3088 	ldr	r3, [pc, #136]	; c001080 <timer0_ISR+0x1b8>
+ c000ff4:	e3a02001 	mov	r2, #1
+ c000ff8:	e5832000 	str	r2, [r3]
+				gestionarSudoku(botonIzquierdo);
+ c000ffc:	e3a00000 	mov	r0, #0
+ c001000:	eb000070 	bl	c0011c8 <gestionarSudoku>
+				veces10ms = 0;
+ c001004:	e59f3078 	ldr	r3, [pc, #120]	; c001084 <timer0_ISR+0x1bc>
+ c001008:	e3a02000 	mov	r2, #0
+ c00100c:	e5832000 	str	r2, [r3]
+ c001010:	ea00000c 	b	c001048 <timer0_ISR+0x180>
+			}
+			//Si ha alcanzado los 500 ms, aumenta cada 300ms
+			else if(haLlegadoA500ms && veces10ms==30){
+ c001014:	e59f3064 	ldr	r3, [pc, #100]	; c001080 <timer0_ISR+0x1b8>
+ c001018:	e5933000 	ldr	r3, [r3]
+ c00101c:	e3530000 	cmp	r3, #0
+ c001020:	0a000008 	beq	c001048 <timer0_ISR+0x180>
+ c001024:	e59f3058 	ldr	r3, [pc, #88]	; c001084 <timer0_ISR+0x1bc>
+ c001028:	e5933000 	ldr	r3, [r3]
+ c00102c:	e353001e 	cmp	r3, #30
+ c001030:	1a000004 	bne	c001048 <timer0_ISR+0x180>
+				veces10ms=0;
+ c001034:	e59f3048 	ldr	r3, [pc, #72]	; c001084 <timer0_ISR+0x1bc>
+ c001038:	e3a02000 	mov	r2, #0
+ c00103c:	e5832000 	str	r2, [r3]
+				gestionarSudoku(botonIzquierdo);
+ c001040:	e3a00000 	mov	r0, #0
+ c001044:	eb00005f 	bl	c0011c8 <gestionarSudoku>
+			}
+		}
+		timer0_init(tiempoSiguePulsado);  //Falta el include del timer
+ c001048:	e59f3050 	ldr	r3, [pc, #80]	; c0010a0 <timer0_ISR+0x1d8>
+ c00104c:	e5933000 	ldr	r3, [r3]
+ c001050:	e1a00003 	mov	r0, r3
+ c001054:	eb000027 	bl	c0010f8 <timer0_init>
+	}
+	/* borrar bit en I_ISPC para desactivar la solicitud de interrupción*/
+	rI_ISPC |= BIT_TIMER0;
+ c001058:	e59f302c 	ldr	r3, [pc, #44]	; c00108c <timer0_ISR+0x1c4>
+ c00105c:	e59f2028 	ldr	r2, [pc, #40]	; c00108c <timer0_ISR+0x1c4>
+ c001060:	e5922000 	ldr	r2, [r2]
+ c001064:	e3822a02 	orr	r2, r2, #8192	; 0x2000
+ c001068:	e5832000 	str	r2, [r3]
+}
+ c00106c:	e24bd01c 	sub	sp, fp, #28
+ c001070:	e89d680f 	ldm	sp, {r0, r1, r2, r3, fp, sp, lr}
+ c001074:	e49dc004 	pop	{ip}		; (ldr ip, [sp], #4)
+ c001078:	e25ef004 	subs	pc, lr, #4
+ c00107c:	0c002f2c 	.word	0x0c002f2c
+ c001080:	0c002f24 	.word	0x0c002f24
+ c001084:	0c002f28 	.word	0x0c002f28
+ c001088:	01e0000c 	.word	0x01e0000c
+ c00108c:	01e00024 	.word	0x01e00024
+ c001090:	01d20054 	.word	0x01d20054
+ c001094:	01d20044 	.word	0x01d20044
+ c001098:	0c002f48 	.word	0x0c002f48
+ c00109c:	0c002dbc 	.word	0x0c002dbc
+ c0010a0:	0c002dc0 	.word	0x0c002dc0
+
+0c0010a4 <gestionarRebotesPulsacion>:
+
+void gestionarRebotesPulsacion(int boton){
+ c0010a4:	e1a0c00d 	mov	ip, sp
+ c0010a8:	e92dd800 	push	{fp, ip, lr, pc}
+ c0010ac:	e24cb004 	sub	fp, ip, #4
+ c0010b0:	e24dd008 	sub	sp, sp, #8
+ c0010b4:	e50b0010 	str	r0, [fp, #-16]
+	estado = Pulsado; //va a Estado1
+ c0010b8:	e59f302c 	ldr	r3, [pc, #44]	; c0010ec <gestionarRebotesPulsacion+0x48>
+ c0010bc:	e3a02001 	mov	r2, #1
+ c0010c0:	e5832000 	str	r2, [r3]
+	botonPulsado = boton;
+ c0010c4:	e59f3024 	ldr	r3, [pc, #36]	; c0010f0 <gestionarRebotesPulsacion+0x4c>
+ c0010c8:	e51b2010 	ldr	r2, [fp, #-16]
+ c0010cc:	e5832000 	str	r2, [r3]
+	timer0_init(tiempoAlPulsar_Soltar);
+ c0010d0:	e59f301c 	ldr	r3, [pc, #28]	; c0010f4 <gestionarRebotesPulsacion+0x50>
+ c0010d4:	e5933000 	ldr	r3, [r3]
+ c0010d8:	e1a00003 	mov	r0, r3
+ c0010dc:	eb000005 	bl	c0010f8 <timer0_init>
+}
+ c0010e0:	e24bd00c 	sub	sp, fp, #12
+ c0010e4:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0010e8:	e12fff1e 	bx	lr
+ c0010ec:	0c002f2c 	.word	0x0c002f2c
+ c0010f0:	0c002f48 	.word	0x0c002f48
+ c0010f4:	0c002dbc 	.word	0x0c002dbc
+
+0c0010f8 <timer0_init>:
+
+// Inicializa los valores del timer.
+void timer0_init(int tiempo)
+{
+ c0010f8:	e1a0c00d 	mov	ip, sp
+ c0010fc:	e92dd800 	push	{fp, ip, lr, pc}
+ c001100:	e24cb004 	sub	fp, ip, #4
+ c001104:	e24dd008 	sub	sp, sp, #8
+ c001108:	e50b0010 	str	r0, [fp, #-16]
+	/* Configuracion controlador de interrupciones */
+	rINTMSK &= ~(BIT_TIMER0); // Emascara el bit del timer 0.
+ c00110c:	e59f3094 	ldr	r3, [pc, #148]	; c0011a8 <timer0_init+0xb0>
+ c001110:	e59f2090 	ldr	r2, [pc, #144]	; c0011a8 <timer0_init+0xb0>
+ c001114:	e5922000 	ldr	r2, [r2]
+ c001118:	e3c22a02 	bic	r2, r2, #8192	; 0x2000
+ c00111c:	e5832000 	str	r2, [r3]
+
+	/* Establece la rutina de servicio para TIMER0 */
+	pISR_TIMER0 = (unsigned) timer0_ISR;
+ c001120:	e59f3084 	ldr	r3, [pc, #132]	; c0011ac <timer0_init+0xb4>
+ c001124:	e59f2084 	ldr	r2, [pc, #132]	; c0011b0 <timer0_init+0xb8>
+ c001128:	e5832000 	str	r2, [r3]
+
+	/* Configura el Timer0 */
+	rTCFG0 |= 0x000000FF; // ajusta el preescalado a 255
+ c00112c:	e59f3080 	ldr	r3, [pc, #128]	; c0011b4 <timer0_init+0xbc>
+ c001130:	e59f207c 	ldr	r2, [pc, #124]	; c0011b4 <timer0_init+0xbc>
+ c001134:	e5922000 	ldr	r2, [r2]
+ c001138:	e38220ff 	orr	r2, r2, #255	; 0xff
+ c00113c:	e5832000 	str	r2, [r3]
+	rTCFG1 &= 0xFFFFFFF0; // selecciona la entrada del mux que proporciona el reloj. La 00 corresponde a un divisor de 1/2.
+ c001140:	e59f3070 	ldr	r3, [pc, #112]	; c0011b8 <timer0_init+0xc0>
+ c001144:	e59f206c 	ldr	r2, [pc, #108]	; c0011b8 <timer0_init+0xc0>
+ c001148:	e5922000 	ldr	r2, [r2]
+ c00114c:	e3c2200f 	bic	r2, r2, #15
+ c001150:	e5832000 	str	r2, [r3]
+	rTCNTB0 = tiempo;// valor inicial de cuenta (la cuenta es descendente)
+ c001154:	e59f3060 	ldr	r3, [pc, #96]	; c0011bc <timer0_init+0xc4>
+ c001158:	e51b2010 	ldr	r2, [fp, #-16]
+ c00115c:	e5832000 	str	r2, [r3]
+	rTCMPB0 = 0;// valor de comparación
+ c001160:	e59f3058 	ldr	r3, [pc, #88]	; c0011c0 <timer0_init+0xc8>
+ c001164:	e3a02000 	mov	r2, #0
+ c001168:	e5832000 	str	r2, [r3]
+	/* establecer update=manual (bit 1) + inverter=on (¿? será inverter off un cero en el bit 2 pone el inverter en off)*/
+	rTCON = (rTCON & 0xFFFFFFF0) | 0x2;
+ c00116c:	e59f3050 	ldr	r3, [pc, #80]	; c0011c4 <timer0_init+0xcc>
+ c001170:	e59f204c 	ldr	r2, [pc, #76]	; c0011c4 <timer0_init+0xcc>
+ c001174:	e5922000 	ldr	r2, [r2]
+ c001178:	e3c2200f 	bic	r2, r2, #15
+ c00117c:	e3822002 	orr	r2, r2, #2
+ c001180:	e5832000 	str	r2, [r3]
+	/* iniciar timer (bit 0) con auto-reload (bit 3)*/
+	rTCON = (rTCON & 0xFFFFFFF0) | 0x9;
+ c001184:	e59f3038 	ldr	r3, [pc, #56]	; c0011c4 <timer0_init+0xcc>
+ c001188:	e59f2034 	ldr	r2, [pc, #52]	; c0011c4 <timer0_init+0xcc>
+ c00118c:	e5922000 	ldr	r2, [r2]
+ c001190:	e3c2200f 	bic	r2, r2, #15
+ c001194:	e3822009 	orr	r2, r2, #9
+ c001198:	e5832000 	str	r2, [r3]
+}
+ c00119c:	e24bd00c 	sub	sp, fp, #12
+ c0011a0:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0011a4:	e12fff1e 	bx	lr
+ c0011a8:	01e0000c 	.word	0x01e0000c
+ c0011ac:	0c7fff54 	.word	0x0c7fff54
+ c0011b0:	0c000ec8 	.word	0x0c000ec8
+ c0011b4:	01d50000 	.word	0x01d50000
+ c0011b8:	01d50004 	.word	0x01d50004
+ c0011bc:	01d5000c 	.word	0x01d5000c
+ c0011c0:	01d50010 	.word	0x01d50010
+ c0011c4:	01d50008 	.word	0x01d50008
+
+0c0011c8 <gestionarSudoku>:
+int datoMostradoPorPantalla = 0;
+int fila, columna;
+
+/* Gestiona el juego del sudoku, actualizando los estados y
+ * mostrando las salidas correspondientes */
+void gestionarSudoku(int botonPulsado) {
+ c0011c8:	e1a0c00d 	mov	ip, sp
+ c0011cc:	e92dd800 	push	{fp, ip, lr, pc}
+ c0011d0:	e24cb004 	sub	fp, ip, #4
+ c0011d4:	e24dd008 	sub	sp, sp, #8
+ c0011d8:	e50b0010 	str	r0, [fp, #-16]
+	/* ESTADOSUDOKU = SIN EMPEZAR */
+	if (estadoSudoku == sinEmpezar) {
+ c0011dc:	e59f32a4 	ldr	r3, [pc, #676]	; c001488 <gestionarSudoku+0x2c0>
+ c0011e0:	e5933000 	ldr	r3, [r3]
+ c0011e4:	e3530000 	cmp	r3, #0
+ c0011e8:	1a000007 	bne	c00120c <gestionarSudoku+0x44>
+		estadoSudoku = mostrarF;
+ c0011ec:	e59f3294 	ldr	r3, [pc, #660]	; c001488 <gestionarSudoku+0x2c0>
+ c0011f0:	e3a02001 	mov	r2, #1
+ c0011f4:	e5832000 	str	r2, [r3]
+		datoMostradoPorPantalla = 15;	// Mostramos una F por pantalla
+ c0011f8:	e59f328c 	ldr	r3, [pc, #652]	; c00148c <gestionarSudoku+0x2c4>
+ c0011fc:	e3a0200f 	mov	r2, #15
+ c001200:	e5832000 	str	r2, [r3]
+		iniciarArmThumb();				// Iniciamos algoritmo (ARM-THUMB)
+ c001204:	eb000402 	bl	c002214 <iniciarArmThumb>
+ c001208:	ea000097 	b	c00146c <gestionarSudoku+0x2a4>
+	}
+
+	/* ESTADOSUDOKU = MOSTRAR F */
+	else if (estadoSudoku == mostrarF && botonPulsado == botonIzquierdo) {
+ c00120c:	e59f3274 	ldr	r3, [pc, #628]	; c001488 <gestionarSudoku+0x2c0>
+ c001210:	e5933000 	ldr	r3, [r3]
+ c001214:	e3530001 	cmp	r3, #1
+ c001218:	1a000009 	bne	c001244 <gestionarSudoku+0x7c>
+ c00121c:	e51b3010 	ldr	r3, [fp, #-16]
+ c001220:	e3530000 	cmp	r3, #0
+ c001224:	1a000006 	bne	c001244 <gestionarSudoku+0x7c>
+		datoMostradoPorPantalla = 1;	// Mostramos en pantalla un 1
+ c001228:	e59f325c 	ldr	r3, [pc, #604]	; c00148c <gestionarSudoku+0x2c4>
+ c00122c:	e3a02001 	mov	r2, #1
+ c001230:	e5832000 	str	r2, [r3]
+		estadoSudoku = elegirFila;	// Avanzamos de estado
+ c001234:	e59f324c 	ldr	r3, [pc, #588]	; c001488 <gestionarSudoku+0x2c0>
+ c001238:	e3a02002 	mov	r2, #2
+ c00123c:	e5832000 	str	r2, [r3]
+ c001240:	ea000089 	b	c00146c <gestionarSudoku+0x2a4>
+	}
+
+	/* ESTADOSUDOKU = ELEGIR FILA */
+	else if (estadoSudoku == elegirFila) {
+ c001244:	e59f323c 	ldr	r3, [pc, #572]	; c001488 <gestionarSudoku+0x2c0>
+ c001248:	e5933000 	ldr	r3, [r3]
+ c00124c:	e3530002 	cmp	r3, #2
+ c001250:	1a00001d 	bne	c0012cc <gestionarSudoku+0x104>
+		if (botonPulsado == botonIzquierdo) {
+ c001254:	e51b3010 	ldr	r3, [fp, #-16]
+ c001258:	e3530000 	cmp	r3, #0
+ c00125c:	1a00000c 	bne	c001294 <gestionarSudoku+0xcc>
+			datoMostradoPorPantalla++;
+ c001260:	e59f3224 	ldr	r3, [pc, #548]	; c00148c <gestionarSudoku+0x2c4>
+ c001264:	e5933000 	ldr	r3, [r3]
+ c001268:	e2832001 	add	r2, r3, #1
+ c00126c:	e59f3218 	ldr	r3, [pc, #536]	; c00148c <gestionarSudoku+0x2c4>
+ c001270:	e5832000 	str	r2, [r3]
+			if (datoMostradoPorPantalla == 10) {
+ c001274:	e59f3210 	ldr	r3, [pc, #528]	; c00148c <gestionarSudoku+0x2c4>
+ c001278:	e5933000 	ldr	r3, [r3]
+ c00127c:	e353000a 	cmp	r3, #10
+ c001280:	1a000079 	bne	c00146c <gestionarSudoku+0x2a4>
+				datoMostradoPorPantalla = 1;
+ c001284:	e59f3200 	ldr	r3, [pc, #512]	; c00148c <gestionarSudoku+0x2c4>
+ c001288:	e3a02001 	mov	r2, #1
+ c00128c:	e5832000 	str	r2, [r3]
+ c001290:	ea000075 	b	c00146c <gestionarSudoku+0x2a4>
+			}
+		} else if (botonPulsado == botonDerecho) {
+ c001294:	e51b3010 	ldr	r3, [fp, #-16]
+ c001298:	e3530001 	cmp	r3, #1
+ c00129c:	1a000072 	bne	c00146c <gestionarSudoku+0x2a4>
+			fila = datoMostradoPorPantalla;
+ c0012a0:	e59f31e4 	ldr	r3, [pc, #484]	; c00148c <gestionarSudoku+0x2c4>
+ c0012a4:	e5932000 	ldr	r2, [r3]
+ c0012a8:	e59f31e0 	ldr	r3, [pc, #480]	; c001490 <gestionarSudoku+0x2c8>
+ c0012ac:	e5832000 	str	r2, [r3]
+			estadoSudoku = mostrarC;
+ c0012b0:	e59f31d0 	ldr	r3, [pc, #464]	; c001488 <gestionarSudoku+0x2c0>
+ c0012b4:	e3a02003 	mov	r2, #3
+ c0012b8:	e5832000 	str	r2, [r3]
+			datoMostradoPorPantalla = 12;
+ c0012bc:	e59f31c8 	ldr	r3, [pc, #456]	; c00148c <gestionarSudoku+0x2c4>
+ c0012c0:	e3a0200c 	mov	r2, #12
+ c0012c4:	e5832000 	str	r2, [r3]
+ c0012c8:	ea000067 	b	c00146c <gestionarSudoku+0x2a4>
+		}
+	}
+
+	/* ESTADOSUDOKU = MOSTRAR C */
+	else if (estadoSudoku == mostrarC && botonPulsado == botonIzquierdo) {
+ c0012cc:	e59f31b4 	ldr	r3, [pc, #436]	; c001488 <gestionarSudoku+0x2c0>
+ c0012d0:	e5933000 	ldr	r3, [r3]
+ c0012d4:	e3530003 	cmp	r3, #3
+ c0012d8:	1a000009 	bne	c001304 <gestionarSudoku+0x13c>
+ c0012dc:	e51b3010 	ldr	r3, [fp, #-16]
+ c0012e0:	e3530000 	cmp	r3, #0
+ c0012e4:	1a000006 	bne	c001304 <gestionarSudoku+0x13c>
+		datoMostradoPorPantalla = 1;
+ c0012e8:	e59f319c 	ldr	r3, [pc, #412]	; c00148c <gestionarSudoku+0x2c4>
+ c0012ec:	e3a02001 	mov	r2, #1
+ c0012f0:	e5832000 	str	r2, [r3]
+		estadoSudoku = elegirColumna;
+ c0012f4:	e59f318c 	ldr	r3, [pc, #396]	; c001488 <gestionarSudoku+0x2c0>
+ c0012f8:	e3a02004 	mov	r2, #4
+ c0012fc:	e5832000 	str	r2, [r3]
+ c001300:	ea000059 	b	c00146c <gestionarSudoku+0x2a4>
+	}
+
+	/* ESTADOSUDOKU = ELEGIR COLUMNA */
+	else if (estadoSudoku == elegirColumna) {
+ c001304:	e59f317c 	ldr	r3, [pc, #380]	; c001488 <gestionarSudoku+0x2c0>
+ c001308:	e5933000 	ldr	r3, [r3]
+ c00130c:	e3530004 	cmp	r3, #4
+ c001310:	1a00001d 	bne	c00138c <gestionarSudoku+0x1c4>
+		if (botonPulsado == botonIzquierdo) {
+ c001314:	e51b3010 	ldr	r3, [fp, #-16]
+ c001318:	e3530000 	cmp	r3, #0
+ c00131c:	1a00000c 	bne	c001354 <gestionarSudoku+0x18c>
+			datoMostradoPorPantalla++;
+ c001320:	e59f3164 	ldr	r3, [pc, #356]	; c00148c <gestionarSudoku+0x2c4>
+ c001324:	e5933000 	ldr	r3, [r3]
+ c001328:	e2832001 	add	r2, r3, #1
+ c00132c:	e59f3158 	ldr	r3, [pc, #344]	; c00148c <gestionarSudoku+0x2c4>
+ c001330:	e5832000 	str	r2, [r3]
+			if (datoMostradoPorPantalla == 10) {
+ c001334:	e59f3150 	ldr	r3, [pc, #336]	; c00148c <gestionarSudoku+0x2c4>
+ c001338:	e5933000 	ldr	r3, [r3]
+ c00133c:	e353000a 	cmp	r3, #10
+ c001340:	1a000049 	bne	c00146c <gestionarSudoku+0x2a4>
+				datoMostradoPorPantalla = 1;
+ c001344:	e59f3140 	ldr	r3, [pc, #320]	; c00148c <gestionarSudoku+0x2c4>
+ c001348:	e3a02001 	mov	r2, #1
+ c00134c:	e5832000 	str	r2, [r3]
+ c001350:	ea000045 	b	c00146c <gestionarSudoku+0x2a4>
+			}
+		} else if (botonPulsado == botonDerecho) {
+ c001354:	e51b3010 	ldr	r3, [fp, #-16]
+ c001358:	e3530001 	cmp	r3, #1
+ c00135c:	1a000042 	bne	c00146c <gestionarSudoku+0x2a4>
+			columna = datoMostradoPorPantalla;
+ c001360:	e59f3124 	ldr	r3, [pc, #292]	; c00148c <gestionarSudoku+0x2c4>
+ c001364:	e5932000 	ldr	r2, [r3]
+ c001368:	e59f3124 	ldr	r3, [pc, #292]	; c001494 <gestionarSudoku+0x2cc>
+ c00136c:	e5832000 	str	r2, [r3]
+			estadoSudoku = mostrarD;
+ c001370:	e59f3110 	ldr	r3, [pc, #272]	; c001488 <gestionarSudoku+0x2c0>
+ c001374:	e3a02005 	mov	r2, #5
+ c001378:	e5832000 	str	r2, [r3]
+			datoMostradoPorPantalla = 13;
+ c00137c:	e59f3108 	ldr	r3, [pc, #264]	; c00148c <gestionarSudoku+0x2c4>
+ c001380:	e3a0200d 	mov	r2, #13
+ c001384:	e5832000 	str	r2, [r3]
+ c001388:	ea000037 	b	c00146c <gestionarSudoku+0x2a4>
+		}
+	}
+
+	/* ESTADOSUDOKU = MOSTRAR D */
+	else if (estadoSudoku == mostrarD && botonPulsado == botonIzquierdo) {
+ c00138c:	e59f30f4 	ldr	r3, [pc, #244]	; c001488 <gestionarSudoku+0x2c0>
+ c001390:	e5933000 	ldr	r3, [r3]
+ c001394:	e3530005 	cmp	r3, #5
+ c001398:	1a000009 	bne	c0013c4 <gestionarSudoku+0x1fc>
+ c00139c:	e51b3010 	ldr	r3, [fp, #-16]
+ c0013a0:	e3530000 	cmp	r3, #0
+ c0013a4:	1a000006 	bne	c0013c4 <gestionarSudoku+0x1fc>
+		datoMostradoPorPantalla = 1;
+ c0013a8:	e59f30dc 	ldr	r3, [pc, #220]	; c00148c <gestionarSudoku+0x2c4>
+ c0013ac:	e3a02001 	mov	r2, #1
+ c0013b0:	e5832000 	str	r2, [r3]
+		estadoSudoku = elegirValorDato;
+ c0013b4:	e59f30cc 	ldr	r3, [pc, #204]	; c001488 <gestionarSudoku+0x2c0>
+ c0013b8:	e3a02006 	mov	r2, #6
+ c0013bc:	e5832000 	str	r2, [r3]
+ c0013c0:	ea000029 	b	c00146c <gestionarSudoku+0x2a4>
+	}
+
+	/* ESTADOSUDOKU = ELEGIR VALOR DATO */
+	else if (estadoSudoku == elegirValorDato) {
+ c0013c4:	e59f30bc 	ldr	r3, [pc, #188]	; c001488 <gestionarSudoku+0x2c0>
+ c0013c8:	e5933000 	ldr	r3, [r3]
+ c0013cc:	e3530006 	cmp	r3, #6
+ c0013d0:	1a000025 	bne	c00146c <gestionarSudoku+0x2a4>
+		if (botonPulsado == botonIzquierdo) {
+ c0013d4:	e51b3010 	ldr	r3, [fp, #-16]
+ c0013d8:	e3530000 	cmp	r3, #0
+ c0013dc:	1a00000f 	bne	c001420 <gestionarSudoku+0x258>
+			datoMostradoPorPantalla = (datoMostradoPorPantalla+1)%10;
+ c0013e0:	e59f30a4 	ldr	r3, [pc, #164]	; c00148c <gestionarSudoku+0x2c4>
+ c0013e4:	e5933000 	ldr	r3, [r3]
+ c0013e8:	e2831001 	add	r1, r3, #1
+ c0013ec:	e59f30a4 	ldr	r3, [pc, #164]	; c001498 <gestionarSudoku+0x2d0>
+ c0013f0:	e0c32391 	smull	r2, r3, r1, r3
+ c0013f4:	e1a02143 	asr	r2, r3, #2
+ c0013f8:	e1a03fc1 	asr	r3, r1, #31
+ c0013fc:	e0632002 	rsb	r2, r3, r2
+ c001400:	e1a03002 	mov	r3, r2
+ c001404:	e1a03103 	lsl	r3, r3, #2
+ c001408:	e0833002 	add	r3, r3, r2
+ c00140c:	e1a03083 	lsl	r3, r3, #1
+ c001410:	e0632001 	rsb	r2, r3, r1
+ c001414:	e59f3070 	ldr	r3, [pc, #112]	; c00148c <gestionarSudoku+0x2c4>
+ c001418:	e5832000 	str	r2, [r3]
+ c00141c:	ea000012 	b	c00146c <gestionarSudoku+0x2a4>
+		} else if (botonPulsado == botonDerecho) {
+ c001420:	e51b3010 	ldr	r3, [fp, #-16]
+ c001424:	e3530001 	cmp	r3, #1
+ c001428:	1a00000f 	bne	c00146c <gestionarSudoku+0x2a4>
+			insertValor(fila, columna, datoMostradoPorPantalla);
+ c00142c:	e59f305c 	ldr	r3, [pc, #92]	; c001490 <gestionarSudoku+0x2c8>
+ c001430:	e5931000 	ldr	r1, [r3]
+ c001434:	e59f3058 	ldr	r3, [pc, #88]	; c001494 <gestionarSudoku+0x2cc>
+ c001438:	e5932000 	ldr	r2, [r3]
+ c00143c:	e59f3048 	ldr	r3, [pc, #72]	; c00148c <gestionarSudoku+0x2c4>
+ c001440:	e5933000 	ldr	r3, [r3]
+ c001444:	e1a00001 	mov	r0, r1
+ c001448:	e1a01002 	mov	r1, r2
+ c00144c:	e1a02003 	mov	r2, r3
+ c001450:	eb000378 	bl	c002238 <insertValor>
+			estadoSudoku = mostrarF;
+ c001454:	e59f302c 	ldr	r3, [pc, #44]	; c001488 <gestionarSudoku+0x2c0>
+ c001458:	e3a02001 	mov	r2, #1
+ c00145c:	e5832000 	str	r2, [r3]
+			datoMostradoPorPantalla = 15;
+ c001460:	e59f3024 	ldr	r3, [pc, #36]	; c00148c <gestionarSudoku+0x2c4>
+ c001464:	e3a0200f 	mov	r2, #15
+ c001468:	e5832000 	str	r2, [r3]
+		}
+	}
+	D8Led_symbol(datoMostradoPorPantalla);
+ c00146c:	e59f3018 	ldr	r3, [pc, #24]	; c00148c <gestionarSudoku+0x2c4>
+ c001470:	e5933000 	ldr	r3, [r3]
+ c001474:	e1a00003 	mov	r0, r3
+ c001478:	ebfffdc7 	bl	c000b9c <D8Led_symbol>
+}
+ c00147c:	e24bd00c 	sub	sp, fp, #12
+ c001480:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001484:	e12fff1e 	bx	lr
+ c001488:	0c002f30 	.word	0x0c002f30
+ c00148c:	0c002f34 	.word	0x0c002f34
+ c001490:	0c002f4c 	.word	0x0c002f4c
+ c001494:	0c002f50 	.word	0x0c002f50
+ c001498:	66666667 	.word	0x66666667
+
+0c00149c <leds_on>:
+void Led_Display(int LedStatus);		// control directo del LED
+
+/*--- codigo de las funciones ---*/
+// Pone todos los leds encendidos.
+void leds_on()
+{
+ c00149c:	e1a0c00d 	mov	ip, sp
+ c0014a0:	e92dd800 	push	{fp, ip, lr, pc}
+ c0014a4:	e24cb004 	sub	fp, ip, #4
+	Led_Display(0x3);
+ c0014a8:	e3a00003 	mov	r0, #3
+ c0014ac:	eb00005a 	bl	c00161c <Led_Display>
+}
+ c0014b0:	e24bd00c 	sub	sp, fp, #12
+ c0014b4:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0014b8:	e12fff1e 	bx	lr
+
+0c0014bc <leds_off>:
+
+// Apaga todos los leds.
+void leds_off()
+{
+ c0014bc:	e1a0c00d 	mov	ip, sp
+ c0014c0:	e92dd800 	push	{fp, ip, lr, pc}
+ c0014c4:	e24cb004 	sub	fp, ip, #4
+	Led_Display(0x0);
+ c0014c8:	e3a00000 	mov	r0, #0
+ c0014cc:	eb000052 	bl	c00161c <Led_Display>
+}
+ c0014d0:	e24bd00c 	sub	sp, fp, #12
+ c0014d4:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0014d8:	e12fff1e 	bx	lr
+
+0c0014dc <led1_on>:
+
+// Enciende el led 1.
+void led1_on()
+{
+ c0014dc:	e1a0c00d 	mov	ip, sp
+ c0014e0:	e92dd800 	push	{fp, ip, lr, pc}
+ c0014e4:	e24cb004 	sub	fp, ip, #4
+	led_state = led_state | 0x1;
+ c0014e8:	e59f3028 	ldr	r3, [pc, #40]	; c001518 <led1_on+0x3c>
+ c0014ec:	e5933000 	ldr	r3, [r3]
+ c0014f0:	e3832001 	orr	r2, r3, #1
+ c0014f4:	e59f301c 	ldr	r3, [pc, #28]	; c001518 <led1_on+0x3c>
+ c0014f8:	e5832000 	str	r2, [r3]
+	Led_Display(led_state);
+ c0014fc:	e59f3014 	ldr	r3, [pc, #20]	; c001518 <led1_on+0x3c>
+ c001500:	e5933000 	ldr	r3, [r3]
+ c001504:	e1a00003 	mov	r0, r3
+ c001508:	eb000043 	bl	c00161c <Led_Display>
+}
+ c00150c:	e24bd00c 	sub	sp, fp, #12
+ c001510:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001514:	e12fff1e 	bx	lr
+ c001518:	0c002f54 	.word	0x0c002f54
+
+0c00151c <led1_off>:
+
+// Apaga el led 1.
+void led1_off()
+{
+ c00151c:	e1a0c00d 	mov	ip, sp
+ c001520:	e92dd800 	push	{fp, ip, lr, pc}
+ c001524:	e24cb004 	sub	fp, ip, #4
+	led_state = led_state & 0xfe;
+ c001528:	e59f3028 	ldr	r3, [pc, #40]	; c001558 <led1_off+0x3c>
+ c00152c:	e5933000 	ldr	r3, [r3]
+ c001530:	e20320fe 	and	r2, r3, #254	; 0xfe
+ c001534:	e59f301c 	ldr	r3, [pc, #28]	; c001558 <led1_off+0x3c>
+ c001538:	e5832000 	str	r2, [r3]
+	Led_Display(led_state);
+ c00153c:	e59f3014 	ldr	r3, [pc, #20]	; c001558 <led1_off+0x3c>
+ c001540:	e5933000 	ldr	r3, [r3]
+ c001544:	e1a00003 	mov	r0, r3
+ c001548:	eb000033 	bl	c00161c <Led_Display>
+}
+ c00154c:	e24bd00c 	sub	sp, fp, #12
+ c001550:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001554:	e12fff1e 	bx	lr
+ c001558:	0c002f54 	.word	0x0c002f54
+
+0c00155c <led2_on>:
+
+// Enciende el led 2.
+void led2_on()
+{
+ c00155c:	e1a0c00d 	mov	ip, sp
+ c001560:	e92dd800 	push	{fp, ip, lr, pc}
+ c001564:	e24cb004 	sub	fp, ip, #4
+	led_state = led_state | 0x2;
+ c001568:	e59f3028 	ldr	r3, [pc, #40]	; c001598 <led2_on+0x3c>
+ c00156c:	e5933000 	ldr	r3, [r3]
+ c001570:	e3832002 	orr	r2, r3, #2
+ c001574:	e59f301c 	ldr	r3, [pc, #28]	; c001598 <led2_on+0x3c>
+ c001578:	e5832000 	str	r2, [r3]
+	Led_Display(led_state);
+ c00157c:	e59f3014 	ldr	r3, [pc, #20]	; c001598 <led2_on+0x3c>
+ c001580:	e5933000 	ldr	r3, [r3]
+ c001584:	e1a00003 	mov	r0, r3
+ c001588:	eb000023 	bl	c00161c <Led_Display>
+}
+ c00158c:	e24bd00c 	sub	sp, fp, #12
+ c001590:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001594:	e12fff1e 	bx	lr
+ c001598:	0c002f54 	.word	0x0c002f54
+
+0c00159c <led2_off>:
+
+// Apaga el led 2.
+void led2_off()
+{
+ c00159c:	e1a0c00d 	mov	ip, sp
+ c0015a0:	e92dd800 	push	{fp, ip, lr, pc}
+ c0015a4:	e24cb004 	sub	fp, ip, #4
+	led_state = led_state & 0xfd;
+ c0015a8:	e59f3028 	ldr	r3, [pc, #40]	; c0015d8 <led2_off+0x3c>
+ c0015ac:	e5933000 	ldr	r3, [r3]
+ c0015b0:	e20320fd 	and	r2, r3, #253	; 0xfd
+ c0015b4:	e59f301c 	ldr	r3, [pc, #28]	; c0015d8 <led2_off+0x3c>
+ c0015b8:	e5832000 	str	r2, [r3]
+	Led_Display(led_state);
+ c0015bc:	e59f3014 	ldr	r3, [pc, #20]	; c0015d8 <led2_off+0x3c>
+ c0015c0:	e5933000 	ldr	r3, [r3]
+ c0015c4:	e1a00003 	mov	r0, r3
+ c0015c8:	eb000013 	bl	c00161c <Led_Display>
+}
+ c0015cc:	e24bd00c 	sub	sp, fp, #12
+ c0015d0:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0015d4:	e12fff1e 	bx	lr
+ c0015d8:	0c002f54 	.word	0x0c002f54
+
+0c0015dc <leds_switch>:
+
+// Intercambia el estado de los leds.
+void leds_switch()
+{
+ c0015dc:	e1a0c00d 	mov	ip, sp
+ c0015e0:	e92dd800 	push	{fp, ip, lr, pc}
+ c0015e4:	e24cb004 	sub	fp, ip, #4
+	led_state ^= 0x03;
+ c0015e8:	e59f3028 	ldr	r3, [pc, #40]	; c001618 <leds_switch+0x3c>
+ c0015ec:	e5933000 	ldr	r3, [r3]
+ c0015f0:	e2232003 	eor	r2, r3, #3
+ c0015f4:	e59f301c 	ldr	r3, [pc, #28]	; c001618 <leds_switch+0x3c>
+ c0015f8:	e5832000 	str	r2, [r3]
+	Led_Display(led_state);
+ c0015fc:	e59f3014 	ldr	r3, [pc, #20]	; c001618 <leds_switch+0x3c>
+ c001600:	e5933000 	ldr	r3, [r3]
+ c001604:	e1a00003 	mov	r0, r3
+ c001608:	eb000003 	bl	c00161c <Led_Display>
+
+}
+ c00160c:	e24bd00c 	sub	sp, fp, #12
+ c001610:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001614:	e12fff1e 	bx	lr
+ c001618:	0c002f54 	.word	0x0c002f54
+
+0c00161c <Led_Display>:
+
+// Intercambia el estado de los leds.
+void Led_Display(int LedStatus)
+{
+ c00161c:	e1a0c00d 	mov	ip, sp
+ c001620:	e92dd800 	push	{fp, ip, lr, pc}
+ c001624:	e24cb004 	sub	fp, ip, #4
+ c001628:	e24dd008 	sub	sp, sp, #8
+ c00162c:	e50b0010 	str	r0, [fp, #-16]
+	led_state = LedStatus;
+ c001630:	e59f3094 	ldr	r3, [pc, #148]	; c0016cc <Led_Display+0xb0>
+ c001634:	e51b2010 	ldr	r2, [fp, #-16]
+ c001638:	e5832000 	str	r2, [r3]
+
+	if ((LedStatus & 0x01) == 0x01)
+ c00163c:	e51b3010 	ldr	r3, [fp, #-16]
+ c001640:	e2033001 	and	r3, r3, #1
+ c001644:	e20330ff 	and	r3, r3, #255	; 0xff
+ c001648:	e3530000 	cmp	r3, #0
+ c00164c:	0a000006 	beq	c00166c <Led_Display+0x50>
+		rPDATB = rPDATB & 0x5ff; /* poner a 0 el bit 9 del puerto B */
+ c001650:	e59f2078 	ldr	r2, [pc, #120]	; c0016d0 <Led_Display+0xb4>
+ c001654:	e59f3074 	ldr	r3, [pc, #116]	; c0016d0 <Led_Display+0xb4>
+ c001658:	e5931000 	ldr	r1, [r3]
+ c00165c:	e59f3070 	ldr	r3, [pc, #112]	; c0016d4 <Led_Display+0xb8>
+ c001660:	e0013003 	and	r3, r1, r3
+ c001664:	e5823000 	str	r3, [r2]
+ c001668:	ea000004 	b	c001680 <Led_Display+0x64>
+	else
+		rPDATB = rPDATB | 0x200; /* poner a 1 el bit 9 del puerto B */
+ c00166c:	e59f305c 	ldr	r3, [pc, #92]	; c0016d0 <Led_Display+0xb4>
+ c001670:	e59f2058 	ldr	r2, [pc, #88]	; c0016d0 <Led_Display+0xb4>
+ c001674:	e5922000 	ldr	r2, [r2]
+ c001678:	e3822c02 	orr	r2, r2, #512	; 0x200
+ c00167c:	e5832000 	str	r2, [r3]
+
+	if ((LedStatus & 0x02) == 0x02)
+ c001680:	e51b3010 	ldr	r3, [fp, #-16]
+ c001684:	e2033002 	and	r3, r3, #2
+ c001688:	e3530000 	cmp	r3, #0
+ c00168c:	0a000006 	beq	c0016ac <Led_Display+0x90>
+		rPDATB = rPDATB & 0x3ff; /* poner a 0 el bit 10 del puerto B */
+ c001690:	e59f2038 	ldr	r2, [pc, #56]	; c0016d0 <Led_Display+0xb4>
+ c001694:	e59f3034 	ldr	r3, [pc, #52]	; c0016d0 <Led_Display+0xb4>
+ c001698:	e5933000 	ldr	r3, [r3]
+ c00169c:	e1a03b03 	lsl	r3, r3, #22
+ c0016a0:	e1a03b23 	lsr	r3, r3, #22
+ c0016a4:	e5823000 	str	r3, [r2]
+ c0016a8:	ea000004 	b	c0016c0 <Led_Display+0xa4>
+	else
+		rPDATB = rPDATB | 0x400; /* poner a 1 el bit 10 del puerto B */
+ c0016ac:	e59f301c 	ldr	r3, [pc, #28]	; c0016d0 <Led_Display+0xb4>
+ c0016b0:	e59f2018 	ldr	r2, [pc, #24]	; c0016d0 <Led_Display+0xb4>
+ c0016b4:	e5922000 	ldr	r2, [r2]
+ c0016b8:	e3822b01 	orr	r2, r2, #1024	; 0x400
+ c0016bc:	e5832000 	str	r2, [r3]
+}
+ c0016c0:	e24bd00c 	sub	sp, fp, #12
+ c0016c4:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0016c8:	e12fff1e 	bx	lr
+ c0016cc:	0c002f54 	.word	0x0c002f54
+ c0016d0:	01d2000c 	.word	0x01d2000c
+ c0016d4:	000005ff 	.word	0x000005ff
+
+0c0016d8 <anadirElemento>:
+
+// Indice que marca el ultimo elemento de la pila
+static int indice = 0;
+
+// Operacion que se encarga de aÃƒÂ±adir un nuevo elemento a la lista
+void anadirElemento(int identificador, int dato, int tiempo){
+ c0016d8:	e1a0c00d 	mov	ip, sp
+ c0016dc:	e92dd800 	push	{fp, ip, lr, pc}
+ c0016e0:	e24cb004 	sub	fp, ip, #4
+ c0016e4:	e24dd010 	sub	sp, sp, #16
+ c0016e8:	e50b0010 	str	r0, [fp, #-16]
+ c0016ec:	e50b1014 	str	r1, [fp, #-20]	; 0xffffffec
+ c0016f0:	e50b2018 	str	r2, [fp, #-24]	; 0xffffffe8
+	lista[indice].ID_evento = identificador;
+ c0016f4:	e59f30ec 	ldr	r3, [pc, #236]	; c0017e8 <anadirElemento+0x110>
+ c0016f8:	e5931000 	ldr	r1, [r3]
+ c0016fc:	e59f30e8 	ldr	r3, [pc, #232]	; c0017ec <anadirElemento+0x114>
+ c001700:	e5933000 	ldr	r3, [r3]
+ c001704:	e1a02003 	mov	r2, r3
+ c001708:	e1a03002 	mov	r3, r2
+ c00170c:	e1a03083 	lsl	r3, r3, #1
+ c001710:	e0833002 	add	r3, r3, r2
+ c001714:	e1a03103 	lsl	r3, r3, #2
+ c001718:	e0813003 	add	r3, r1, r3
+ c00171c:	e51b2010 	ldr	r2, [fp, #-16]
+ c001720:	e5832000 	str	r2, [r3]
+	lista[indice].auxData = dato;
+ c001724:	e59f30bc 	ldr	r3, [pc, #188]	; c0017e8 <anadirElemento+0x110>
+ c001728:	e5931000 	ldr	r1, [r3]
+ c00172c:	e59f30b8 	ldr	r3, [pc, #184]	; c0017ec <anadirElemento+0x114>
+ c001730:	e5933000 	ldr	r3, [r3]
+ c001734:	e1a02003 	mov	r2, r3
+ c001738:	e1a03002 	mov	r3, r2
+ c00173c:	e1a03083 	lsl	r3, r3, #1
+ c001740:	e0833002 	add	r3, r3, r2
+ c001744:	e1a03103 	lsl	r3, r3, #2
+ c001748:	e0813003 	add	r3, r1, r3
+ c00174c:	e51b2014 	ldr	r2, [fp, #-20]	; 0xffffffec
+ c001750:	e5832004 	str	r2, [r3, #4]
+	lista[indice].tiempo = tiempo;
+ c001754:	e59f308c 	ldr	r3, [pc, #140]	; c0017e8 <anadirElemento+0x110>
+ c001758:	e5931000 	ldr	r1, [r3]
+ c00175c:	e59f3088 	ldr	r3, [pc, #136]	; c0017ec <anadirElemento+0x114>
+ c001760:	e5933000 	ldr	r3, [r3]
+ c001764:	e1a02003 	mov	r2, r3
+ c001768:	e1a03002 	mov	r3, r2
+ c00176c:	e1a03083 	lsl	r3, r3, #1
+ c001770:	e0833002 	add	r3, r3, r2
+ c001774:	e1a03103 	lsl	r3, r3, #2
+ c001778:	e0813003 	add	r3, r1, r3
+ c00177c:	e51b2018 	ldr	r2, [fp, #-24]	; 0xffffffe8
+ c001780:	e5832008 	str	r2, [r3, #8]
+	indice++;
+ c001784:	e59f3060 	ldr	r3, [pc, #96]	; c0017ec <anadirElemento+0x114>
+ c001788:	e5933000 	ldr	r3, [r3]
+ c00178c:	e2832001 	add	r2, r3, #1
+ c001790:	e59f3054 	ldr	r3, [pc, #84]	; c0017ec <anadirElemento+0x114>
+ c001794:	e5832000 	str	r2, [r3]
+	
+	//Resetea el indice de la lista si esta llega al tope
+	if((int)&lista[indice]>0xc7fef00){
+ c001798:	e59f3048 	ldr	r3, [pc, #72]	; c0017e8 <anadirElemento+0x110>
+ c00179c:	e5931000 	ldr	r1, [r3]
+ c0017a0:	e59f3044 	ldr	r3, [pc, #68]	; c0017ec <anadirElemento+0x114>
+ c0017a4:	e5933000 	ldr	r3, [r3]
+ c0017a8:	e1a02003 	mov	r2, r3
+ c0017ac:	e1a03002 	mov	r3, r2
+ c0017b0:	e1a03083 	lsl	r3, r3, #1
+ c0017b4:	e0833002 	add	r3, r3, r2
+ c0017b8:	e1a03103 	lsl	r3, r3, #2
+ c0017bc:	e0813003 	add	r3, r1, r3
+ c0017c0:	e1a02003 	mov	r2, r3
+ c0017c4:	e59f3024 	ldr	r3, [pc, #36]	; c0017f0 <anadirElemento+0x118>
+ c0017c8:	e1520003 	cmp	r2, r3
+ c0017cc:	da000002 	ble	c0017dc <anadirElemento+0x104>
+		indice = 0;
+ c0017d0:	e59f3014 	ldr	r3, [pc, #20]	; c0017ec <anadirElemento+0x114>
+ c0017d4:	e3a02000 	mov	r2, #0
+ c0017d8:	e5832000 	str	r2, [r3]
+	}
+}
+ c0017dc:	e24bd00c 	sub	sp, fp, #12
+ c0017e0:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0017e4:	e12fff1e 	bx	lr
+ c0017e8:	0c002dc4 	.word	0x0c002dc4
+ c0017ec:	0c002f38 	.word	0x0c002f38
+ c0017f0:	0c7fef00 	.word	0x0c7fef00
+
+0c0017f4 <Main>:
+/*--- declaracion de funciones ---*/
+void Main(void);
+
+/*--- codigo de funciones ---*/
+void Main(void)
+{
+ c0017f4:	e1a0c00d 	mov	ip, sp
+ c0017f8:	e92dd800 	push	{fp, ip, lr, pc}
+ c0017fc:	e24cb004 	sub	fp, ip, #4
+
+	/* Inicializa controladores */
+	sys_init();       			// Inicializacion de la placa, interrupciones y puertos.
+ c001800:	ebfffcc0 	bl	c000b08 <sys_init>
+	Timer2_Inicializar();	   	// Inicialización del temporizador 2.
+ c001804:	eb0004a7 	bl	c002aa8 <Timer2_Inicializar>
+	Eint4567_init();			// Inicializamos los pulsadores. Cada vez que se pulse se verá reflejado en el 8led.
+ c001808:	ebfffcf8 	bl	c000bf0 <Eint4567_init>
+	D8Led_init(); 				// Inicializamos el 8led.
+ c00180c:	ebfffcd9 	bl	c000b78 <D8Led_init>
+	init_excep();
+ c001810:	ebfffd99 	bl	c000e7c <init_excep>
+	Timer2_Empezar();			// Comienza la cuenta del timer 2.
+ c001814:	eb0004d6 	bl	c002b74 <Timer2_Empezar>
+	/* PARTE 7 */
+	//sudoku9x9();
+	/* FIN PARTE 7 */
+
+	/* PARTE 8 */
+	while(1){}
+ c001818:	eafffffe 	b	c001818 <Main+0x24>
+
+0c00181c <push_debug>:
+extern Timer2_Leer();
+
+void push_debug(int ID_evento, int auxData);
+
+// Funcion encargada de apilar un nuevo elemento en la pilaDepuracion
+void push_debug(int ID_evento, int auxData){
+ c00181c:	e1a0c00d 	mov	ip, sp
+ c001820:	e92dd800 	push	{fp, ip, lr, pc}
+ c001824:	e24cb004 	sub	fp, ip, #4
+ c001828:	e24dd010 	sub	sp, sp, #16
+ c00182c:	e50b0018 	str	r0, [fp, #-24]	; 0xffffffe8
+ c001830:	e50b101c 	str	r1, [fp, #-28]	; 0xffffffe4
+	uint32_t tiempo = (Timer2_Leer());			// Tiempo en el que se ha producido la interrupciÃ³n
+ c001834:	eb0004d8 	bl	c002b9c <Timer2_Leer>
+ c001838:	e1a03000 	mov	r3, r0
+ c00183c:	e50b3010 	str	r3, [fp, #-16]
+	anadirElemento(ID_evento, auxData, tiempo);
+ c001840:	e51b0018 	ldr	r0, [fp, #-24]	; 0xffffffe8
+ c001844:	e51b101c 	ldr	r1, [fp, #-28]	; 0xffffffe4
+ c001848:	e51b2010 	ldr	r2, [fp, #-16]
+ c00184c:	ebffffa1 	bl	c0016d8 <anadirElemento>
+}
+ c001850:	e24bd00c 	sub	sp, fp, #12
+ c001854:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001858:	e12fff1e 	bx	lr
+
+0c00185c <celda_poner_valor>:
+			{0x0000,0x4800,0x1800,0x0000,0x0000,0x9800,0x5800,0x2800,0x0000,0,0,0,0,0,0,0}
+	};
+CELDA cAux[NUM_FILAS][NUM_COLUMNAS]__attribute__((aligned(32)));
+CELDA cOriginal[NUM_FILAS][NUM_COLUMNAS];
+
+inline void celda_poner_valor(CELDA *celdaptr, uint8_t val){	//Guarda los 12 primeros bits tal cual,
+ c00185c:	e1a0c00d 	mov	ip, sp
+ c001860:	e92dd800 	push	{fp, ip, lr, pc}
+ c001864:	e24cb004 	sub	fp, ip, #4
+ c001868:	e24dd008 	sub	sp, sp, #8
+ c00186c:	e50b0010 	str	r0, [fp, #-16]
+ c001870:	e1a03001 	mov	r3, r1
+ c001874:	e54b3011 	strb	r3, [fp, #-17]	; 0xffffffef
+	*celdaptr = (*celdaptr & 0x0FFF) | ((val & 0x000F) << 12);  //pone el valor en los ultimos 4 bits y los desplaza 12 a la izq.
+ c001878:	e51b3010 	ldr	r3, [fp, #-16]
+ c00187c:	e1d330b0 	ldrh	r3, [r3]
+ c001880:	e1a03803 	lsl	r3, r3, #16
+ c001884:	e1a03823 	lsr	r3, r3, #16
+ c001888:	e1a03a03 	lsl	r3, r3, #20
+ c00188c:	e1a03a23 	lsr	r3, r3, #20
+ c001890:	e1a03803 	lsl	r3, r3, #16
+ c001894:	e1a02823 	lsr	r2, r3, #16
+ c001898:	e55b3011 	ldrb	r3, [fp, #-17]	; 0xffffffef
+ c00189c:	e1a03603 	lsl	r3, r3, #12
+ c0018a0:	e1a03803 	lsl	r3, r3, #16
+ c0018a4:	e1a03823 	lsr	r3, r3, #16
+ c0018a8:	e1823003 	orr	r3, r2, r3
+ c0018ac:	e1a03803 	lsl	r3, r3, #16
+ c0018b0:	e1a03823 	lsr	r3, r3, #16
+ c0018b4:	e1a03803 	lsl	r3, r3, #16
+ c0018b8:	e1a02823 	lsr	r2, r3, #16
+ c0018bc:	e51b3010 	ldr	r3, [fp, #-16]
+ c0018c0:	e1c320b0 	strh	r2, [r3]
+}
+ c0018c4:	e24bd00c 	sub	sp, fp, #12
+ c0018c8:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0018cc:	e12fff1e 	bx	lr
+
+0c0018d0 <celda_leer_valor>:
+inline uint8_t celda_leer_valor(CELDA celda){					//Te saca los bits 16-13
+ c0018d0:	e1a0c00d 	mov	ip, sp
+ c0018d4:	e92dd800 	push	{fp, ip, lr, pc}
+ c0018d8:	e24cb004 	sub	fp, ip, #4
+ c0018dc:	e24dd008 	sub	sp, sp, #8
+ c0018e0:	e1a03000 	mov	r3, r0
+ c0018e4:	e14b30be 	strh	r3, [fp, #-14]
+	return celda >> 12;
+ c0018e8:	e15b30be 	ldrh	r3, [fp, #-14]
+ c0018ec:	e1a03623 	lsr	r3, r3, #12
+ c0018f0:	e1a03803 	lsl	r3, r3, #16
+ c0018f4:	e1a03823 	lsr	r3, r3, #16
+ c0018f8:	e20330ff 	and	r3, r3, #255	; 0xff
+}
+ c0018fc:	e1a00003 	mov	r0, r3
+ c001900:	e24bd00c 	sub	sp, fp, #12
+ c001904:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001908:	e12fff1e 	bx	lr
+
+0c00190c <sudoku_candidatos_c>:
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// dada una determinada celda encuentra los posibles valores candidatos y guarda el mapa de bits en la celda
+// retorna false si la celda esta vacia, true si contiene un valor
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+int sudoku_candidatos_c(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS], uint8_t fila, uint8_t columna) {
+ c00190c:	e1a0c00d 	mov	ip, sp
+ c001910:	e92dd800 	push	{fp, ip, lr, pc}
+ c001914:	e24cb004 	sub	fp, ip, #4
+ c001918:	e24dd018 	sub	sp, sp, #24
+ c00191c:	e50b0020 	str	r0, [fp, #-32]	; 0xffffffe0
+ c001920:	e1a03002 	mov	r3, r2
+ c001924:	e1a02001 	mov	r2, r1
+ c001928:	e54b2021 	strb	r2, [fp, #-33]	; 0xffffffdf
+ c00192c:	e54b3022 	strb	r3, [fp, #-34]	; 0xffffffde
+	//iniciar candidatos
+	cuadricula[fila][columna] |= 0x01FF;
+ c001930:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001934:	e1a03283 	lsl	r3, r3, #5
+ c001938:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c00193c:	e0821003 	add	r1, r2, r3
+ c001940:	e55b0022 	ldrb	r0, [fp, #-34]	; 0xffffffde
+ c001944:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001948:	e1a03283 	lsl	r3, r3, #5
+ c00194c:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001950:	e0822003 	add	r2, r2, r3
+ c001954:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001958:	e1a03083 	lsl	r3, r3, #1
+ c00195c:	e0823003 	add	r3, r2, r3
+ c001960:	e1d330b0 	ldrh	r3, [r3]
+ c001964:	e1e034a3 	mvn	r3, r3, lsr #9
+ c001968:	e1e03483 	mvn	r3, r3, lsl #9
+ c00196c:	e1a03803 	lsl	r3, r3, #16
+ c001970:	e1a02823 	lsr	r2, r3, #16
+ c001974:	e1a03080 	lsl	r3, r0, #1
+ c001978:	e0813003 	add	r3, r1, r3
+ c00197c:	e1c320b0 	strh	r2, [r3]
+	//recorrer fila recalculando candidatos
+	uint8_t filaX = 0;
+ c001980:	e3a03000 	mov	r3, #0
+ c001984:	e54b300d 	strb	r3, [fp, #-13]
+	uint8_t columnaX = 0;
+ c001988:	e3a03000 	mov	r3, #0
+ c00198c:	e54b300e 	strb	r3, [fp, #-14]
+	while(columnaX<9){
+ c001990:	ea000044 	b	c001aa8 <sudoku_candidatos_c+0x19c>
+		if (((cuadricula[fila][columnaX] & 0x0800) != 0) ||
+ c001994:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001998:	e1a03283 	lsl	r3, r3, #5
+ c00199c:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c0019a0:	e0822003 	add	r2, r2, r3
+ c0019a4:	e55b300e 	ldrb	r3, [fp, #-14]
+ c0019a8:	e1a03083 	lsl	r3, r3, #1
+ c0019ac:	e0823003 	add	r3, r2, r3
+ c0019b0:	e1d330b0 	ldrh	r3, [r3]
+ c0019b4:	e2033b02 	and	r3, r3, #2048	; 0x800
+ c0019b8:	e3530000 	cmp	r3, #0
+ c0019bc:	1a00000a 	bne	c0019ec <sudoku_candidatos_c+0xe0>
+				((cuadricula[fila][columnaX] & 0xF000) != 0)) { 			//Si es pista lo añadimos o no es pista pero es !=0
+ c0019c0:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c0019c4:	e1a03283 	lsl	r3, r3, #5
+ c0019c8:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c0019cc:	e0822003 	add	r2, r2, r3
+ c0019d0:	e55b300e 	ldrb	r3, [fp, #-14]
+ c0019d4:	e1a03083 	lsl	r3, r3, #1
+ c0019d8:	e0823003 	add	r3, r2, r3
+ c0019dc:	e1d330b0 	ldrh	r3, [r3]
+ c0019e0:	e2033a0f 	and	r3, r3, #61440	; 0xf000
+	cuadricula[fila][columna] |= 0x01FF;
+	//recorrer fila recalculando candidatos
+	uint8_t filaX = 0;
+	uint8_t columnaX = 0;
+	while(columnaX<9){
+		if (((cuadricula[fila][columnaX] & 0x0800) != 0) ||
+ c0019e4:	e3530000 	cmp	r3, #0
+ c0019e8:	0a00002b 	beq	c001a9c <sudoku_candidatos_c+0x190>
+				((cuadricula[fila][columnaX] & 0xF000) != 0)) { 			//Si es pista lo añadimos o no es pista pero es !=0
+			uint8_t valor = celda_leer_valor(cuadricula[fila][columnaX]);	//Sacamos el valor
+ c0019ec:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c0019f0:	e1a03283 	lsl	r3, r3, #5
+ c0019f4:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c0019f8:	e0822003 	add	r2, r2, r3
+ c0019fc:	e55b300e 	ldrb	r3, [fp, #-14]
+ c001a00:	e1a03083 	lsl	r3, r3, #1
+ c001a04:	e0823003 	add	r3, r2, r3
+ c001a08:	e1d330b0 	ldrh	r3, [r3]
+ c001a0c:	e1a00003 	mov	r0, r3
+ c001a10:	ebffffae 	bl	c0018d0 <celda_leer_valor>
+ c001a14:	e1a03000 	mov	r3, r0
+ c001a18:	e54b3015 	strb	r3, [fp, #-21]	; 0xffffffeb
+			cuadricula[fila][columna] &= ~(1 << (valor-1));					//Ponemos el valor a 0 (no se puede poner)
+ c001a1c:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001a20:	e1a03283 	lsl	r3, r3, #5
+ c001a24:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001a28:	e0821003 	add	r1, r2, r3
+ c001a2c:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001a30:	e55b2021 	ldrb	r2, [fp, #-33]	; 0xffffffdf
+ c001a34:	e1a02282 	lsl	r2, r2, #5
+ c001a38:	e51b0020 	ldr	r0, [fp, #-32]	; 0xffffffe0
+ c001a3c:	e0800002 	add	r0, r0, r2
+ c001a40:	e55b2022 	ldrb	r2, [fp, #-34]	; 0xffffffde
+ c001a44:	e1a02082 	lsl	r2, r2, #1
+ c001a48:	e0802002 	add	r2, r0, r2
+ c001a4c:	e1d220b0 	ldrh	r2, [r2]
+ c001a50:	e1a02802 	lsl	r2, r2, #16
+ c001a54:	e1a00822 	lsr	r0, r2, #16
+ c001a58:	e55b2015 	ldrb	r2, [fp, #-21]	; 0xffffffeb
+ c001a5c:	e2422001 	sub	r2, r2, #1
+ c001a60:	e3a0c001 	mov	ip, #1
+ c001a64:	e1a0221c 	lsl	r2, ip, r2
+ c001a68:	e1a02802 	lsl	r2, r2, #16
+ c001a6c:	e1a02822 	lsr	r2, r2, #16
+ c001a70:	e1e02002 	mvn	r2, r2
+ c001a74:	e1a02802 	lsl	r2, r2, #16
+ c001a78:	e1a02822 	lsr	r2, r2, #16
+ c001a7c:	e0002002 	and	r2, r0, r2
+ c001a80:	e1a02802 	lsl	r2, r2, #16
+ c001a84:	e1a02822 	lsr	r2, r2, #16
+ c001a88:	e1a02802 	lsl	r2, r2, #16
+ c001a8c:	e1a02822 	lsr	r2, r2, #16
+ c001a90:	e1a03083 	lsl	r3, r3, #1
+ c001a94:	e0813003 	add	r3, r1, r3
+ c001a98:	e1c320b0 	strh	r2, [r3]
+		}
+		columnaX++;
+ c001a9c:	e55b300e 	ldrb	r3, [fp, #-14]
+ c001aa0:	e2833001 	add	r3, r3, #1
+ c001aa4:	e54b300e 	strb	r3, [fp, #-14]
+	//iniciar candidatos
+	cuadricula[fila][columna] |= 0x01FF;
+	//recorrer fila recalculando candidatos
+	uint8_t filaX = 0;
+	uint8_t columnaX = 0;
+	while(columnaX<9){
+ c001aa8:	e55b300e 	ldrb	r3, [fp, #-14]
+ c001aac:	e3530008 	cmp	r3, #8
+ c001ab0:	9affffb7 	bls	c001994 <sudoku_candidatos_c+0x88>
+			cuadricula[fila][columna] &= ~(1 << (valor-1));					//Ponemos el valor a 0 (no se puede poner)
+		}
+		columnaX++;
+	}
+	//recorer columna recalculando candidatos
+	while(filaX<9){
+ c001ab4:	ea000044 	b	c001bcc <sudoku_candidatos_c+0x2c0>
+		if (((cuadricula[filaX][columna] & 0x0800) != 0) ||
+ c001ab8:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001abc:	e1a03283 	lsl	r3, r3, #5
+ c001ac0:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001ac4:	e0822003 	add	r2, r2, r3
+ c001ac8:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001acc:	e1a03083 	lsl	r3, r3, #1
+ c001ad0:	e0823003 	add	r3, r2, r3
+ c001ad4:	e1d330b0 	ldrh	r3, [r3]
+ c001ad8:	e2033b02 	and	r3, r3, #2048	; 0x800
+ c001adc:	e3530000 	cmp	r3, #0
+ c001ae0:	1a00000a 	bne	c001b10 <sudoku_candidatos_c+0x204>
+				((cuadricula[filaX][columna] & 0xF000) != 0)) { 			//Si es pista lo añadimos o no es pista pero es !=0
+ c001ae4:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001ae8:	e1a03283 	lsl	r3, r3, #5
+ c001aec:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001af0:	e0822003 	add	r2, r2, r3
+ c001af4:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001af8:	e1a03083 	lsl	r3, r3, #1
+ c001afc:	e0823003 	add	r3, r2, r3
+ c001b00:	e1d330b0 	ldrh	r3, [r3]
+ c001b04:	e2033a0f 	and	r3, r3, #61440	; 0xf000
+		}
+		columnaX++;
+	}
+	//recorer columna recalculando candidatos
+	while(filaX<9){
+		if (((cuadricula[filaX][columna] & 0x0800) != 0) ||
+ c001b08:	e3530000 	cmp	r3, #0
+ c001b0c:	0a00002b 	beq	c001bc0 <sudoku_candidatos_c+0x2b4>
+				((cuadricula[filaX][columna] & 0xF000) != 0)) { 			//Si es pista lo añadimos o no es pista pero es !=0
+			uint8_t valor = celda_leer_valor(cuadricula[filaX][columna]);	//Sacamos el valor
+ c001b10:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001b14:	e1a03283 	lsl	r3, r3, #5
+ c001b18:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001b1c:	e0822003 	add	r2, r2, r3
+ c001b20:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001b24:	e1a03083 	lsl	r3, r3, #1
+ c001b28:	e0823003 	add	r3, r2, r3
+ c001b2c:	e1d330b0 	ldrh	r3, [r3]
+ c001b30:	e1a00003 	mov	r0, r3
+ c001b34:	ebffff65 	bl	c0018d0 <celda_leer_valor>
+ c001b38:	e1a03000 	mov	r3, r0
+ c001b3c:	e54b3016 	strb	r3, [fp, #-22]	; 0xffffffea
+			cuadricula[fila][columna] &= ~(1 << (valor-1));					//Ponemos el valor a 0 (no se puede poner)
+ c001b40:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001b44:	e1a03283 	lsl	r3, r3, #5
+ c001b48:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001b4c:	e0821003 	add	r1, r2, r3
+ c001b50:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001b54:	e55b2021 	ldrb	r2, [fp, #-33]	; 0xffffffdf
+ c001b58:	e1a02282 	lsl	r2, r2, #5
+ c001b5c:	e51b0020 	ldr	r0, [fp, #-32]	; 0xffffffe0
+ c001b60:	e0800002 	add	r0, r0, r2
+ c001b64:	e55b2022 	ldrb	r2, [fp, #-34]	; 0xffffffde
+ c001b68:	e1a02082 	lsl	r2, r2, #1
+ c001b6c:	e0802002 	add	r2, r0, r2
+ c001b70:	e1d220b0 	ldrh	r2, [r2]
+ c001b74:	e1a02802 	lsl	r2, r2, #16
+ c001b78:	e1a00822 	lsr	r0, r2, #16
+ c001b7c:	e55b2016 	ldrb	r2, [fp, #-22]	; 0xffffffea
+ c001b80:	e2422001 	sub	r2, r2, #1
+ c001b84:	e3a0c001 	mov	ip, #1
+ c001b88:	e1a0221c 	lsl	r2, ip, r2
+ c001b8c:	e1a02802 	lsl	r2, r2, #16
+ c001b90:	e1a02822 	lsr	r2, r2, #16
+ c001b94:	e1e02002 	mvn	r2, r2
+ c001b98:	e1a02802 	lsl	r2, r2, #16
+ c001b9c:	e1a02822 	lsr	r2, r2, #16
+ c001ba0:	e0002002 	and	r2, r0, r2
+ c001ba4:	e1a02802 	lsl	r2, r2, #16
+ c001ba8:	e1a02822 	lsr	r2, r2, #16
+ c001bac:	e1a02802 	lsl	r2, r2, #16
+ c001bb0:	e1a02822 	lsr	r2, r2, #16
+ c001bb4:	e1a03083 	lsl	r3, r3, #1
+ c001bb8:	e0813003 	add	r3, r1, r3
+ c001bbc:	e1c320b0 	strh	r2, [r3]
+		}
+		filaX++;
+ c001bc0:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001bc4:	e2833001 	add	r3, r3, #1
+ c001bc8:	e54b300d 	strb	r3, [fp, #-13]
+			cuadricula[fila][columna] &= ~(1 << (valor-1));					//Ponemos el valor a 0 (no se puede poner)
+		}
+		columnaX++;
+	}
+	//recorer columna recalculando candidatos
+	while(filaX<9){
+ c001bcc:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001bd0:	e3530008 	cmp	r3, #8
+ c001bd4:	9affffb7 	bls	c001ab8 <sudoku_candidatos_c+0x1ac>
+			cuadricula[fila][columna] &= ~(1 << (valor-1));					//Ponemos el valor a 0 (no se puede poner)
+		}
+		filaX++;
+	}
+	//recorrer region recalculando candidatos
+	uint8_t fInicio = fila - (fila%3);       //Se posiciona en la primera posicion del cuadrante y se usa para iterar dentro
+ c001bd8:	e55b2021 	ldrb	r2, [fp, #-33]	; 0xffffffdf
+ c001bdc:	e59f3238 	ldr	r3, [pc, #568]	; c001e1c <sudoku_candidatos_c+0x510>
+ c001be0:	e0831392 	umull	r1, r3, r2, r3
+ c001be4:	e1a010a3 	lsr	r1, r3, #1
+ c001be8:	e1a03001 	mov	r3, r1
+ c001bec:	e1a03083 	lsl	r3, r3, #1
+ c001bf0:	e0833001 	add	r3, r3, r1
+ c001bf4:	e0633002 	rsb	r3, r3, r2
+ c001bf8:	e20330ff 	and	r3, r3, #255	; 0xff
+ c001bfc:	e55b2021 	ldrb	r2, [fp, #-33]	; 0xffffffdf
+ c001c00:	e0633002 	rsb	r3, r3, r2
+ c001c04:	e54b3017 	strb	r3, [fp, #-23]	; 0xffffffe9
+	uint8_t cInicio = columna;
+ c001c08:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001c0c:	e54b3018 	strb	r3, [fp, #-24]	; 0xffffffe8
+	cInicio = cInicio - (columna%3);
+ c001c10:	e55b2022 	ldrb	r2, [fp, #-34]	; 0xffffffde
+ c001c14:	e59f3200 	ldr	r3, [pc, #512]	; c001e1c <sudoku_candidatos_c+0x510>
+ c001c18:	e0831392 	umull	r1, r3, r2, r3
+ c001c1c:	e1a010a3 	lsr	r1, r3, #1
+ c001c20:	e1a03001 	mov	r3, r1
+ c001c24:	e1a03083 	lsl	r3, r3, #1
+ c001c28:	e0833001 	add	r3, r3, r1
+ c001c2c:	e0633002 	rsb	r3, r3, r2
+ c001c30:	e20330ff 	and	r3, r3, #255	; 0xff
+ c001c34:	e55b2018 	ldrb	r2, [fp, #-24]	; 0xffffffe8
+ c001c38:	e0633002 	rsb	r3, r3, r2
+ c001c3c:	e54b3018 	strb	r3, [fp, #-24]	; 0xffffffe8
+	filaX=fInicio; columnaX=cInicio;
+ c001c40:	e55b3017 	ldrb	r3, [fp, #-23]	; 0xffffffe9
+ c001c44:	e54b300d 	strb	r3, [fp, #-13]
+ c001c48:	e55b3018 	ldrb	r3, [fp, #-24]	; 0xffffffe8
+ c001c4c:	e54b300e 	strb	r3, [fp, #-14]
+	int i = 0;
+ c001c50:	e3a03000 	mov	r3, #0
+ c001c54:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+	while(i<9){
+ c001c58:	ea00005a 	b	c001dc8 <sudoku_candidatos_c+0x4bc>
+		if(filaX!=fila && columnaX!=columna){
+ c001c5c:	e55b200d 	ldrb	r2, [fp, #-13]
+ c001c60:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001c64:	e1520003 	cmp	r2, r3
+ c001c68:	0a000045 	beq	c001d84 <sudoku_candidatos_c+0x478>
+ c001c6c:	e55b200e 	ldrb	r2, [fp, #-14]
+ c001c70:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001c74:	e1520003 	cmp	r2, r3
+ c001c78:	0a000041 	beq	c001d84 <sudoku_candidatos_c+0x478>
+			if (((cuadricula[filaX][columnaX] & 0x0800) != 0) ||
+ c001c7c:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001c80:	e1a03283 	lsl	r3, r3, #5
+ c001c84:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001c88:	e0822003 	add	r2, r2, r3
+ c001c8c:	e55b300e 	ldrb	r3, [fp, #-14]
+ c001c90:	e1a03083 	lsl	r3, r3, #1
+ c001c94:	e0823003 	add	r3, r2, r3
+ c001c98:	e1d330b0 	ldrh	r3, [r3]
+ c001c9c:	e2033b02 	and	r3, r3, #2048	; 0x800
+ c001ca0:	e3530000 	cmp	r3, #0
+ c001ca4:	1a00000a 	bne	c001cd4 <sudoku_candidatos_c+0x3c8>
+					((cuadricula[filaX][columnaX] & 0xF000) != 0)) { 			//Si es pista lo añadimos o no es pista pero es !=0
+ c001ca8:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001cac:	e1a03283 	lsl	r3, r3, #5
+ c001cb0:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001cb4:	e0822003 	add	r2, r2, r3
+ c001cb8:	e55b300e 	ldrb	r3, [fp, #-14]
+ c001cbc:	e1a03083 	lsl	r3, r3, #1
+ c001cc0:	e0823003 	add	r3, r2, r3
+ c001cc4:	e1d330b0 	ldrh	r3, [r3]
+ c001cc8:	e2033a0f 	and	r3, r3, #61440	; 0xf000
+	cInicio = cInicio - (columna%3);
+	filaX=fInicio; columnaX=cInicio;
+	int i = 0;
+	while(i<9){
+		if(filaX!=fila && columnaX!=columna){
+			if (((cuadricula[filaX][columnaX] & 0x0800) != 0) ||
+ c001ccc:	e3530000 	cmp	r3, #0
+ c001cd0:	0a00002b 	beq	c001d84 <sudoku_candidatos_c+0x478>
+					((cuadricula[filaX][columnaX] & 0xF000) != 0)) { 			//Si es pista lo añadimos o no es pista pero es !=0
+				uint8_t valor = celda_leer_valor(cuadricula[filaX][columnaX]);	//Sacamos el valor
+ c001cd4:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001cd8:	e1a03283 	lsl	r3, r3, #5
+ c001cdc:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001ce0:	e0822003 	add	r2, r2, r3
+ c001ce4:	e55b300e 	ldrb	r3, [fp, #-14]
+ c001ce8:	e1a03083 	lsl	r3, r3, #1
+ c001cec:	e0823003 	add	r3, r2, r3
+ c001cf0:	e1d330b0 	ldrh	r3, [r3]
+ c001cf4:	e1a00003 	mov	r0, r3
+ c001cf8:	ebfffef4 	bl	c0018d0 <celda_leer_valor>
+ c001cfc:	e1a03000 	mov	r3, r0
+ c001d00:	e54b3019 	strb	r3, [fp, #-25]	; 0xffffffe7
+				cuadricula[fila][columna] &= ~(1 << (valor-1));					//Ponemos el valor a 0 (no se puede poner)
+ c001d04:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001d08:	e1a03283 	lsl	r3, r3, #5
+ c001d0c:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001d10:	e0821003 	add	r1, r2, r3
+ c001d14:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001d18:	e55b2021 	ldrb	r2, [fp, #-33]	; 0xffffffdf
+ c001d1c:	e1a02282 	lsl	r2, r2, #5
+ c001d20:	e51b0020 	ldr	r0, [fp, #-32]	; 0xffffffe0
+ c001d24:	e0800002 	add	r0, r0, r2
+ c001d28:	e55b2022 	ldrb	r2, [fp, #-34]	; 0xffffffde
+ c001d2c:	e1a02082 	lsl	r2, r2, #1
+ c001d30:	e0802002 	add	r2, r0, r2
+ c001d34:	e1d220b0 	ldrh	r2, [r2]
+ c001d38:	e1a02802 	lsl	r2, r2, #16
+ c001d3c:	e1a00822 	lsr	r0, r2, #16
+ c001d40:	e55b2019 	ldrb	r2, [fp, #-25]	; 0xffffffe7
+ c001d44:	e2422001 	sub	r2, r2, #1
+ c001d48:	e3a0c001 	mov	ip, #1
+ c001d4c:	e1a0221c 	lsl	r2, ip, r2
+ c001d50:	e1a02802 	lsl	r2, r2, #16
+ c001d54:	e1a02822 	lsr	r2, r2, #16
+ c001d58:	e1e02002 	mvn	r2, r2
+ c001d5c:	e1a02802 	lsl	r2, r2, #16
+ c001d60:	e1a02822 	lsr	r2, r2, #16
+ c001d64:	e0002002 	and	r2, r0, r2
+ c001d68:	e1a02802 	lsl	r2, r2, #16
+ c001d6c:	e1a02822 	lsr	r2, r2, #16
+ c001d70:	e1a02802 	lsl	r2, r2, #16
+ c001d74:	e1a02822 	lsr	r2, r2, #16
+ c001d78:	e1a03083 	lsl	r3, r3, #1
+ c001d7c:	e0813003 	add	r3, r1, r3
+ c001d80:	e1c320b0 	strh	r2, [r3]
+			}
+		}
+		if(filaX==fInicio+2){	//Avanzamos por el sudoku
+ c001d84:	e55b200d 	ldrb	r2, [fp, #-13]
+ c001d88:	e55b3017 	ldrb	r3, [fp, #-23]	; 0xffffffe9
+ c001d8c:	e2833002 	add	r3, r3, #2
+ c001d90:	e1520003 	cmp	r2, r3
+ c001d94:	1a000005 	bne	c001db0 <sudoku_candidatos_c+0x4a4>
+			filaX=fInicio;
+ c001d98:	e55b3017 	ldrb	r3, [fp, #-23]	; 0xffffffe9
+ c001d9c:	e54b300d 	strb	r3, [fp, #-13]
+			columnaX++;
+ c001da0:	e55b300e 	ldrb	r3, [fp, #-14]
+ c001da4:	e2833001 	add	r3, r3, #1
+ c001da8:	e54b300e 	strb	r3, [fp, #-14]
+ c001dac:	ea000002 	b	c001dbc <sudoku_candidatos_c+0x4b0>
+		}else{
+			filaX++;
+ c001db0:	e55b300d 	ldrb	r3, [fp, #-13]
+ c001db4:	e2833001 	add	r3, r3, #1
+ c001db8:	e54b300d 	strb	r3, [fp, #-13]
+		}
+		i++;
+ c001dbc:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001dc0:	e2833001 	add	r3, r3, #1
+ c001dc4:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+	uint8_t fInicio = fila - (fila%3);       //Se posiciona en la primera posicion del cuadrante y se usa para iterar dentro
+	uint8_t cInicio = columna;
+	cInicio = cInicio - (columna%3);
+	filaX=fInicio; columnaX=cInicio;
+	int i = 0;
+	while(i<9){
+ c001dc8:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001dcc:	e3530008 	cmp	r3, #8
+ c001dd0:	daffffa1 	ble	c001c5c <sudoku_candidatos_c+0x350>
+		}
+		i++;
+	}
+	
+	//retornar indicando si la celda tiene un valor o esta vacia
+	if ((cuadricula[fila][columna] & 0xF000) != 0) return TRUE;
+ c001dd4:	e55b3021 	ldrb	r3, [fp, #-33]	; 0xffffffdf
+ c001dd8:	e1a03283 	lsl	r3, r3, #5
+ c001ddc:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001de0:	e0822003 	add	r2, r2, r3
+ c001de4:	e55b3022 	ldrb	r3, [fp, #-34]	; 0xffffffde
+ c001de8:	e1a03083 	lsl	r3, r3, #1
+ c001dec:	e0823003 	add	r3, r2, r3
+ c001df0:	e1d330b0 	ldrh	r3, [r3]
+ c001df4:	e2033a0f 	and	r3, r3, #61440	; 0xf000
+ c001df8:	e3530000 	cmp	r3, #0
+ c001dfc:	0a000001 	beq	c001e08 <sudoku_candidatos_c+0x4fc>
+ c001e00:	e3a03001 	mov	r3, #1
+ c001e04:	ea000000 	b	c001e0c <sudoku_candidatos_c+0x500>
+	return FALSE;
+ c001e08:	e3a03000 	mov	r3, #0
+}
+ c001e0c:	e1a00003 	mov	r0, r3
+ c001e10:	e24bd00c 	sub	sp, fp, #12
+ c001e14:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001e18:	e12fff1e 	bx	lr
+ c001e1c:	aaaaaaab 	.word	0xaaaaaaab
+
+0c001e20 <sudoku_recalcular_c>:
+
+////////////////////////////////////////////////////////////////////////////////
+// recalcula todo el tablero (9x9) buscando candidatos con C
+// retorna el numero de celdas vacias
+////////////////////////////////////////////////////////////////////////////////
+int sudoku_recalcular_c(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+ c001e20:	e1a0c00d 	mov	ip, sp
+ c001e24:	e92dd800 	push	{fp, ip, lr, pc}
+ c001e28:	e24cb004 	sub	fp, ip, #4
+ c001e2c:	e24dd018 	sub	sp, sp, #24
+ c001e30:	e50b0020 	str	r0, [fp, #-32]	; 0xffffffe0
+	int celdasVacias = 0;
+ c001e34:	e3a03000 	mov	r3, #0
+ c001e38:	e50b3010 	str	r3, [fp, #-16]
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+ c001e3c:	e3a03000 	mov	r3, #0
+ c001e40:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c001e44:	ea000024 	b	c001edc <sudoku_recalcular_c+0xbc>
+		for(j=0;j<NUM_COLUMNAS-7;j++){ //para cada columna
+ c001e48:	e3a03000 	mov	r3, #0
+ c001e4c:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+ c001e50:	ea00001b 	b	c001ec4 <sudoku_recalcular_c+0xa4>
+			if(((cuadricula[i][j] & 0x0800) == 0) && !sudoku_candidatos_c(cuadricula,i,j)){ //determinar candidatos si no es pista
+ c001e54:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001e58:	e1a03283 	lsl	r3, r3, #5
+ c001e5c:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001e60:	e0822003 	add	r2, r2, r3
+ c001e64:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c001e68:	e1a03083 	lsl	r3, r3, #1
+ c001e6c:	e0823003 	add	r3, r2, r3
+ c001e70:	e1d330b0 	ldrh	r3, [r3]
+ c001e74:	e2033b02 	and	r3, r3, #2048	; 0x800
+ c001e78:	e3530000 	cmp	r3, #0
+ c001e7c:	1a00000d 	bne	c001eb8 <sudoku_recalcular_c+0x98>
+ c001e80:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001e84:	e20320ff 	and	r2, r3, #255	; 0xff
+ c001e88:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c001e8c:	e20330ff 	and	r3, r3, #255	; 0xff
+ c001e90:	e51b0020 	ldr	r0, [fp, #-32]	; 0xffffffe0
+ c001e94:	e1a01002 	mov	r1, r2
+ c001e98:	e1a02003 	mov	r2, r3
+ c001e9c:	ebfffe9a 	bl	c00190c <sudoku_candidatos_c>
+ c001ea0:	e1a03000 	mov	r3, r0
+ c001ea4:	e3530000 	cmp	r3, #0
+ c001ea8:	1a000002 	bne	c001eb8 <sudoku_recalcular_c+0x98>
+				celdasVacias++; //actualizar contador de celdas vacias
+ c001eac:	e51b3010 	ldr	r3, [fp, #-16]
+ c001eb0:	e2833001 	add	r3, r3, #1
+ c001eb4:	e50b3010 	str	r3, [fp, #-16]
+int sudoku_recalcular_c(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+	int celdasVacias = 0;
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+		for(j=0;j<NUM_COLUMNAS-7;j++){ //para cada columna
+ c001eb8:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c001ebc:	e2833001 	add	r3, r3, #1
+ c001ec0:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+ c001ec4:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c001ec8:	e3530008 	cmp	r3, #8
+ c001ecc:	daffffe0 	ble	c001e54 <sudoku_recalcular_c+0x34>
+////////////////////////////////////////////////////////////////////////////////
+int sudoku_recalcular_c(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+	int celdasVacias = 0;
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+ c001ed0:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001ed4:	e2833001 	add	r3, r3, #1
+ c001ed8:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c001edc:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001ee0:	e3530008 	cmp	r3, #8
+ c001ee4:	daffffd7 	ble	c001e48 <sudoku_recalcular_c+0x28>
+			if(((cuadricula[i][j] & 0x0800) == 0) && !sudoku_candidatos_c(cuadricula,i,j)){ //determinar candidatos si no es pista
+				celdasVacias++; //actualizar contador de celdas vacias
+			}
+		}
+	}
+	return celdasVacias; //retornar el numero de celdas vacias
+ c001ee8:	e51b3010 	ldr	r3, [fp, #-16]
+}
+ c001eec:	e1a00003 	mov	r0, r3
+ c001ef0:	e24bd00c 	sub	sp, fp, #12
+ c001ef4:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001ef8:	e12fff1e 	bx	lr
+
+0c001efc <sudoku_recalcular_c_arm>:
+////////////////////////////////////////////////////////////////////////////////
+// recalcula todo el tablero (9x9) buscando candidatos con ARM
+// retorna el numero de celdas vacias
+////////////////////////////////////////////////////////////////////////////////
+int sudoku_recalcular_c_arm(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+ c001efc:	e1a0c00d 	mov	ip, sp
+ c001f00:	e92dd800 	push	{fp, ip, lr, pc}
+ c001f04:	e24cb004 	sub	fp, ip, #4
+ c001f08:	e24dd018 	sub	sp, sp, #24
+ c001f0c:	e50b0020 	str	r0, [fp, #-32]	; 0xffffffe0
+	int celdasVacias = 0;
+ c001f10:	e3a03000 	mov	r3, #0
+ c001f14:	e50b3010 	str	r3, [fp, #-16]
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+ c001f18:	e3a03000 	mov	r3, #0
+ c001f1c:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c001f20:	ea000020 	b	c001fa8 <sudoku_recalcular_c_arm+0xac>
+		for(j=0;j<NUM_COLUMNAS-7;j++){ //para cada columna
+ c001f24:	e3a03000 	mov	r3, #0
+ c001f28:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+ c001f2c:	ea000017 	b	c001f90 <sudoku_recalcular_c_arm+0x94>
+			if(((cuadricula[i][j] & 0x0800) == 0) && !sudoku_candidatos_arm(cuadricula,i,j)){ //determinar candidatos si no es pista
+ c001f30:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001f34:	e1a03283 	lsl	r3, r3, #5
+ c001f38:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c001f3c:	e0822003 	add	r2, r2, r3
+ c001f40:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c001f44:	e1a03083 	lsl	r3, r3, #1
+ c001f48:	e0823003 	add	r3, r2, r3
+ c001f4c:	e1d330b0 	ldrh	r3, [r3]
+ c001f50:	e2033b02 	and	r3, r3, #2048	; 0x800
+ c001f54:	e3530000 	cmp	r3, #0
+ c001f58:	1a000009 	bne	c001f84 <sudoku_recalcular_c_arm+0x88>
+ c001f5c:	e51b0020 	ldr	r0, [fp, #-32]	; 0xffffffe0
+ c001f60:	e51b1014 	ldr	r1, [fp, #-20]	; 0xffffffec
+ c001f64:	e51b2018 	ldr	r2, [fp, #-24]	; 0xffffffe8
+ c001f68:	eb00024f 	bl	c0028ac <sudoku_candidatos_arm>
+ c001f6c:	e1a03000 	mov	r3, r0
+ c001f70:	e3530000 	cmp	r3, #0
+ c001f74:	1a000002 	bne	c001f84 <sudoku_recalcular_c_arm+0x88>
+				celdasVacias++; //actualizar contador de celdas vacias
+ c001f78:	e51b3010 	ldr	r3, [fp, #-16]
+ c001f7c:	e2833001 	add	r3, r3, #1
+ c001f80:	e50b3010 	str	r3, [fp, #-16]
+int sudoku_recalcular_c_arm(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+	int celdasVacias = 0;
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+		for(j=0;j<NUM_COLUMNAS-7;j++){ //para cada columna
+ c001f84:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c001f88:	e2833001 	add	r3, r3, #1
+ c001f8c:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+ c001f90:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c001f94:	e3530008 	cmp	r3, #8
+ c001f98:	daffffe4 	ble	c001f30 <sudoku_recalcular_c_arm+0x34>
+////////////////////////////////////////////////////////////////////////////////
+int sudoku_recalcular_c_arm(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+	int celdasVacias = 0;
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+ c001f9c:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001fa0:	e2833001 	add	r3, r3, #1
+ c001fa4:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c001fa8:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c001fac:	e3530008 	cmp	r3, #8
+ c001fb0:	daffffdb 	ble	c001f24 <sudoku_recalcular_c_arm+0x28>
+			if(((cuadricula[i][j] & 0x0800) == 0) && !sudoku_candidatos_arm(cuadricula,i,j)){ //determinar candidatos si no es pista
+				celdasVacias++; //actualizar contador de celdas vacias
+			}
+		}
+	}
+	return celdasVacias; //retornar el numero de celdas vacias
+ c001fb4:	e51b3010 	ldr	r3, [fp, #-16]
+}
+ c001fb8:	e1a00003 	mov	r0, r3
+ c001fbc:	e24bd00c 	sub	sp, fp, #12
+ c001fc0:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c001fc4:	e12fff1e 	bx	lr
+
+0c001fc8 <sudoku_recalcular_c_thumb>:
+
+////////////////////////////////////////////////////////////////////////////////
+// recalcula todo el tablero (9x9) buscando candidatos con THUMB
+// retorna el numero de celdas vacias
+////////////////////////////////////////////////////////////////////////////////
+int sudoku_recalcular_c_thumb(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+ c001fc8:	e1a0c00d 	mov	ip, sp
+ c001fcc:	e92dd800 	push	{fp, ip, lr, pc}
+ c001fd0:	e24cb004 	sub	fp, ip, #4
+ c001fd4:	e24dd018 	sub	sp, sp, #24
+ c001fd8:	e50b0020 	str	r0, [fp, #-32]	; 0xffffffe0
+	int celdasVacias = 0;
+ c001fdc:	e3a03000 	mov	r3, #0
+ c001fe0:	e50b3010 	str	r3, [fp, #-16]
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+ c001fe4:	e3a03000 	mov	r3, #0
+ c001fe8:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c001fec:	ea000020 	b	c002074 <sudoku_recalcular_c_thumb+0xac>
+		for(j=0;j<NUM_COLUMNAS-7;j++){ //para cada columna
+ c001ff0:	e3a03000 	mov	r3, #0
+ c001ff4:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+ c001ff8:	ea000017 	b	c00205c <sudoku_recalcular_c_thumb+0x94>
+			if(((cuadricula[i][j] & 0x0800) == 0) && !sudoku_candidatos_thumb(cuadricula,i,j)){ //determinar candidatos si no es pista
+ c001ffc:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002000:	e1a03283 	lsl	r3, r3, #5
+ c002004:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c002008:	e0822003 	add	r2, r2, r3
+ c00200c:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c002010:	e1a03083 	lsl	r3, r3, #1
+ c002014:	e0823003 	add	r3, r2, r3
+ c002018:	e1d330b0 	ldrh	r3, [r3]
+ c00201c:	e2033b02 	and	r3, r3, #2048	; 0x800
+ c002020:	e3530000 	cmp	r3, #0
+ c002024:	1a000009 	bne	c002050 <sudoku_recalcular_c_thumb+0x88>
+ c002028:	e51b0020 	ldr	r0, [fp, #-32]	; 0xffffffe0
+ c00202c:	e51b1014 	ldr	r1, [fp, #-20]	; 0xffffffec
+ c002030:	e51b2018 	ldr	r2, [fp, #-24]	; 0xffffffe8
+ c002034:	eb00017d 	bl	c002630 <sudoku_candidatos_thumb>
+ c002038:	e1a03000 	mov	r3, r0
+ c00203c:	e3530000 	cmp	r3, #0
+ c002040:	1a000002 	bne	c002050 <sudoku_recalcular_c_thumb+0x88>
+							celdasVacias++; //actualizar contador de celdas vacias
+ c002044:	e51b3010 	ldr	r3, [fp, #-16]
+ c002048:	e2833001 	add	r3, r3, #1
+ c00204c:	e50b3010 	str	r3, [fp, #-16]
+int sudoku_recalcular_c_thumb(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+	int celdasVacias = 0;
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+		for(j=0;j<NUM_COLUMNAS-7;j++){ //para cada columna
+ c002050:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c002054:	e2833001 	add	r3, r3, #1
+ c002058:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+ c00205c:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c002060:	e3530008 	cmp	r3, #8
+ c002064:	daffffe4 	ble	c001ffc <sudoku_recalcular_c_thumb+0x34>
+////////////////////////////////////////////////////////////////////////////////
+int sudoku_recalcular_c_thumb(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS]) {
+	int celdasVacias = 0;
+	int i;
+	int j;
+	for(i=0;i<NUM_FILAS;i++){ 	//para cada fila
+ c002068:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c00206c:	e2833001 	add	r3, r3, #1
+ c002070:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c002074:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002078:	e3530008 	cmp	r3, #8
+ c00207c:	daffffdb 	ble	c001ff0 <sudoku_recalcular_c_thumb+0x28>
+			if(((cuadricula[i][j] & 0x0800) == 0) && !sudoku_candidatos_thumb(cuadricula,i,j)){ //determinar candidatos si no es pista
+							celdasVacias++; //actualizar contador de celdas vacias
+			}
+		}
+	}
+	return celdasVacias; //retornar el numero de celdas vacias
+ c002080:	e51b3010 	ldr	r3, [fp, #-16]
+}
+ c002084:	e1a00003 	mov	r0, r3
+ c002088:	e24bd00c 	sub	sp, fp, #12
+ c00208c:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c002090:	e12fff1e 	bx	lr
+
+0c002094 <validar>:
+
+////////////////////////////////////////////////////////////////////////////////
+// valida un tablero (9x9) comparandolo con otro cuyos resultados son correctos
+//retorna 1 si y solo si son iguales, 0 en caso contrario
+////////////////////////////////////////////////////////////////////////////////
+int validar(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS], CELDA resultado_C[NUM_FILAS][NUM_COLUMNAS]) {
+ c002094:	e1a0c00d 	mov	ip, sp
+ c002098:	e92dd800 	push	{fp, ip, lr, pc}
+ c00209c:	e24cb004 	sub	fp, ip, #4
+ c0020a0:	e24dd018 	sub	sp, sp, #24
+ c0020a4:	e50b0020 	str	r0, [fp, #-32]	; 0xffffffe0
+ c0020a8:	e50b1024 	str	r1, [fp, #-36]	; 0xffffffdc
+	int i,j,iguales=TRUE;
+ c0020ac:	e3a03001 	mov	r3, #1
+ c0020b0:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+	for(i=0;i<NUM_FILAS;i++) {
+ c0020b4:	e3a03000 	mov	r3, #0
+ c0020b8:	e50b3010 	str	r3, [fp, #-16]
+ c0020bc:	ea000021 	b	c002148 <validar+0xb4>
+		for(j=0;j<NUM_COLUMNAS;j++) {
+ c0020c0:	e3a03000 	mov	r3, #0
+ c0020c4:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c0020c8:	ea000018 	b	c002130 <validar+0x9c>
+			if(cuadricula[i][j]!=resultado_C[i][j]){
+ c0020cc:	e51b3010 	ldr	r3, [fp, #-16]
+ c0020d0:	e1a03283 	lsl	r3, r3, #5
+ c0020d4:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c0020d8:	e0822003 	add	r2, r2, r3
+ c0020dc:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c0020e0:	e1a03083 	lsl	r3, r3, #1
+ c0020e4:	e0823003 	add	r3, r2, r3
+ c0020e8:	e1d320b0 	ldrh	r2, [r3]
+ c0020ec:	e51b3010 	ldr	r3, [fp, #-16]
+ c0020f0:	e1a03283 	lsl	r3, r3, #5
+ c0020f4:	e51b1024 	ldr	r1, [fp, #-36]	; 0xffffffdc
+ c0020f8:	e0811003 	add	r1, r1, r3
+ c0020fc:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002100:	e1a03083 	lsl	r3, r3, #1
+ c002104:	e0813003 	add	r3, r1, r3
+ c002108:	e1d330b0 	ldrh	r3, [r3]
+ c00210c:	e1520003 	cmp	r2, r3
+ c002110:	0a000003 	beq	c002124 <validar+0x90>
+				iguales = FALSE;
+ c002114:	e3a03000 	mov	r3, #0
+ c002118:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+				return iguales;
+ c00211c:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c002120:	ea00000c 	b	c002158 <validar+0xc4>
+//retorna 1 si y solo si son iguales, 0 en caso contrario
+////////////////////////////////////////////////////////////////////////////////
+int validar(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS], CELDA resultado_C[NUM_FILAS][NUM_COLUMNAS]) {
+	int i,j,iguales=TRUE;
+	for(i=0;i<NUM_FILAS;i++) {
+		for(j=0;j<NUM_COLUMNAS;j++) {
+ c002124:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002128:	e2833001 	add	r3, r3, #1
+ c00212c:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c002130:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002134:	e353000f 	cmp	r3, #15
+ c002138:	daffffe3 	ble	c0020cc <validar+0x38>
+// valida un tablero (9x9) comparandolo con otro cuyos resultados son correctos
+//retorna 1 si y solo si son iguales, 0 en caso contrario
+////////////////////////////////////////////////////////////////////////////////
+int validar(CELDA cuadricula[NUM_FILAS][NUM_COLUMNAS], CELDA resultado_C[NUM_FILAS][NUM_COLUMNAS]) {
+	int i,j,iguales=TRUE;
+	for(i=0;i<NUM_FILAS;i++) {
+ c00213c:	e51b3010 	ldr	r3, [fp, #-16]
+ c002140:	e2833001 	add	r3, r3, #1
+ c002144:	e50b3010 	str	r3, [fp, #-16]
+ c002148:	e51b3010 	ldr	r3, [fp, #-16]
+ c00214c:	e3530008 	cmp	r3, #8
+ c002150:	daffffda 	ble	c0020c0 <validar+0x2c>
+				iguales = FALSE;
+				return iguales;
+			}
+		}
+	}
+	return iguales;
+ c002154:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+}
+ c002158:	e1a00003 	mov	r0, r3
+ c00215c:	e24bd00c 	sub	sp, fp, #12
+ c002160:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c002164:	e12fff1e 	bx	lr
+
+0c002168 <reiniciar_tablero>:
+
+////////////////////////////////////////////////////////////////////////////////
+// Reinicia un tablero (9x9) al tablero por inicial
+////////////////////////////////////////////////////////////////////////////////
+void reiniciar_tablero() {
+ c002168:	e1a0c00d 	mov	ip, sp
+ c00216c:	e92dd800 	push	{fp, ip, lr, pc}
+ c002170:	e24cb004 	sub	fp, ip, #4
+ c002174:	e24dd008 	sub	sp, sp, #8
+	int i,j;
+	for(i=0;i<NUM_FILAS;i++) {
+ c002178:	e3a03000 	mov	r3, #0
+ c00217c:	e50b3010 	str	r3, [fp, #-16]
+ c002180:	ea00001b 	b	c0021f4 <reiniciar_tablero+0x8c>
+		for(j=0;j<NUM_COLUMNAS-7;j++) {
+ c002184:	e3a03000 	mov	r3, #0
+ c002188:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c00218c:	ea000012 	b	c0021dc <reiniciar_tablero+0x74>
+			cAux[i][j] = cOriginal[i][j];
+ c002190:	e59f2074 	ldr	r2, [pc, #116]	; c00220c <reiniciar_tablero+0xa4>
+ c002194:	e51b3010 	ldr	r3, [fp, #-16]
+ c002198:	e1a01203 	lsl	r1, r3, #4
+ c00219c:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c0021a0:	e0813003 	add	r3, r1, r3
+ c0021a4:	e1a03083 	lsl	r3, r3, #1
+ c0021a8:	e0823003 	add	r3, r2, r3
+ c0021ac:	e1d320b0 	ldrh	r2, [r3]
+ c0021b0:	e59f1058 	ldr	r1, [pc, #88]	; c002210 <reiniciar_tablero+0xa8>
+ c0021b4:	e51b3010 	ldr	r3, [fp, #-16]
+ c0021b8:	e1a00203 	lsl	r0, r3, #4
+ c0021bc:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c0021c0:	e0803003 	add	r3, r0, r3
+ c0021c4:	e1a03083 	lsl	r3, r3, #1
+ c0021c8:	e0813003 	add	r3, r1, r3
+ c0021cc:	e1c320b0 	strh	r2, [r3]
+// Reinicia un tablero (9x9) al tablero por inicial
+////////////////////////////////////////////////////////////////////////////////
+void reiniciar_tablero() {
+	int i,j;
+	for(i=0;i<NUM_FILAS;i++) {
+		for(j=0;j<NUM_COLUMNAS-7;j++) {
+ c0021d0:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c0021d4:	e2833001 	add	r3, r3, #1
+ c0021d8:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c0021dc:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c0021e0:	e3530008 	cmp	r3, #8
+ c0021e4:	daffffe9 	ble	c002190 <reiniciar_tablero+0x28>
+////////////////////////////////////////////////////////////////////////////////
+// Reinicia un tablero (9x9) al tablero por inicial
+////////////////////////////////////////////////////////////////////////////////
+void reiniciar_tablero() {
+	int i,j;
+	for(i=0;i<NUM_FILAS;i++) {
+ c0021e8:	e51b3010 	ldr	r3, [fp, #-16]
+ c0021ec:	e2833001 	add	r3, r3, #1
+ c0021f0:	e50b3010 	str	r3, [fp, #-16]
+ c0021f4:	e51b3010 	ldr	r3, [fp, #-16]
+ c0021f8:	e3530008 	cmp	r3, #8
+ c0021fc:	daffffe0 	ble	c002184 <reiniciar_tablero+0x1c>
+		for(j=0;j<NUM_COLUMNAS-7;j++) {
+			cAux[i][j] = cOriginal[i][j];
+		}
+	}
+}
+ c002200:	e24bd00c 	sub	sp, fp, #12
+ c002204:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c002208:	e12fff1e 	bx	lr
+ c00220c:	0c002f60 	.word	0x0c002f60
+ c002210:	0c003080 	.word	0x0c003080
+
+0c002214 <iniciarArmThumb>:
+
+////////////////////////////////////////////////////////////////////////////////
+// Recalcula todo el sudoku
+////////////////////////////////////////////////////////////////////////////////
+void iniciarArmThumb(){
+ c002214:	e1a0c00d 	mov	ip, sp
+ c002218:	e92dd800 	push	{fp, ip, lr, pc}
+ c00221c:	e24cb004 	sub	fp, ip, #4
+	sudoku_recalcular_arm_thumb(cuadricula);
+ c002220:	e59f000c 	ldr	r0, [pc, #12]	; c002234 <iniciarArmThumb+0x20>
+ c002224:	eb0000dc 	bl	c00259c <sudoku_recalcular_arm_thumb>
+}
+ c002228:	e24bd00c 	sub	sp, fp, #12
+ c00222c:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c002230:	e12fff1e 	bx	lr
+ c002234:	0c002de0 	.word	0x0c002de0
+
+0c002238 <insertValor>:
+
+////////////////////////////////////////////////////////////////////////////////
+// Inserta un valor en una celda y recalcula todo el sudoku, si y solo si
+// dicha celda no es pista.
+////////////////////////////////////////////////////////////////////////////////
+void insertValor(int fila, int columna, int valor){
+ c002238:	e1a0c00d 	mov	ip, sp
+ c00223c:	e92dd800 	push	{fp, ip, lr, pc}
+ c002240:	e24cb004 	sub	fp, ip, #4
+ c002244:	e24dd018 	sub	sp, sp, #24
+ c002248:	e50b0018 	str	r0, [fp, #-24]	; 0xffffffe8
+ c00224c:	e50b101c 	str	r1, [fp, #-28]	; 0xffffffe4
+ c002250:	e50b2020 	str	r2, [fp, #-32]	; 0xffffffe0
+	if((cuadricula[fila][columna] & 0x0800) == 0){
+ c002254:	e59f2074 	ldr	r2, [pc, #116]	; c0022d0 <insertValor+0x98>
+ c002258:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c00225c:	e1a01203 	lsl	r1, r3, #4
+ c002260:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c002264:	e0813003 	add	r3, r1, r3
+ c002268:	e1a03083 	lsl	r3, r3, #1
+ c00226c:	e0823003 	add	r3, r2, r3
+ c002270:	e1d330b0 	ldrh	r3, [r3]
+ c002274:	e2033b02 	and	r3, r3, #2048	; 0x800
+ c002278:	e3530000 	cmp	r3, #0
+ c00227c:	1a000010 	bne	c0022c4 <insertValor+0x8c>
+		celda_poner_valor(&cuadricula[fila-1][columna-1], valor);
+ c002280:	e59f2048 	ldr	r2, [pc, #72]	; c0022d0 <insertValor+0x98>
+ c002284:	e51b3018 	ldr	r3, [fp, #-24]	; 0xffffffe8
+ c002288:	e2433001 	sub	r3, r3, #1
+ c00228c:	e1a01203 	lsl	r1, r3, #4
+ c002290:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c002294:	e0813003 	add	r3, r1, r3
+ c002298:	e2433001 	sub	r3, r3, #1
+ c00229c:	e1a03083 	lsl	r3, r3, #1
+ c0022a0:	e0822003 	add	r2, r2, r3
+ c0022a4:	e51b3020 	ldr	r3, [fp, #-32]	; 0xffffffe0
+ c0022a8:	e20330ff 	and	r3, r3, #255	; 0xff
+ c0022ac:	e1a00002 	mov	r0, r2
+ c0022b0:	e1a01003 	mov	r1, r3
+ c0022b4:	ebfffd68 	bl	c00185c <celda_poner_valor>
+		int celdasVacias = sudoku_recalcular_arm_thumb(cuadricula);
+ c0022b8:	e59f0010 	ldr	r0, [pc, #16]	; c0022d0 <insertValor+0x98>
+ c0022bc:	eb0000b6 	bl	c00259c <sudoku_recalcular_arm_thumb>
+ c0022c0:	e50b0010 	str	r0, [fp, #-16]
+	}
+}
+ c0022c4:	e24bd00c 	sub	sp, fp, #12
+ c0022c8:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c0022cc:	e12fff1e 	bx	lr
+ c0022d0:	0c002de0 	.word	0x0c002de0
+
+0c0022d4 <sudoku9x9>:
+
+////////////////////////////////////////////////////////////////////////////////
+// proceso principal del juego que recibe el tablero,
+// y la señal de ready que indica que se han actualizado fila y columna
+////////////////////////////////////////////////////////////////////////////////
+void sudoku9x9() {
+ c0022d4:	e1a0c00d 	mov	ip, sp
+ c0022d8:	e92dd800 	push	{fp, ip, lr, pc}
+ c0022dc:	e24cb004 	sub	fp, ip, #4
+ c0022e0:	e24dd018 	sub	sp, sp, #24
+	uint32_t t1, t2;
+	int i,j,todos_correctos=TRUE;
+ c0022e4:	e3a03001 	mov	r3, #1
+ c0022e8:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+	for(i=0;i<NUM_FILAS;i++) {
+ c0022ec:	e3a03000 	mov	r3, #0
+ c0022f0:	e50b3010 	str	r3, [fp, #-16]
+ c0022f4:	ea00002b 	b	c0023a8 <sudoku9x9+0xd4>
+		for(j=0;j<NUM_COLUMNAS;j++) {
+ c0022f8:	e3a03000 	mov	r3, #0
+ c0022fc:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c002300:	ea000022 	b	c002390 <sudoku9x9+0xbc>
+			cAux[i][j] = cuadricula[i][j];
+ c002304:	e59f2284 	ldr	r2, [pc, #644]	; c002590 <sudoku9x9+0x2bc>
+ c002308:	e51b3010 	ldr	r3, [fp, #-16]
+ c00230c:	e1a01203 	lsl	r1, r3, #4
+ c002310:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002314:	e0813003 	add	r3, r1, r3
+ c002318:	e1a03083 	lsl	r3, r3, #1
+ c00231c:	e0823003 	add	r3, r2, r3
+ c002320:	e1d320b0 	ldrh	r2, [r3]
+ c002324:	e59f1268 	ldr	r1, [pc, #616]	; c002594 <sudoku9x9+0x2c0>
+ c002328:	e51b3010 	ldr	r3, [fp, #-16]
+ c00232c:	e1a00203 	lsl	r0, r3, #4
+ c002330:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002334:	e0803003 	add	r3, r0, r3
+ c002338:	e1a03083 	lsl	r3, r3, #1
+ c00233c:	e0813003 	add	r3, r1, r3
+ c002340:	e1c320b0 	strh	r2, [r3]
+			cOriginal[i][j] = cuadricula[i][j];
+ c002344:	e59f2244 	ldr	r2, [pc, #580]	; c002590 <sudoku9x9+0x2bc>
+ c002348:	e51b3010 	ldr	r3, [fp, #-16]
+ c00234c:	e1a01203 	lsl	r1, r3, #4
+ c002350:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002354:	e0813003 	add	r3, r1, r3
+ c002358:	e1a03083 	lsl	r3, r3, #1
+ c00235c:	e0823003 	add	r3, r2, r3
+ c002360:	e1d320b0 	ldrh	r2, [r3]
+ c002364:	e59f122c 	ldr	r1, [pc, #556]	; c002598 <sudoku9x9+0x2c4>
+ c002368:	e51b3010 	ldr	r3, [fp, #-16]
+ c00236c:	e1a00203 	lsl	r0, r3, #4
+ c002370:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002374:	e0803003 	add	r3, r0, r3
+ c002378:	e1a03083 	lsl	r3, r3, #1
+ c00237c:	e0813003 	add	r3, r1, r3
+ c002380:	e1c320b0 	strh	r2, [r3]
+////////////////////////////////////////////////////////////////////////////////
+void sudoku9x9() {
+	uint32_t t1, t2;
+	int i,j,todos_correctos=TRUE;
+	for(i=0;i<NUM_FILAS;i++) {
+		for(j=0;j<NUM_COLUMNAS;j++) {
+ c002384:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002388:	e2833001 	add	r3, r3, #1
+ c00238c:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+ c002390:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+ c002394:	e353000f 	cmp	r3, #15
+ c002398:	daffffd9 	ble	c002304 <sudoku9x9+0x30>
+// y la señal de ready que indica que se han actualizado fila y columna
+////////////////////////////////////////////////////////////////////////////////
+void sudoku9x9() {
+	uint32_t t1, t2;
+	int i,j,todos_correctos=TRUE;
+	for(i=0;i<NUM_FILAS;i++) {
+ c00239c:	e51b3010 	ldr	r3, [fp, #-16]
+ c0023a0:	e2833001 	add	r3, r3, #1
+ c0023a4:	e50b3010 	str	r3, [fp, #-16]
+ c0023a8:	e51b3010 	ldr	r3, [fp, #-16]
+ c0023ac:	e3530008 	cmp	r3, #8
+ c0023b0:	daffffd0 	ble	c0022f8 <sudoku9x9+0x24>
+		for(j=0;j<NUM_COLUMNAS;j++) {
+			cAux[i][j] = cuadricula[i][j];
+			cOriginal[i][j] = cuadricula[i][j];
+		}
+	}
+	t1=Timer2_Leer();
+ c0023b4:	eb0001f8 	bl	c002b9c <Timer2_Leer>
+ c0023b8:	e1a03000 	mov	r3, r0
+ c0023bc:	e50b301c 	str	r3, [fp, #-28]	; 0xffffffe4
+	sudoku_recalcular_c(cuadricula);
+ c0023c0:	e59f01c8 	ldr	r0, [pc, #456]	; c002590 <sudoku9x9+0x2bc>
+ c0023c4:	ebfffe95 	bl	c001e20 <sudoku_recalcular_c>
+	t2=Timer2_Leer();
+ c0023c8:	eb0001f3 	bl	c002b9c <Timer2_Leer>
+ c0023cc:	e1a03000 	mov	r3, r0
+ c0023d0:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	t2=t2-t1;
+ c0023d4:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c0023d8:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c0023dc:	e0633002 	rsb	r3, r3, r2
+ c0023e0:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+
+	t1=Timer2_Leer();
+ c0023e4:	eb0001ec 	bl	c002b9c <Timer2_Leer>
+ c0023e8:	e1a03000 	mov	r3, r0
+ c0023ec:	e50b301c 	str	r3, [fp, #-28]	; 0xffffffe4
+	sudoku_recalcular_c_arm(cAux);
+ c0023f0:	e59f019c 	ldr	r0, [pc, #412]	; c002594 <sudoku9x9+0x2c0>
+ c0023f4:	ebfffec0 	bl	c001efc <sudoku_recalcular_c_arm>
+	t2=Timer2_Leer();
+ c0023f8:	eb0001e7 	bl	c002b9c <Timer2_Leer>
+ c0023fc:	e1a03000 	mov	r3, r0
+ c002400:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	t2=t2-t1;
+ c002404:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c002408:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c00240c:	e0633002 	rsb	r3, r3, r2
+ c002410:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	if(!validar(cAux, cuadricula)) 	todos_correctos=FALSE;
+ c002414:	e59f0178 	ldr	r0, [pc, #376]	; c002594 <sudoku9x9+0x2c0>
+ c002418:	e59f1170 	ldr	r1, [pc, #368]	; c002590 <sudoku9x9+0x2bc>
+ c00241c:	ebffff1c 	bl	c002094 <validar>
+ c002420:	e1a03000 	mov	r3, r0
+ c002424:	e3530000 	cmp	r3, #0
+ c002428:	1a000001 	bne	c002434 <sudoku9x9+0x160>
+ c00242c:	e3a03000 	mov	r3, #0
+ c002430:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+	reiniciar_tablero();
+ c002434:	ebffff4b 	bl	c002168 <reiniciar_tablero>
+
+	t1=Timer2_Leer();
+ c002438:	eb0001d7 	bl	c002b9c <Timer2_Leer>
+ c00243c:	e1a03000 	mov	r3, r0
+ c002440:	e50b301c 	str	r3, [fp, #-28]	; 0xffffffe4
+	sudoku_recalcular_c_thumb(cAux);
+ c002444:	e59f0148 	ldr	r0, [pc, #328]	; c002594 <sudoku9x9+0x2c0>
+ c002448:	ebfffede 	bl	c001fc8 <sudoku_recalcular_c_thumb>
+	t2=Timer2_Leer();
+ c00244c:	eb0001d2 	bl	c002b9c <Timer2_Leer>
+ c002450:	e1a03000 	mov	r3, r0
+ c002454:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	t2=t2-t1;
+ c002458:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c00245c:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c002460:	e0633002 	rsb	r3, r3, r2
+ c002464:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	if(!validar(cAux, cuadricula)) 	todos_correctos=FALSE;
+ c002468:	e59f0124 	ldr	r0, [pc, #292]	; c002594 <sudoku9x9+0x2c0>
+ c00246c:	e59f111c 	ldr	r1, [pc, #284]	; c002590 <sudoku9x9+0x2bc>
+ c002470:	ebffff07 	bl	c002094 <validar>
+ c002474:	e1a03000 	mov	r3, r0
+ c002478:	e3530000 	cmp	r3, #0
+ c00247c:	1a000001 	bne	c002488 <sudoku9x9+0x1b4>
+ c002480:	e3a03000 	mov	r3, #0
+ c002484:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+	reiniciar_tablero();
+ c002488:	ebffff36 	bl	c002168 <reiniciar_tablero>
+
+	t1=Timer2_Leer();
+ c00248c:	eb0001c2 	bl	c002b9c <Timer2_Leer>
+ c002490:	e1a03000 	mov	r3, r0
+ c002494:	e50b301c 	str	r3, [fp, #-28]	; 0xffffffe4
+	sudoku_recalcular_arm(cAux);
+ c002498:	e59f00f4 	ldr	r0, [pc, #244]	; c002594 <sudoku9x9+0x2c0>
+ c00249c:	eb0000bf 	bl	c0027a0 <sudoku_recalcular_arm>
+	t2=Timer2_Leer();
+ c0024a0:	eb0001bd 	bl	c002b9c <Timer2_Leer>
+ c0024a4:	e1a03000 	mov	r3, r0
+ c0024a8:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	t2=t2-t1;
+ c0024ac:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c0024b0:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c0024b4:	e0633002 	rsb	r3, r3, r2
+ c0024b8:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	if(!validar(cAux, cuadricula)) 	todos_correctos=FALSE;
+ c0024bc:	e59f00d0 	ldr	r0, [pc, #208]	; c002594 <sudoku9x9+0x2c0>
+ c0024c0:	e59f10c8 	ldr	r1, [pc, #200]	; c002590 <sudoku9x9+0x2bc>
+ c0024c4:	ebfffef2 	bl	c002094 <validar>
+ c0024c8:	e1a03000 	mov	r3, r0
+ c0024cc:	e3530000 	cmp	r3, #0
+ c0024d0:	1a000001 	bne	c0024dc <sudoku9x9+0x208>
+ c0024d4:	e3a03000 	mov	r3, #0
+ c0024d8:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+	reiniciar_tablero();
+ c0024dc:	ebffff21 	bl	c002168 <reiniciar_tablero>
+
+	t1=Timer2_Leer();
+ c0024e0:	eb0001ad 	bl	c002b9c <Timer2_Leer>
+ c0024e4:	e1a03000 	mov	r3, r0
+ c0024e8:	e50b301c 	str	r3, [fp, #-28]	; 0xffffffe4
+	sudoku_recalcular_arm_c(cAux);
+ c0024ec:	e59f00a0 	ldr	r0, [pc, #160]	; c002594 <sudoku9x9+0x2c0>
+ c0024f0:	eb0000cd 	bl	c00282c <sudoku_recalcular_arm_c>
+	t2=Timer2_Leer();
+ c0024f4:	eb0001a8 	bl	c002b9c <Timer2_Leer>
+ c0024f8:	e1a03000 	mov	r3, r0
+ c0024fc:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	t2=t2-t1;
+ c002500:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c002504:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c002508:	e0633002 	rsb	r3, r3, r2
+ c00250c:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	if(!validar(cAux, cuadricula)) 	todos_correctos=FALSE;
+ c002510:	e59f007c 	ldr	r0, [pc, #124]	; c002594 <sudoku9x9+0x2c0>
+ c002514:	e59f1074 	ldr	r1, [pc, #116]	; c002590 <sudoku9x9+0x2bc>
+ c002518:	ebfffedd 	bl	c002094 <validar>
+ c00251c:	e1a03000 	mov	r3, r0
+ c002520:	e3530000 	cmp	r3, #0
+ c002524:	1a000001 	bne	c002530 <sudoku9x9+0x25c>
+ c002528:	e3a03000 	mov	r3, #0
+ c00252c:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+	reiniciar_tablero();
+ c002530:	ebffff0c 	bl	c002168 <reiniciar_tablero>
+
+	t1=Timer2_Leer();
+ c002534:	eb000198 	bl	c002b9c <Timer2_Leer>
+ c002538:	e1a03000 	mov	r3, r0
+ c00253c:	e50b301c 	str	r3, [fp, #-28]	; 0xffffffe4
+	sudoku_recalcular_arm_thumb(cAux);
+ c002540:	e59f004c 	ldr	r0, [pc, #76]	; c002594 <sudoku9x9+0x2c0>
+ c002544:	eb000014 	bl	c00259c <sudoku_recalcular_arm_thumb>
+	t2=Timer2_Leer();
+ c002548:	eb000193 	bl	c002b9c <Timer2_Leer>
+ c00254c:	e1a03000 	mov	r3, r0
+ c002550:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	t2=t2-t1;
+ c002554:	e51b2020 	ldr	r2, [fp, #-32]	; 0xffffffe0
+ c002558:	e51b301c 	ldr	r3, [fp, #-28]	; 0xffffffe4
+ c00255c:	e0633002 	rsb	r3, r3, r2
+ c002560:	e50b3020 	str	r3, [fp, #-32]	; 0xffffffe0
+	if(!validar(cAux, cuadricula)) 	todos_correctos=FALSE;
+ c002564:	e59f0028 	ldr	r0, [pc, #40]	; c002594 <sudoku9x9+0x2c0>
+ c002568:	e59f1020 	ldr	r1, [pc, #32]	; c002590 <sudoku9x9+0x2bc>
+ c00256c:	ebfffec8 	bl	c002094 <validar>
+ c002570:	e1a03000 	mov	r3, r0
+ c002574:	e3530000 	cmp	r3, #0
+ c002578:	1a000001 	bne	c002584 <sudoku9x9+0x2b0>
+ c00257c:	e3a03000 	mov	r3, #0
+ c002580:	e50b3018 	str	r3, [fp, #-24]	; 0xffffffe8
+}
+ c002584:	e24bd00c 	sub	sp, fp, #12
+ c002588:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c00258c:	e12fff1e 	bx	lr
+ c002590:	0c002de0 	.word	0x0c002de0
+ c002594:	0c003080 	.word	0x0c003080
+ c002598:	0c002f60 	.word	0x0c002f60
+
+0c00259c <sudoku_recalcular_arm_thumb>:
+/* Parámetros:											    								      */
+/* r0 = @inicio del sudoku																	      */
+/**************************************************************************************************/
+
+sudoku_recalcular_arm_thumb:
+		PUSH {lr}					/*Se apila la dirección de salto desde la que se ha saltado*/
+ c00259c:	e52de004 	push	{lr}		; (str lr, [sp, #-4]!)
+		PUSH {r4-r8}				/*Se apilan los registros que se van a utilizar*/
+ c0025a0:	e92d01f0 	push	{r4, r5, r6, r7, r8}
+		mov r1, #0					/*i=0 (iterador de filas)*/
+ c0025a4:	e3a01000 	mov	r1, #0
+		mov r2, #0					/*j=0 (iterador de columnas)*/
+ c0025a8:	e3a02000 	mov	r2, #0
+		mov r3, #0					/*variable: Celdasvacias=0*/
+ c0025ac:	e3a03000 	mov	r3, #0
+		mov r7, #0					/*Vale 1 si ha habido alguna celda con error*/
+ c0025b0:	e3a07000 	mov	r7, #0
+		ldr r4, =NUM_FILAS			/*Se carga el número de filas*/
+ c0025b4:	e59f41c8 	ldr	r4, [pc, #456]	; c002784 <fin+0x4>
+		ldr r4, [r4]
+ c0025b8:	e5944000 	ldr	r4, [r4]
+		ldr r5, =NUM_COLUMNAS		/*Se carga el número de columnas*/
+ c0025bc:	e59f51c4 	ldr	r5, [pc, #452]	; c002788 <fin+0x8>
+		ldr r5, [r5]
+ c0025c0:	e5955000 	ldr	r5, [r5]
+		sub r5, r5, #7				/*r5 = valor real de columnas (NUM_COLUMNAS-7)*/
+ c0025c4:	e2455007 	sub	r5, r5, #7
+
+0c0025c8 <for1>:
+for1:
+		cmp r1, r4					/*Se compara i con el número de filas*/
+ c0025c8:	e1510004 	cmp	r1, r4
+		bne for2					/*Si son distintos, hace otra iteración*/
+ c0025cc:	1a000000 	bne	c0025d4 <for2>
+		b finalRec					/*Si son iguales, ha terminado, y se finaliza el bucle*/
+ c0025d0:	ea00000e 	b	c002610 <finalRec>
+
+0c0025d4 <for2>:
+for2:
+		cmp r2, r5					/*Se compara j con el número de columnas*/
+ c0025d4:	e1520005 	cmp	r2, r5
+		beq finFila					/*Si son iguales, se comprueba si hay que avanzar a la siguiente fila*/
+ c0025d8:	0a000009 	beq	c002604 <finFila>
+		PUSH {r0-r3}				/*Si no es pista, preparamos pila para bl*/
+ c0025dc:	e92d000f 	push	{r0, r1, r2, r3}
+		bl sudoku_candidatos_thumb	/* Llama a sudoku_candidatos_thumb */
+ c0025e0:	eb000012 	bl	c002630 <sudoku_candidatos_thumb>
+		mov r8, r0					/*r8 guarda el resultado de la funcion, para poder restaurar los registros r0-r3*/
+ c0025e4:	e1a08000 	mov	r8, r0
+		POP {r0-r3}					/*Se restauran los valores de los registros*/
+ c0025e8:	e8bd000f 	pop	{r0, r1, r2, r3}
+		cmp r8, #0
+ c0025ec:	e3580000 	cmp	r8, #0
+		addeq r3, r3, #1			/*Si es 0 incrementamos celdasVacias*/
+ c0025f0:	02833001 	addeq	r3, r3, #1
+		cmp r8, #0
+ c0025f4:	e3580000 	cmp	r8, #0
+		addlt r7, #1				/*si hay error se incrementa el contador de errores*/
+ c0025f8:	b2877001 	addlt	r7, r7, #1
+		add r2, r2, #1				/*Incrementamos j*/
+ c0025fc:	e2822001 	add	r2, r2, #1
+		b for2
+ c002600:	eafffff3 	b	c0025d4 <for2>
+
+0c002604 <finFila>:
+
+finFila:
+		add r1, r1, #1				/*incrementamos i*/
+ c002604:	e2811001 	add	r1, r1, #1
+ 		mov r2, #0					/*reiniciamos j*/
+ c002608:	e3a02000 	mov	r2, #0
+		b for1
+ c00260c:	eaffffed 	b	c0025c8 <for1>
+
+0c002610 <finalRec>:
+finalRec:
+		mov r0, r3					/*Se sitúa el resultado en el registro 0 para devolverlo*/
+ c002610:	e1a00003 	mov	r0, r3
+		cmp r7, #0
+ c002614:	e3570000 	cmp	r7, #0
+		ble terminar
+ c002618:	da000002 	ble	c002628 <terminar>
+		mov r3, #0
+ c00261c:	e3a03000 	mov	r3, #0
+		sub r3, r3, #1
+ c002620:	e2433001 	sub	r3, r3, #1
+		mul r0, r0, r3				/*Se actualiza para que celdasVacias sea negativo*/
+ c002624:	e0000390 	mul	r0, r0, r3
+
+0c002628 <terminar>:
+terminar:
+		POP {r4-r8}					/*Se desapilan los valores iniciales de los registros*/
+ c002628:	e8bd01f0 	pop	{r4, r5, r6, r7, r8}
+		POP {pc}					/*Se salta a la función inicial*/
+ c00262c:	e49df004 	pop	{pc}		; (ldr pc, [sp], #4)
+
+0c002630 <sudoku_candidatos_thumb>:
+/* Tras lo anterior, devuelve cierto si contiene un valor, o falso si esta vacía   */
+/***********************************************************************************/
+
+/*Paso de ARM a Thumb*/
+sudoku_candidatos_thumb:
+		PUSH {lr}					/*Se apila la dirección desde la que se ha saltado*/
+ c002630:	e52de004 	push	{lr}		; (str lr, [sp, #-4]!)
+		ldr r3, = sudoku_candidatos_thumb2+1
+ c002634:	e59f3150 	ldr	r3, [pc, #336]	; c00278c <fin+0xc>
+		bx r3						/*Salta a la función en modo thumb*/
+ c002638:	e12fff13 	bx	r3
+
+0c00263c <sudoku_candidatos_thumb2>:
+/* r1 = fila													   */
+/* r2 = columna													   */
+/*******************************************************************/
+.thumb
+sudoku_candidatos_thumb2:
+		PUSH {r0-r2,r4-r7}			/*Se apilan los registros a usar*/
+ c00263c:	b4f7      	push	{r0, r1, r2, r4, r5, r6, r7}
+		mov r3, #0					/*Se inicializa el iterador*/
+ c00263e:	2300      	movs	r3, #0
+		LSL r1, #5					/*Se desplaza la fila 5 bits, teniendo los bytes respecto a la inicial*/
+ c002640:	0149      	lsls	r1, r1, #5
+		add r0, r0, r1				/*Situamos el puntero en el inicio de la fila con los candidatos a revisar*/
+ c002642:	1840      	adds	r0, r0, r1
+		mov r1, r2
+ c002644:	1c11      	adds	r1, r2, #0
+		LSL r1, #1
+ c002646:	0049      	lsls	r1, r1, #1
+		add r7, r0, r1				/*r7 = @ de la celda principal*/
+ c002648:	1847      	adds	r7, r0, r1
+		ldr r1, =0x01FF				/*r1 = Futuro valor de la casilla a la que estamos mirando candidatos*/
+ c00264a:	4951      	ldr	r1, [pc, #324]	; (c002790 <fin+0x10>)
+		ldr r6, =NUM_COLUMNAS		/*Se carga el número de columnas*/
+ c00264c:	4e4e      	ldr	r6, [pc, #312]	; (c002788 <fin+0x8>)
+		ldr r6, [r6]
+ c00264e:	6836      	ldr	r6, [r6, #0]
+		sub r6, r6, #7
+ c002650:	3e07      	subs	r6, #7
+
+0c002652 <whileColumnas>:
+
+		/* ----------- WHILE QUE REVISA LA FILA ------------- */
+whileColumnas:
+		cmp r3, r6					/*Se comprueba si se han revisado todas las columnas de la fila*/
+ c002652:	42b3      	cmp	r3, r6
+		bge finColumnas
+ c002654:	da0f      	bge.n	c002676 <finColumnas>
+		add r3, r3, #1				/*Se actualiza el iterador de celdas recorridas*/
+ c002656:	3301      	adds	r3, #1
+		ldrh r2, [r0]				/*r2=valor que hay en @sudoku*/
+ c002658:	8802      	ldrh	r2, [r0, #0]
+		mov r5, r0
+ c00265a:	1c05      	adds	r5, r0, #0
+		add r0, r0, #2				/*r0 apunta a siguiente @sudoku*/
+ c00265c:	3002      	adds	r0, #2
+		cmp r5, r7
+ c00265e:	42bd      	cmp	r5, r7
+		beq whileColumnas
+ c002660:	d0f7      	beq.n	c002652 <whileColumnas>
+		ldr r5, =0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ c002662:	4d4c      	ldr	r5, [pc, #304]	; (c002794 <fin+0x14>)
+		TST r2, r5					/*Se compara la celda con la máscara*/
+ c002664:	422a      	tst	r2, r5
+		beq whileColumnas			/*Si es vacia, se comprueba el siguiente, si no lo es, se elimina el candidato*/
+ c002666:	d0f4      	beq.n	c002652 <whileColumnas>
+
+		/* Eliminación de un candidato: */
+		LSR r2, r2, #12				/*Sacamos el valor de la cuadricula en la que estamos (4 bits)*/
+ c002668:	0b12      	lsrs	r2, r2, #12
+		sub r2, r2, #1				/*Se resta uno al candidato para el desplazamiento*/
+ c00266a:	3a01      	subs	r2, #1
+		mov r4, #1					/*Ponemos el 1 y lo desplazamos hasta la posicion a borrar*/
+ c00266c:	2401      	movs	r4, #1
+		LSL r4, r4, r2				/*Se desplaza el 1 para eliminarlo*/
+ c00266e:	4094      	lsls	r4, r2
+		mvn r5, r4					/*Negamos los bits*/
+ c002670:	43e5      	mvns	r5, r4
+		and r1, r5					/*Pone a 0 el bit que corresponde al candidato eliminado*/
+ c002672:	4029      	ands	r1, r5
+		b whileColumnas
+ c002674:	e7ed      	b.n	c002652 <whileColumnas>
+
+0c002676 <finColumnas>:
+
+finColumnas:
+		mov r4, r1					/*Movemos candidatos a r4 para no perderlo al restaurar registros*/
+ c002676:	1c0c      	adds	r4, r1, #0
+		POP {r0-r2}					/*Restauramos los registros con la columna, fila y @inicio del sudoku*/
+ c002678:	bc07      	pop	{r0, r1, r2}
+		PUSH {r0-r2}				/*Se mantienen guardados para su futura reutilización*/
+ c00267a:	b407      	push	{r0, r1, r2}
+		mov r1, r4					/*Volvemos a meter candidatos a r1*/
+ c00267c:	1c21      	adds	r1, r4, #0
+		LSL r2, #1					/*Se desplaza la columna 1 bit, teniendo los bytes respecto a la inicial*/
+ c00267e:	0052      	lsls	r2, r2, #1
+		add r0, r0, r2  			/*Se posiciona en la columna que hay que revisar*/
+ c002680:	1880      	adds	r0, r0, r2
+		ldr r6, =NUM_FILAS			/*Se carga el número de filas*/
+ c002682:	4e40      	ldr	r6, [pc, #256]	; (c002784 <fin+0x4>)
+		ldr r6, [r6]
+ c002684:	6836      	ldr	r6, [r6, #0]
+		mov r3, #0					/*Reiniciamos el iterador*/
+ c002686:	2300      	movs	r3, #0
+
+0c002688 <whileFilas>:
+
+		/* ------------ WHILE QUE REVISA LA COLUMNA --------------*/
+whileFilas:
+		cmp r3, r6					/*Se comprueba si se han revisado todas las filas de la columna*/
+ c002688:	42b3      	cmp	r3, r6
+		beq revisionRegion			/*si es asi, se pasa a revisar la región*/
+ c00268a:	d00f      	beq.n	c0026ac <revisionRegion>
+		add r3, r3, #1				/*Se incrementa el iterador*/
+ c00268c:	3301      	adds	r3, #1
+		ldrh r2, [r0]				/*Se carga en r2 el valor*/
+ c00268e:	8802      	ldrh	r2, [r0, #0]
+		mov r5, r0
+ c002690:	1c05      	adds	r5, r0, #0
+		add r0, r0, #32				/*Se pasa a la siguiente fila*/
+ c002692:	3020      	adds	r0, #32
+		cmp r5, r7
+ c002694:	42bd      	cmp	r5, r7
+		beq whileFilas
+ c002696:	d0f7      	beq.n	c002688 <whileFilas>
+		ldr r5, =0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ c002698:	4d3e      	ldr	r5, [pc, #248]	; (c002794 <fin+0x14>)
+		TST r2, r5					/*Se compara la celda con la máscara*/
+ c00269a:	422a      	tst	r2, r5
+		beq whileFilas				/*Si es vacia, se comprueba el siguiente, si no lo es, se elimina el candidato*/
+ c00269c:	d0f4      	beq.n	c002688 <whileFilas>
+
+		/* Eliminación de un candidato: */
+		LSR r2, r2, #12				/*Sacamos el valor de la cuadricula en la que estamos (4 bits)*/
+ c00269e:	0b12      	lsrs	r2, r2, #12
+		sub r2, r2, #1				/*Se resta uno al candidato para el desplazamiento*/
+ c0026a0:	3a01      	subs	r2, #1
+		mov r4, #1					/*Ponemos el 1 y lo desplazamos hasta la posicion a borrar*/
+ c0026a2:	2401      	movs	r4, #1
+		LSL r4, r4, r2				/*Se desplaza el 1 para eliminarlo*/
+ c0026a4:	4094      	lsls	r4, r2
+		mvn r5, r4					/*Negamos los bits*/
+ c0026a6:	43e5      	mvns	r5, r4
+		and r1, r5					/*Pone a 0 el bit que corresponde al candidato eliminado*/
+ c0026a8:	4029      	ands	r1, r5
+		b whileFilas
+ c0026aa:	e7ed      	b.n	c002688 <whileFilas>
+
+0c0026ac <revisionRegion>:
+
+		/* ------------ WHILE QUE REVISA LA REGIÓN -------------*/
+revisionRegion:
+		mov r10, r1					/*Guardamos los candidatos actuales en R10*/
+ c0026ac:	468a      	mov	sl, r1
+		POP {r0-r2}					/*Restauramos la fila, columna y @ de inicio del sudoku en r1, r2 y r0 respectivamente*/
+ c0026ae:	bc07      	pop	{r0, r1, r2}
+		PUSH {r0}					/*Se guarda la @ de inicio del sudoku*/
+ c0026b0:	b401      	push	{r0}
+
+		/* Cálculo de la primera celda de la región */
+		cmp r1, #6					/*Se calcula si la primera fila del cuadrante es 0,3 o 6*/
+ c0026b2:	2906      	cmp	r1, #6
+		blt fmenor6					/*Si es menor de 6 solo puede ser la fila 0 o la 3*/
+ c0026b4:	db01      	blt.n	c0026ba <fmenor6>
+		mov r3, #6
+ c0026b6:	2306      	movs	r3, #6
+		b recCol
+ c0026b8:	e004      	b.n	c0026c4 <recCol>
+
+0c0026ba <fmenor6>:
+fmenor6:cmp r1, #3					/*Si es menor de 3 solo puede ser la fila 0*/
+ c0026ba:	2903      	cmp	r1, #3
+		blt fmenor3
+ c0026bc:	db01      	blt.n	c0026c2 <fmenor3>
+		mov r3, #3
+ c0026be:	2303      	movs	r3, #3
+		b recCol
+ c0026c0:	e000      	b.n	c0026c4 <recCol>
+
+0c0026c2 <fmenor3>:
+fmenor3:mov r3, #0					/*r3= FilaInicio */
+ c0026c2:	2300      	movs	r3, #0
+
+0c0026c4 <recCol>:
+
+recCol: cmp r2, #6					/*Se calcula si la primera columna del cuadrante es 0,3 o 6*/
+ c0026c4:	2a06      	cmp	r2, #6
+		blt cmenor6					/*Si es menor de 6 solo puede ser la columna 0 o la 3*/
+ c0026c6:	db01      	blt.n	c0026cc <cmenor6>
+		mov r4, #6
+ c0026c8:	2406      	movs	r4, #6
+		b finrev
+ c0026ca:	e004      	b.n	c0026d6 <finrev>
+
+0c0026cc <cmenor6>:
+cmenor6:cmp r2, #3
+ c0026cc:	2a03      	cmp	r2, #3
+		blt cmenor3					/*Si es menor de 3 solo puede ser la columna 0*/
+ c0026ce:	db01      	blt.n	c0026d4 <cmenor3>
+		mov r4, #3
+ c0026d0:	2403      	movs	r4, #3
+		b finrev
+ c0026d2:	e000      	b.n	c0026d6 <finrev>
+
+0c0026d4 <cmenor3>:
+cmenor3:mov r4, #0					/*r4= ColumnaInicio */
+ c0026d4:	2400      	movs	r4, #0
+
+0c0026d6 <finrev>:
+
+		/* Fin del Cálculo de la primera celda de la región */
+finrev:	mov r5, r3					/* filaX */
+ c0026d6:	1c1d      	adds	r5, r3, #0
+		mov r6, r4					/* columnaX */
+ c0026d8:	1c26      	adds	r6, r4, #0
+
+		/*FilaInicio=r3 ColumnaInicio=r4*/
+		mov r7, r3
+ c0026da:	1c1f      	adds	r7, r3, #0
+		LSL r7, #5					/*Se calcula el desplazamiento por filas*/
+ c0026dc:	017f      	lsls	r7, r7, #5
+		add r0, r0, r7				/*Se aplica al puntero*/
+ c0026de:	19c0      	adds	r0, r0, r7
+		mov r7, r4
+ c0026e0:	1c27      	adds	r7, r4, #0
+		LSL r7, #1					/*Se calcula el desplazamiento por columnas*/
+ c0026e2:	007f      	lsls	r7, r7, #1
+		add r0, r0, r7				/*Se aplica al puntero*/
+ c0026e4:	19c0      	adds	r0, r0, r7
+		mov r3, #0					/*r3=iterador (se reinicia a 0)*/
+ c0026e6:	2300      	movs	r3, #0
+
+0c0026e8 <whileRegion>:
+
+whileRegion:
+		cmp r3, #9					/*Se itera mientras r3 distinto de 9, siendo 9 el número de celdas a revisar*/
+ c0026e8:	2b09      	cmp	r3, #9
+		bne revisarCandidatoRegion
+ c0026ea:	d12a      	bne.n	c002742 <revisarCandidatoRegion>
+		POP {r0}					/*Obtenemos @sudoku*/
+ c0026ec:	bc01      	pop	{r0}
+		LSL r1, #5					/*Nos situamos en la fila correcta*/
+ c0026ee:	0149      	lsls	r1, r1, #5
+		add r0, r0, r1
+ c0026f0:	1840      	adds	r0, r0, r1
+		LSL r2, #1					/*Nos situamos en la columna correcta*/
+ c0026f2:	0052      	lsls	r2, r2, #1
+		add r0, r0, r2
+ c0026f4:	1880      	adds	r0, r0, r2
+		mov r6, r10					/*Sacamos @ del dato del sudoku a actualizar candidatos:*/
+ c0026f6:	4656      	mov	r6, sl
+		ldrh r5, [r0]
+ c0026f8:	8805      	ldrh	r5, [r0, #0]
+		LSR r5, r5, #9
+ c0026fa:	0a6d      	lsrs	r5, r5, #9
+		LSL r5, r5, #9
+ c0026fc:	026d      	lsls	r5, r5, #9
+		add r6, r5, r6
+ c0026fe:	19ae      	adds	r6, r5, r6
+		mov r1, r6
+ c002700:	1c31      	adds	r1, r6, #0
+		LSR r6, r6, #12				/*Se saca el valor de la celda*/
+ c002702:	0b36      	lsrs	r6, r6, #12
+		cmp r6, #0					/*comprueba si tiene valor o no*/
+ c002704:	2e00      	cmp	r6, #0
+		beq false					/*No tiene, y devuelve FALSE*/
+ c002706:	d015      	beq.n	c002734 <false>
+
+		mov r7, r10					/*Candidatos de la celda*/
+ c002708:	4657      	mov	r7, sl
+		sub r5, r6, #1				/*Se resta uno al valor de la celda*/
+ c00270a:	1e75      	subs	r5, r6, #1
+		mov r4, #1					/*Ponemos el 1 en r4 para comprobar si esta en candidatos*/
+ c00270c:	2401      	movs	r4, #1
+		LSL r4, r4, r5				/*Se desplaza el 1*/
+ c00270e:	40ac      	lsls	r4, r5
+		and r4, r4, r7				/*Si tiene valor 1 es que el valor estaba en candidatos*/
+ c002710:	403c      	ands	r4, r7
+		cmp r4, #0
+ c002712:	2c00      	cmp	r4, #0
+		beq rechazamos
+ c002714:	d006      	beq.n	c002724 <rechazamos>
+
+		ldr r2, =0xFBFF				/*Eliminamos el bit error*/
+ c002716:	4a20      	ldr	r2, [pc, #128]	; (c002798 <fin+0x18>)
+		and r1, r2
+ c002718:	4011      	ands	r1, r2
+		strh r1, [r0]				/*Actualizamos los candidatos en memoria*/
+ c00271a:	8001      	strh	r1, [r0, #0]
+		mov r0, #1					/*Devuelve TRUE porque valor de la celda es distinto de 0*/
+ c00271c:	2001      	movs	r0, #1
+		POP {r4-r7}					/*Restaura el valor de los registros usados*/
+ c00271e:	bcf0      	pop	{r4, r5, r6, r7}
+		POP {r3}
+ c002720:	bc08      	pop	{r3}
+		bx r3						/*FINAL DE LA EJECUCION DE LA FUNCIÓN: Salta a la función de llamada*/
+ c002722:	4718      	bx	r3
+
+0c002724 <rechazamos>:
+
+rechazamos:
+		ldr r2, =0x400
+ c002724:	4a1d      	ldr	r2, [pc, #116]	; (c00279c <fin+0x1c>)
+		add r1, r1, r2				/*Añadimos bit error*/
+ c002726:	1889      	adds	r1, r1, r2
+		strh r1, [r0]				/*Actualizamos los candidatos en memoria*/
+ c002728:	8001      	strh	r1, [r0, #0]
+		mov r0, #0					/*Devuelve -1 porque da error, el valor de la celda no esta en candidatos*/
+ c00272a:	2000      	movs	r0, #0
+		sub r0, r0, #1
+ c00272c:	3801      	subs	r0, #1
+		POP {r4-r7}					/*Restaura valor de los registros usados*/
+ c00272e:	bcf0      	pop	{r4, r5, r6, r7}
+		POP {r3}
+ c002730:	bc08      	pop	{r3}
+		bx r3						/*FINAL DE LA EJECUCION DE LA FUNCIÓN: Salta a la función de llamada*/
+ c002732:	4718      	bx	r3
+
+0c002734 <false>:
+
+false:
+		ldr r2, =0xFBFF				/*Eliminamos bit error*/
+ c002734:	4a18      	ldr	r2, [pc, #96]	; (c002798 <fin+0x18>)
+		and r1, r2
+ c002736:	4011      	ands	r1, r2
+		strh r1, [r0]				/*Actualizamos los candidatos en memoria*/
+ c002738:	8001      	strh	r1, [r0, #0]
+		mov r0, #0					/*Devuelve FALSE porque valor de la celda es = 0*/
+ c00273a:	2000      	movs	r0, #0
+		POP {r4-r7}					/*Restaura el valor de los registros usados*/
+ c00273c:	bcf0      	pop	{r4, r5, r6, r7}
+		POP {r3}
+ c00273e:	bc08      	pop	{r3}
+		bx r3						/*FINAL DE LA EJECUCION DE LA FUNCIÓN: Salta a la función de llamada*/
+ c002740:	4718      	bx	r3
+
+0c002742 <revisarCandidatoRegion>:
+
+revisarCandidatoRegion:
+		mov r8, r4					/*Guardamos r4 ya que se utiliza poco*/
+ c002742:	46a0      	mov	r8, r4
+		cmp r1, r5					/*Comparamos filaX con fila*/
+ c002744:	42a9      	cmp	r1, r5
+		beq avanzaEnRegion
+ c002746:	d00f      	beq.n	c002768 <avanzaEnRegion>
+		cmp r2, r6					/*Comparamos columnaX con columna*/
+ c002748:	42b2      	cmp	r2, r6
+		beq avanzaEnRegion
+ c00274a:	d00d      	beq.n	c002768 <avanzaEnRegion>
+		ldrh r4, [r0]				/*Sacamos el dato*/
+ c00274c:	8804      	ldrh	r4, [r0, #0]
+		ldr r7, =0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ c00274e:	4f11      	ldr	r7, [pc, #68]	; (c002794 <fin+0x14>)
+		TST r4, r7					/*Se compara la celda con la máscara*/
+ c002750:	423c      	tst	r4, r7
+		beq avanzaEnRegion			/*Si es vacia, se comprueba el siguiente, si no lo es, se elimina el candidato*/
+ c002752:	d009      	beq.n	c002768 <avanzaEnRegion>
+
+		/* Eliminación de un candidato: */
+		mov r9, r5					/*Se guarda r5 para poder utilizar el registro*/
+ c002754:	46a9      	mov	r9, r5
+		mov r7, r10					/*r7 = candidatos actuales*/
+ c002756:	4657      	mov	r7, sl
+		LSR r4, r4, #12				/*Se saca el valor de la celda actual*/
+ c002758:	0b24      	lsrs	r4, r4, #12
+		sub r4, r4, #1				/*Se resta uno al candidato para el desplazamiento*/
+ c00275a:	3c01      	subs	r4, #1
+		mov r5, #1					/*Se pone el 1 y se desplaza hasta la posición a borrar*/
+ c00275c:	2501      	movs	r5, #1
+		LSL r5, r5, r4				/*Se desplaza el 1 para eliminarlo*/
+ c00275e:	40a5      	lsls	r5, r4
+		mvn r5, r5					/*Se niegan los bits*/
+ c002760:	43ed      	mvns	r5, r5
+		and r7, r5					/*Se pone a 0 el bit que corresponde al candidato eliminado*/
+ c002762:	402f      	ands	r7, r5
+		mov r10, r7					/*Guaramos r10 los candidatos actualizados*/
+ c002764:	46ba      	mov	sl, r7
+		mov r5, r9					/*Se restaura r5 con el valor de "fila"*/
+ c002766:	464d      	mov	r5, r9
+
+0c002768 <avanzaEnRegion>:
+
+avanzaEnRegion:
+		add r3, r3, #1				/*i++*/
+ c002768:	3301      	adds	r3, #1
+		mov r4, r8					/*Se restaura el valor de r4*/
+ c00276a:	4644      	mov	r4, r8
+		add r7, r4, #2				/*temp = ColumnaInicio+2*/
+ c00276c:	1ca7      	adds	r7, r4, #2
+		cmp r6, r7					/*¿columnaX==ColumnaInicio+2?*/
+ c00276e:	42be      	cmp	r6, r7
+		bne cambioColumnaEnRegion	/*Si no ha llegado al límite de la región, pasa a la siguiente columna*/
+ c002770:	d103      	bne.n	c00277a <cambioColumnaEnRegion>
+		mov r6, r4					/*Si ha llegado, se recoloca la columna y cambia de línea: ColumnaX=ColumnaInicio*/
+ c002772:	1c26      	adds	r6, r4, #0
+		add r5, r5, #1				/*filaX++*/
+ c002774:	3501      	adds	r5, #1
+		add r0, r0, #28				/*Cambio de fila dentro de la región*/
+ c002776:	301c      	adds	r0, #28
+		b whileRegion
+ c002778:	e7b6      	b.n	c0026e8 <whileRegion>
+
+0c00277a <cambioColumnaEnRegion>:
+cambioColumnaEnRegion:
+		add r0, r0, #2				/*Cambio de columna dentro del cuadrante*/
+ c00277a:	3002      	adds	r0, #2
+		add r6, r6, #1				/*ColumnaX++*/
+ c00277c:	3601      	adds	r6, #1
+		b whileRegion
+ c00277e:	e7b3      	b.n	c0026e8 <whileRegion>
+
+0c002780 <fin>:
+
+fin: B .
+ c002780:	e7fe      	b.n	c002780 <fin>
+ c002782:	0000      	.short	0x0000
+ c002784:	0c002f00 	.word	0x0c002f00
+ c002788:	0c002f04 	.word	0x0c002f04
+ c00278c:	0c00263d 	.word	0x0c00263d
+ c002790:	000001ff 	.word	0x000001ff
+ c002794:	0000f000 	.word	0x0000f000
+ c002798:	0000fbff 	.word	0x0000fbff
+ c00279c:	00000400 	.word	0x00000400
+
+0c0027a0 <sudoku_recalcular_arm>:
+/* Parámetros:											    								    */
+/* r0 = @inicio del sudoku																	    */
+/************************************************************************************************/
+
+sudoku_recalcular_arm:
+		PUSH {lr}					/*Se apila la dirección de salto desde la que se ha saltado*/
+ c0027a0:	e52de004 	push	{lr}		; (str lr, [sp, #-4]!)
+		PUSH {r4-r8}				/*Se apilan los registros que se van a utilizar*/
+ c0027a4:	e92d01f0 	push	{r4, r5, r6, r7, r8}
+		mov r7, r0					/*R7 = dirección inicial del sudoku*/
+ c0027a8:	e1a07000 	mov	r7, r0
+		mov r1, #0					/*i=0 (iterador de filas)*/
+ c0027ac:	e3a01000 	mov	r1, #0
+		mov r2, #0					/*j=0 (iterador de columnas)*/
+ c0027b0:	e3a02000 	mov	r2, #0
+		mov r3, #0					/*variable: Celdasvacias=0*/
+ c0027b4:	e3a03000 	mov	r3, #0
+		ldr r4, =NUM_FILAS			/*Se carga el número de filas*/
+ c0027b8:	e59f428c 	ldr	r4, [pc, #652]	; c002a4c <fin+0x4>
+		ldr r4, [r4]
+ c0027bc:	e5944000 	ldr	r4, [r4]
+		ldr r5, =NUM_COLUMNAS		/*Se carga el número de columnas*/
+ c0027c0:	e59f5288 	ldr	r5, [pc, #648]	; c002a50 <fin+0x8>
+		ldr r5, [r5]
+ c0027c4:	e5955000 	ldr	r5, [r5]
+		sub r5, r5, #7				/*r5 = valor real de columnas (NUM_COLUMNAS-7)*/
+ c0027c8:	e2455007 	sub	r5, r5, #7
+
+0c0027cc <for1>:
+for1:
+		cmp r1, r4					/*Se compara i con el número de filas*/
+ c0027cc:	e1510004 	cmp	r1, r4
+		bne for2					/*Si son distintos, hace otra iteración*/
+ c0027d0:	1a000000 	bne	c0027d8 <for2>
+		b finalRec					/*Si son iguales, ha terminado, y se finaliza el bucle*/
+ c0027d4:	ea000011 	b	c002820 <finalRec>
+
+0c0027d8 <for2>:
+for2:
+		cmp r2, r5					/*Se compara j con el número de columnas*/
+ c0027d8:	e1520005 	cmp	r2, r5
+		beq finFila					/*Si son iguales, se comprueba si hay que avanzar a la siguiente fila*/
+ c0027dc:	0a00000b 	beq	c002810 <finFila>
+		ldrh r6, [r7], #2			/*r6 tenemos valor de @memoria*/
+ c0027e0:	e0d760b2 	ldrh	r6, [r7], #2
+		TST r6, #0x0800				/*Se comprueba si la celda esta vacía y no es pista*/
+ c0027e4:	e3160b02 	tst	r6, #2048	; 0x800
+		addne r2, r2, #1			/*Si es pista aumentamos j*/
+ c0027e8:	12822001 	addne	r2, r2, #1
+		bne for2					/*Se pasa a la siguiente iteración al ser pista*/
+ c0027ec:	1afffff9 	bne	c0027d8 <for2>
+		PUSH {r0-r3}				/*Si no es pista, preparamos pila para bl*/
+ c0027f0:	e92d000f 	push	{r0, r1, r2, r3}
+		bl sudoku_candidatos_arm	/* Llama a sudoku_candidatos_arm */
+ c0027f4:	eb00002c 	bl	c0028ac <sudoku_candidatos_arm>
+		mov r8, r0					/*r8 guarda el resultado de la funcion, para poder restaurar los registros r0-r3*/
+ c0027f8:	e1a08000 	mov	r8, r0
+		POP {r0-r3}					/*Se restauran los valores de los registros*/
+ c0027fc:	e8bd000f 	pop	{r0, r1, r2, r3}
+		cmp r8, #0
+ c002800:	e3580000 	cmp	r8, #0
+		addeq r3, r3, #1			/*Si es 0 incrementamos celdasVacias*/
+ c002804:	02833001 	addeq	r3, r3, #1
+		add r2, r2, #1				/*Incrementamos j*/
+ c002808:	e2822001 	add	r2, r2, #1
+		b for2
+ c00280c:	eafffff1 	b	c0027d8 <for2>
+
+0c002810 <finFila>:
+
+finFila:
+		add r1, r1, #1				/*incrementamos i*/
+ c002810:	e2811001 	add	r1, r1, #1
+ 		mov r2, #0					/*reiniciamos j*/
+ c002814:	e3a02000 	mov	r2, #0
+ 		add r7, r7, #14				/*desplazamos el puntero a sudoku para que apunte sig linea*/
+ c002818:	e287700e 	add	r7, r7, #14
+		b for1
+ c00281c:	eaffffea 	b	c0027cc <for1>
+
+0c002820 <finalRec>:
+finalRec:
+		mov r0, r3					/*Se sitúa el resultado en el registro 0 para devolverlo*/
+ c002820:	e1a00003 	mov	r0, r3
+		POP {r4-r8}					/*Se desapilan los valores iniciales de los registros*/
+ c002824:	e8bd01f0 	pop	{r4, r5, r6, r7, r8}
+		POP {pc}					/*Se salta a la función inicial*/
+ c002828:	e49df004 	pop	{pc}		; (ldr pc, [sp], #4)
+
+0c00282c <sudoku_recalcular_arm_c>:
+/* Recalcula el tablero y retorna el número de celdas vacías, los candidatos se calculan en C */
+/* Parámetros:											    								  */
+/* r0 = @inicio del sudoku																	  */
+/**********************************************************************************************/
+sudoku_recalcular_arm_c:
+		PUSH {lr}					/*Se apila la dirección de salto desde la que se ha saltado*/
+ c00282c:	e52de004 	push	{lr}		; (str lr, [sp, #-4]!)
+		PUSH {r4-r8}				/*Se apilan los registros que se van a utilizar*/
+ c002830:	e92d01f0 	push	{r4, r5, r6, r7, r8}
+		mov r7, r0					/*R7 = dirección inicial del sudoku*/
+ c002834:	e1a07000 	mov	r7, r0
+		mov r1, #0					/*i=0 (iterador de filas)*/
+ c002838:	e3a01000 	mov	r1, #0
+		mov r2, #0					/*j=0 (iterador de columnas)*/
+ c00283c:	e3a02000 	mov	r2, #0
+		mov r3, #0					/*variable: Celdasvacias=0*/
+ c002840:	e3a03000 	mov	r3, #0
+		ldr r4, =NUM_FILAS			/*Se carga el número de filas*/
+ c002844:	e59f4200 	ldr	r4, [pc, #512]	; c002a4c <fin+0x4>
+		ldr r4, [r4]
+ c002848:	e5944000 	ldr	r4, [r4]
+		ldr r5, =NUM_COLUMNAS		/*Se carga el número de columnas*/
+ c00284c:	e59f51fc 	ldr	r5, [pc, #508]	; c002a50 <fin+0x8>
+		ldr r5, [r5]
+ c002850:	e5955000 	ldr	r5, [r5]
+		sub r5, r5, #7				/*r5 = valor real de columnas (NUM_COLUMNAS-7)*/
+ c002854:	e2455007 	sub	r5, r5, #7
+
+0c002858 <for1C>:
+for1C:
+		cmp r1, r4					/*Se compara i con el número de filas*/
+ c002858:	e1510004 	cmp	r1, r4
+		bne for2C					/*Si son distintos, hace otra iteración*/
+ c00285c:	1a000000 	bne	c002864 <for2C>
+		b finalRec					/*Si son iguales, ha terminado, y se finaliza el bucle*/
+ c002860:	eaffffee 	b	c002820 <finalRec>
+
+0c002864 <for2C>:
+for2C:
+		cmp r2, r5					/*Se compara j con el número de columnas*/
+ c002864:	e1520005 	cmp	r2, r5
+		beq finFilaC				/*Si son iguales, se comprueba si hay que avanzar a la siguiente fila*/
+ c002868:	0a00000b 	beq	c00289c <finFilaC>
+		ldrh r6, [r7], #2			/*r6 tenemos valor de @memoria*/
+ c00286c:	e0d760b2 	ldrh	r6, [r7], #2
+		TST r6, #0x0800				/*Se comprueba si la celda esta vacía y no es pista*/
+ c002870:	e3160b02 	tst	r6, #2048	; 0x800
+		addne r2, r2, #1			/*Si es pista aumentamos j*/
+ c002874:	12822001 	addne	r2, r2, #1
+		bne for2C					/*Se pasa a la siguiente iteración al ser pista*/
+ c002878:	1afffff9 	bne	c002864 <for2C>
+		PUSH {r0-r3}				/*Si no es pista, preparamos pila para bl*/
+ c00287c:	e92d000f 	push	{r0, r1, r2, r3}
+		bl sudoku_candidatos_c		/* Llama a sudoku_candidatos_c */
+ c002880:	ebfffc21 	bl	c00190c <sudoku_candidatos_c>
+		mov r8, r0					/*r8 guarda el resultado de la funcion, para poder restaurar los registros r0-r3*/
+ c002884:	e1a08000 	mov	r8, r0
+		POP {r0-r3}					/*Se restauran los valores de los registros*/
+ c002888:	e8bd000f 	pop	{r0, r1, r2, r3}
+		cmp r8, #0
+ c00288c:	e3580000 	cmp	r8, #0
+		addeq r3, r3, #1			/*Si es 0 incrementamos celdasVacias*/
+ c002890:	02833001 	addeq	r3, r3, #1
+		add r2, r2, #1				/*Incrementamos j*/
+ c002894:	e2822001 	add	r2, r2, #1
+		b for2C
+ c002898:	eafffff1 	b	c002864 <for2C>
+
+0c00289c <finFilaC>:
+
+finFilaC:
+		add r1, r1, #1				/*incrementamos i*/
+ c00289c:	e2811001 	add	r1, r1, #1
+ 		mov r2, #0					/*reiniciamos j*/
+ c0028a0:	e3a02000 	mov	r2, #0
+ 		add r7, r7, #14				/*desplazamos el puntero a sudoku para que apunte sig linea*/
+ c0028a4:	e287700e 	add	r7, r7, #14
+		b for1C
+ c0028a8:	eaffffea 	b	c002858 <for1C>
+
+0c0028ac <sudoku_candidatos_arm>:
+/* r1 = fila													   */
+/* r2 = columna													   */
+/*******************************************************************/
+
+sudoku_candidatos_arm:
+		PUSH {lr}					/*Se apila la dirección desde la que se ha saltado*/
+ c0028ac:	e52de004 	push	{lr}		; (str lr, [sp, #-4]!)
+		PUSH {r0,r4-r10}			/*Se apilan los registros a usar*/
+ c0028b0:	e92d07f1 	push	{r0, r4, r5, r6, r7, r8, r9, sl}
+		mov r8, r2					/*Guardamos en r8 la columna*/
+ c0028b4:	e1a08002 	mov	r8, r2
+		mov r9, r1					/*Guardamos en r9 la fila*/
+ c0028b8:	e1a09001 	mov	r9, r1
+		mov r3, #0					/*Iterador*/
+ c0028bc:	e3a03000 	mov	r3, #0
+		add r0, r0, r1, LSL #5		/*Situamos el puntero en el inicio de la fila con los candidatos a revisar*/
+ c0028c0:	e0800281 	add	r0, r0, r1, lsl #5
+		ldr r1, =0x01FF				/*r1 = Futuro valor de la casilla a la que estamos mirando candidatos*/
+ c0028c4:	e59f1188 	ldr	r1, [pc, #392]	; c002a54 <fin+0xc>
+		ldr r6, =NUM_COLUMNAS		/*Se carga el número de columnas*/
+ c0028c8:	e59f6180 	ldr	r6, [pc, #384]	; c002a50 <fin+0x8>
+		ldr r6, [r6]
+ c0028cc:	e5966000 	ldr	r6, [r6]
+		sub r6, r6, #7
+ c0028d0:	e2466007 	sub	r6, r6, #7
+
+0c0028d4 <whileColumnas>:
+
+/* ----------- WHILE QUE REVISA LA FILA ------------- */
+whileColumnas:
+		cmp r3, r6					/*Se comprueba si se han revisado todas las columnas de la fila*/
+ c0028d4:	e1530006 	cmp	r3, r6
+		add r3, r3, #1				/*Se incrementa el iterador*/
+ c0028d8:	e2833001 	add	r3, r3, #1
+		beq finColumnas				/*Si se han revisado todas las celdas de la fila, se va a fincolumnas*/
+ c0028dc:	0a000008 	beq	c002904 <finColumnas>
+		ldrh r2, [r0], #2			/*r2=valor que hay en @sudoku*/
+ c0028e0:	e0d020b2 	ldrh	r2, [r0], #2
+		TST r2, #0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ c0028e4:	e3120a0f 	tst	r2, #61440	; 0xf000
+		beq whileColumnas			/*Si es 0 vamos siguiente iteracion*/
+ c0028e8:	0afffff9 	beq	c0028d4 <whileColumnas>
+
+		/* Eliminación del candidato: */
+		mov r4, r2, LSR #12			/*Sacamos el valor (4 bits de mas peso)*/
+ c0028ec:	e1a04622 	lsr	r4, r2, #12
+		sub r4, r4, #1				/*Se resta uno al candidato para el desplazamiento*/
+ c0028f0:	e2444001 	sub	r4, r4, #1
+		mov r2, #1					/*Se establece el 1 a mover a la posición a borrar*/
+ c0028f4:	e3a02001 	mov	r2, #1
+		mvn r4, r2, LSL r4			/*Se desplaza el 1 a la posición a borrar y negamos los bits*/
+ c0028f8:	e1e04412 	mvn	r4, r2, lsl r4
+		and r1, r1, r4				/*Pone a 0 el bit que corresponde al candidato eliminado*/
+ c0028fc:	e0011004 	and	r1, r1, r4
+		b whileColumnas
+ c002900:	eafffff3 	b	c0028d4 <whileColumnas>
+
+0c002904 <finColumnas>:
+finColumnas:
+		POP {r0}					/*Al terminar reiniciamos r0 para revisar las columnas*/
+ c002904:	e49d0004 	pop	{r0}		; (ldr r0, [sp], #4)
+		PUSH {r0}
+ c002908:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+		mov r3, r8
+ c00290c:	e1a03008 	mov	r3, r8
+		LSL r3, #1					/*r3 = r3*2, donde 2 es la cantidad a desplazar por columna*/
+ c002910:	e1a03083 	lsl	r3, r3, #1
+		add r0, r0, r3  			/* Se posiciona en la columna que hay que revisar*/
+ c002914:	e0800003 	add	r0, r0, r3
+		mov r3, #0					/*reiniciamos r3*/
+ c002918:	e3a03000 	mov	r3, #0
+		ldr r6, =NUM_FILAS			/*Se carga el número de filas*/
+ c00291c:	e59f6128 	ldr	r6, [pc, #296]	; c002a4c <fin+0x4>
+		ldr r6, [r6]
+ c002920:	e5966000 	ldr	r6, [r6]
+
+0c002924 <whileFilas>:
+/* ------------ WHILE QUE REVISA LA COLUMNA --------------*/
+whileFilas:
+		cmp r3, r6					/*Se comprueba si se han revisado todas las filas de la columna*/
+ c002924:	e1530006 	cmp	r3, r6
+		add r3, r3, #1				/*Se incrementa el iterador*/
+ c002928:	e2833001 	add	r3, r3, #1
+		beq revisionRegion			/*Si se han revisado todas las celdas de la columna, se va a revisar la región*/
+ c00292c:	0a000008 	beq	c002954 <revisionRegion>
+		ldrh r2, [r0], #32			/*r2=valor que hay en @sudoku*/
+ c002930:	e0d022b0 	ldrh	r2, [r0], #32
+		TST r2, #0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ c002934:	e3120a0f 	tst	r2, #61440	; 0xf000
+		beq whileFilas				/*Si es 0 vamos siguiente iteracion*/
+ c002938:	0afffff9 	beq	c002924 <whileFilas>
+
+		/* Eliminación del candidato: */
+		mov r4, r2, LSR #12			/*Sacamos el valor (4 bits de mas peso)*/
+ c00293c:	e1a04622 	lsr	r4, r2, #12
+		sub r4, r4, #1				/*Se resta uno al candidato para el desplazamiento*/
+ c002940:	e2444001 	sub	r4, r4, #1
+		mov r2, #1					/*Se establece el 1 a mover a la posición a borrar*/
+ c002944:	e3a02001 	mov	r2, #1
+		mvn r4, r2, LSL r4			/*Se desplaza el 1 a la posición a borrar y negamos los bits*/
+ c002948:	e1e04412 	mvn	r4, r2, lsl r4
+		and r1, r1, r4				/*Pone a 0 el bit que corresponde al candidato eliminado*/
+ c00294c:	e0011004 	and	r1, r1, r4
+		b whileFilas
+ c002950:	eafffff3 	b	c002924 <whileFilas>
+
+0c002954 <revisionRegion>:
+r7 es la fila de inicio de la región
+r8 tiene la columna de la celda a la que le buscamos candidatos
+r9 tiene la fila de la celda a la que le buscamos candidatos */
+revisionRegion:
+		/* Cálculo de la primera celda de la región */
+		cmp r9, #6					/*Se calcula si la primera fila del cuadrante es 0,3 o 6*/
+ c002954:	e3590006 	cmp	r9, #6
+		blt fmenor6					/*Si es menor de 6 solo puede ser la fila 0 o la 3*/
+ c002958:	ba000001 	blt	c002964 <fmenor6>
+		mov r7, #6
+ c00295c:	e3a07006 	mov	r7, #6
+		b recCol
+ c002960:	ea000004 	b	c002978 <recCol>
+
+0c002964 <fmenor6>:
+fmenor6:cmp r9, #3					/*Si es menor de 3 solo puede ser la fila 0*/
+ c002964:	e3590003 	cmp	r9, #3
+		blt fmenor3
+ c002968:	ba000001 	blt	c002974 <fmenor3>
+		mov r7, #3
+ c00296c:	e3a07003 	mov	r7, #3
+		b recCol
+ c002970:	ea000000 	b	c002978 <recCol>
+
+0c002974 <fmenor3>:
+fmenor3:mov r7, #0					/*r7= FilaInicio */
+ c002974:	e3a07000 	mov	r7, #0
+
+0c002978 <recCol>:
+
+recCol: cmp r8, #6					/*Se calcula si la primera columna del cuadrante es 0,3 o 6*/
+ c002978:	e3580006 	cmp	r8, #6
+		blt cmenor6					/*Si es menor de 6 solo puede ser la columna 0 o la 3*/
+ c00297c:	ba000001 	blt	c002988 <cmenor6>
+		mov r6, #6
+ c002980:	e3a06006 	mov	r6, #6
+		b finrev
+ c002984:	ea000004 	b	c00299c <finrev>
+
+0c002988 <cmenor6>:
+cmenor6:cmp r8, #3
+ c002988:	e3580003 	cmp	r8, #3
+		blt cmenor3					/*Si es menor de 3 solo puede ser la columna 0*/
+ c00298c:	ba000001 	blt	c002998 <cmenor3>
+		mov r6, #3
+ c002990:	e3a06003 	mov	r6, #3
+		b finrev
+ c002994:	ea000000 	b	c00299c <finrev>
+
+0c002998 <cmenor3>:
+cmenor3:mov r6, #0					/*r6= ColumnaInicio */
+ c002998:	e3a06000 	mov	r6, #0
+
+0c00299c <finrev>:
+
+		/* Fin del Cálculo de la primera celda de la región */
+finrev:	mov r5, r7					/* filaX */
+ c00299c:	e1a05007 	mov	r5, r7
+		mov r4, r6					/* columnaX */
+ c0029a0:	e1a04006 	mov	r4, r6
+		POP {r0}					/*Ahora se va a posicionar el puntero en el principio del recuadro */
+ c0029a4:	e49d0004 	pop	{r0}		; (ldr r0, [sp], #4)
+		PUSH {r0}
+ c0029a8:	e52d0004 	push	{r0}		; (str r0, [sp, #-4]!)
+		add r0, r0, r7, LSL #5		/*Se situa en la fila correcta de la primera celda de la región*/
+ c0029ac:	e0800287 	add	r0, r0, r7, lsl #5
+		add r0, r0, r6, LSL #1		/*Se situa en la columna correcta de la primera celda de la región*/
+ c0029b0:	e0800086 	add	r0, r0, r6, lsl #1
+		mov r3, #0					/* i=0 (se reinicia el iterador) */
+ c0029b4:	e3a03000 	mov	r3, #0
+
+0c0029b8 <whileRegion>:
+
+whileRegion:
+		cmp r3, #9					/*Si se han revisado las 9 celdas de la región, se termina*/
+ c0029b8:	e3530009 	cmp	r3, #9
+		beq final
+ c0029bc:	0a000017 	beq	c002a20 <final>
+		add r3, r3, #1				/*Se incrementa el iterador*/
+ c0029c0:	e2833001 	add	r3, r3, #1
+		ldrh r2, [r0]
+ c0029c4:	e1d020b0 	ldrh	r2, [r0]
+		cmp r4, r8					/*Se revisa si estamos en una celda de la columna ya revisada previamente*/
+ c0029c8:	e1540008 	cmp	r4, r8
+		beq avanzaEnRegion
+ c0029cc:	0a000009 	beq	c0029f8 <avanzaEnRegion>
+		cmp r5, r9					/*se revisa si estamos en una celda de la fila ya revisada previamente*/
+ c0029d0:	e1550009 	cmp	r5, r9
+		beq avanzaEnRegion
+ c0029d4:	0a000007 	beq	c0029f8 <avanzaEnRegion>
+		TST r2, #0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ c0029d8:	e3120a0f 	tst	r2, #61440	; 0xf000
+		beq	avanzaEnRegion			/*Si es vacia, se comprueba el siguiente, si no lo es, se elimina el candidato*/
+ c0029dc:	0a000005 	beq	c0029f8 <avanzaEnRegion>
+
+		/* Eliminación de un candidato */
+		mov r2, r2, LSR #12			/*Valor de la celda actual*/
+ c0029e0:	e1a02622 	lsr	r2, r2, #12
+		sub r2, r2, #1				/*Se resta uno al candidato para el desplazamiento*/
+ c0029e4:	e2422001 	sub	r2, r2, #1
+		mov r10, #1					/*Se pone el 1 y se desplaza hasta la posición a borrar*/
+ c0029e8:	e3a0a001 	mov	sl, #1
+		mvn r2, r10, LSL r2			/*Se desplaza el 1 para eliminarlo y se niegan los bits*/
+ c0029ec:	e1e0221a 	mvn	r2, sl, lsl r2
+		and r1, r1, r2				/*Se pone a 0 el bit que corresponde al candidato eliminado*/
+ c0029f0:	e0011002 	and	r1, r1, r2
+		b avanzaEnRegion
+ c0029f4:	eaffffff 	b	c0029f8 <avanzaEnRegion>
+
+0c0029f8 <avanzaEnRegion>:
+
+avanzaEnRegion:
+		add r10, r6, #2				/*temp = ColumnaInicio+2*/
+ c0029f8:	e286a002 	add	sl, r6, #2
+		cmp r4, r10					/*¿columnaX==ColumnaInicio+2?*/
+ c0029fc:	e154000a 	cmp	r4, sl
+		bne cambioColumnaEnRegion
+ c002a00:	1a000003 	bne	c002a14 <cambioColumnaEnRegion>
+		mov r4, r6					/*ColumnaX=ColumnaInicio*/
+ c002a04:	e1a04006 	mov	r4, r6
+		add r5, r5, #1				/*filaX++*/
+ c002a08:	e2855001 	add	r5, r5, #1
+		add r0, r0, #28				/*Cambio de fila dentro del cuadrante*/
+ c002a0c:	e280001c 	add	r0, r0, #28
+		b whileRegion
+ c002a10:	eaffffe8 	b	c0029b8 <whileRegion>
+
+0c002a14 <cambioColumnaEnRegion>:
+cambioColumnaEnRegion:
+		add r0, r0, #2				/*Cambio de columna dentro del cuadrante*/
+ c002a14:	e2800002 	add	r0, r0, #2
+		add r4, r4, #1				/*ColumnaX++*/
+ c002a18:	e2844001 	add	r4, r4, #1
+		b whileRegion
+ c002a1c:	eaffffe5 	b	c0029b8 <whileRegion>
+
+0c002a20 <final>:
+
+final:
+		POP {r0} 					/*Restauramos la @ inicial del sudoku*/
+ c002a20:	e49d0004 	pop	{r0}		; (ldr r0, [sp], #4)
+		add r0, r0, r9, LSL #5		/*Se posiciona en la fila*/
+ c002a24:	e0800289 	add	r0, r0, r9, lsl #5
+		add r0, r0, r8, LSL #1		/*Se posiciona en la columna*/
+ c002a28:	e0800088 	add	r0, r0, r8, lsl #1
+		strh r1, [r0]				/*Guardamos el nuevo dato con los candidatos actualizados*/
+ c002a2c:	e1c010b0 	strh	r1, [r0]
+		mov r4, r1, LSR #12			/*Se comprueba si el valor es 0 o no*/
+ c002a30:	e1a04621 	lsr	r4, r1, #12
+		mov r0, #1					/*Return de la subrutina = TRUE si es distinto de 0*/
+ c002a34:	e3a00001 	mov	r0, #1
+		cmp r4, #0xF000
+ c002a38:	e3540a0f 	cmp	r4, #61440	; 0xf000
+		movne r0, #0				/*Si es 0 devolvemos FALSE*/
+ c002a3c:	13a00000 	movne	r0, #0
+		POP {r4-r10}				/*Restaura los registros usados*/
+ c002a40:	e8bd07f0 	pop	{r4, r5, r6, r7, r8, r9, sl}
+		POP {pc}					/* FINAL DE LA EJECUCIÓN: salta a la función de llamada */
+ c002a44:	e49df004 	pop	{pc}		; (ldr pc, [sp], #4)
+
+0c002a48 <fin>:
+
+fin: B .
+ c002a48:	eafffffe 	b	c002a48 <fin>
+ c002a4c:	0c002f08 	.word	0x0c002f08
+ c002a50:	0c002f0c 	.word	0x0c002f0c
+ c002a54:	000001ff 	.word	0x000001ff
+
+0c002a58 <timer_ISR2>:
+void Timer2_Empezar();
+uint32_t Timer2_Leer();
+
+/*--- codigo de las funciones ---*/
+void timer_ISR2(void)
+{
+ c002a58:	e52dc004 	push	{ip}		; (str ip, [sp, #-4]!)
+ c002a5c:	e1a0c00d 	mov	ip, sp
+ c002a60:	e92dd80c 	push	{r2, r3, fp, ip, lr, pc}
+ c002a64:	e24cb004 	sub	fp, ip, #4
+	timer2_num_int++;		//Aumentamos el número de interrupciones del timer2
+ c002a68:	e59f3030 	ldr	r3, [pc, #48]	; c002aa0 <timer_ISR2+0x48>
+ c002a6c:	e5933000 	ldr	r3, [r3]
+ c002a70:	e2832001 	add	r2, r3, #1
+ c002a74:	e59f3024 	ldr	r3, [pc, #36]	; c002aa0 <timer_ISR2+0x48>
+ c002a78:	e5832000 	str	r2, [r3]
+	/* borrar bit en I_ISPC para desactivar la solicitud de interrupción*/
+	rI_ISPC |= BIT_TIMER2;
+ c002a7c:	e59f3020 	ldr	r3, [pc, #32]	; c002aa4 <timer_ISR2+0x4c>
+ c002a80:	e59f201c 	ldr	r2, [pc, #28]	; c002aa4 <timer_ISR2+0x4c>
+ c002a84:	e5922000 	ldr	r2, [r2]
+ c002a88:	e3822b02 	orr	r2, r2, #2048	; 0x800
+ c002a8c:	e5832000 	str	r2, [r3]
+}
+ c002a90:	e24bd014 	sub	sp, fp, #20
+ c002a94:	e89d680c 	ldm	sp, {r2, r3, fp, sp, lr}
+ c002a98:	e49dc004 	pop	{ip}		; (ldr ip, [sp], #4)
+ c002a9c:	e25ef004 	subs	pc, lr, #4
+ c002aa0:	0c002f3c 	.word	0x0c002f3c
+ c002aa4:	01e00024 	.word	0x01e00024
+
+0c002aa8 <Timer2_Inicializar>:
+
+void Timer2_Inicializar()
+{
+ c002aa8:	e1a0c00d 	mov	ip, sp
+ c002aac:	e92dd800 	push	{fp, ip, lr, pc}
+ c002ab0:	e24cb004 	sub	fp, ip, #4
+	/* Configuraion controlador de interrupciones */
+	// Enmascara el bit del timer 2.
+	rINTMSK &= ~(BIT_TIMER2);
+ c002ab4:	e59f3094 	ldr	r3, [pc, #148]	; c002b50 <Timer2_Inicializar+0xa8>
+ c002ab8:	e59f2090 	ldr	r2, [pc, #144]	; c002b50 <Timer2_Inicializar+0xa8>
+ c002abc:	e5922000 	ldr	r2, [r2]
+ c002ac0:	e3c22b02 	bic	r2, r2, #2048	; 0x800
+ c002ac4:	e5832000 	str	r2, [r3]
+
+	/* Establece la rutina de servicio para TIMER2 */
+	pISR_TIMER2 = (unsigned) timer_ISR2;
+ c002ac8:	e59f3084 	ldr	r3, [pc, #132]	; c002b54 <Timer2_Inicializar+0xac>
+ c002acc:	e59f2084 	ldr	r2, [pc, #132]	; c002b58 <Timer2_Inicializar+0xb0>
+ c002ad0:	e5832000 	str	r2, [r3]
+
+	/* Configura el Timer2 */
+	rTCFG0 &= 0xFFFF00FF; 	// Preescalado a 0
+ c002ad4:	e59f3080 	ldr	r3, [pc, #128]	; c002b5c <Timer2_Inicializar+0xb4>
+ c002ad8:	e59f207c 	ldr	r2, [pc, #124]	; c002b5c <Timer2_Inicializar+0xb4>
+ c002adc:	e5922000 	ldr	r2, [r2]
+ c002ae0:	e3c22cff 	bic	r2, r2, #65280	; 0xff00
+ c002ae4:	e5832000 	str	r2, [r3]
+	rTCFG1 &= 0xFFFFF0FF;	// Entrada del mux. 00 divisor 1/2
+ c002ae8:	e59f3070 	ldr	r3, [pc, #112]	; c002b60 <Timer2_Inicializar+0xb8>
+ c002aec:	e59f206c 	ldr	r2, [pc, #108]	; c002b60 <Timer2_Inicializar+0xb8>
+ c002af0:	e5922000 	ldr	r2, [r2]
+ c002af4:	e3c22c0f 	bic	r2, r2, #3840	; 0xf00
+ c002af8:	e5832000 	str	r2, [r3]
+	rTCNTB2 = 65535;		// Valor inicial de la cuenta del timer (valor máximo como se pide enunciado)
+ c002afc:	e59f3060 	ldr	r3, [pc, #96]	; c002b64 <Timer2_Inicializar+0xbc>
+ c002b00:	e59f2060 	ldr	r2, [pc, #96]	; c002b68 <Timer2_Inicializar+0xc0>
+ c002b04:	e5832000 	str	r2, [r3]
+	rTCMPB2 = 0;			// Valor con el que se comparará la cuenta del timer2
+ c002b08:	e59f305c 	ldr	r3, [pc, #92]	; c002b6c <Timer2_Inicializar+0xc4>
+ c002b0c:	e3a02000 	mov	r2, #0
+ c002b10:	e5832000 	str	r2, [r3]
+	/* Activamos los bits para iniciar la cuenta (12 y 13) */
+	rTCON = (rTCON & 0xFFFF0FFF) | 0x2000;		//Activamos manual update bit.
+ c002b14:	e59f3054 	ldr	r3, [pc, #84]	; c002b70 <Timer2_Inicializar+0xc8>
+ c002b18:	e59f2050 	ldr	r2, [pc, #80]	; c002b70 <Timer2_Inicializar+0xc8>
+ c002b1c:	e5922000 	ldr	r2, [r2]
+ c002b20:	e3c22a0f 	bic	r2, r2, #61440	; 0xf000
+ c002b24:	e3822a02 	orr	r2, r2, #8192	; 0x2000
+ c002b28:	e5832000 	str	r2, [r3]
+	rTCON = (rTCON & 0xFFFF0FFF) | 0x9000;		//Activamos start/stop y desactivamos manual update bit a la vez.
+ c002b2c:	e59f303c 	ldr	r3, [pc, #60]	; c002b70 <Timer2_Inicializar+0xc8>
+ c002b30:	e59f2038 	ldr	r2, [pc, #56]	; c002b70 <Timer2_Inicializar+0xc8>
+ c002b34:	e5922000 	ldr	r2, [r2]
+ c002b38:	e3c22a0f 	bic	r2, r2, #61440	; 0xf000
+ c002b3c:	e3822a09 	orr	r2, r2, #36864	; 0x9000
+ c002b40:	e5832000 	str	r2, [r3]
+}
+ c002b44:	e24bd00c 	sub	sp, fp, #12
+ c002b48:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c002b4c:	e12fff1e 	bx	lr
+ c002b50:	01e0000c 	.word	0x01e0000c
+ c002b54:	0c7fff4c 	.word	0x0c7fff4c
+ c002b58:	0c002a58 	.word	0x0c002a58
+ c002b5c:	01d50000 	.word	0x01d50000
+ c002b60:	01d50004 	.word	0x01d50004
+ c002b64:	01d50024 	.word	0x01d50024
+ c002b68:	0000ffff 	.word	0x0000ffff
+ c002b6c:	01d50028 	.word	0x01d50028
+ c002b70:	01d50008 	.word	0x01d50008
+
+0c002b74 <Timer2_Empezar>:
+
+// Función encargada de reiniciar la cuenta de interrupciones del timer2
+void Timer2_Empezar()
+{
+ c002b74:	e1a0c00d 	mov	ip, sp
+ c002b78:	e92dd800 	push	{fp, ip, lr, pc}
+ c002b7c:	e24cb004 	sub	fp, ip, #4
+	timer2_num_int = 0;
+ c002b80:	e59f3010 	ldr	r3, [pc, #16]	; c002b98 <Timer2_Empezar+0x24>
+ c002b84:	e3a02000 	mov	r2, #0
+ c002b88:	e5832000 	str	r2, [r3]
+}
+ c002b8c:	e24bd00c 	sub	sp, fp, #12
+ c002b90:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c002b94:	e12fff1e 	bx	lr
+ c002b98:	0c002f3c 	.word	0x0c002f3c
+
+0c002b9c <Timer2_Leer>:
+
+// Devuelve el tiempo actual del timer 2.
+uint32_t Timer2_Leer()
+{
+ c002b9c:	e1a0c00d 	mov	ip, sp
+ c002ba0:	e92dd800 	push	{fp, ip, lr, pc}
+ c002ba4:	e24cb004 	sub	fp, ip, #4
+ c002ba8:	e24dd008 	sub	sp, sp, #8
+	uint32_t cuenta = rTCNTO2;		// Valor de la cuenta actual del timer 2.
+ c002bac:	e59f3050 	ldr	r3, [pc, #80]	; c002c04 <Timer2_Leer+0x68>
+ c002bb0:	e5933000 	ldr	r3, [r3]
+ c002bb4:	e50b3010 	str	r3, [fp, #-16]
+	// Dividido para 32 porque el divisor es 1/2 --> 66/2 = 32
+	uint32_t tiempo_transcurrido = (timer2_num_int*rTCNTB2+(rTCNTB2-cuenta))/33;
+ c002bb8:	e59f3048 	ldr	r3, [pc, #72]	; c002c08 <Timer2_Leer+0x6c>
+ c002bbc:	e5933000 	ldr	r3, [r3]
+ c002bc0:	e59f2044 	ldr	r2, [pc, #68]	; c002c0c <Timer2_Leer+0x70>
+ c002bc4:	e5922000 	ldr	r2, [r2]
+ c002bc8:	e0020293 	mul	r2, r3, r2
+ c002bcc:	e59f3034 	ldr	r3, [pc, #52]	; c002c08 <Timer2_Leer+0x6c>
+ c002bd0:	e5931000 	ldr	r1, [r3]
+ c002bd4:	e51b3010 	ldr	r3, [fp, #-16]
+ c002bd8:	e0633001 	rsb	r3, r3, r1
+ c002bdc:	e0822003 	add	r2, r2, r3
+ c002be0:	e59f3028 	ldr	r3, [pc, #40]	; c002c10 <Timer2_Leer+0x74>
+ c002be4:	e0831392 	umull	r1, r3, r2, r3
+ c002be8:	e1a031a3 	lsr	r3, r3, #3
+ c002bec:	e50b3014 	str	r3, [fp, #-20]	; 0xffffffec
+	return tiempo_transcurrido;
+ c002bf0:	e51b3014 	ldr	r3, [fp, #-20]	; 0xffffffec
+}
+ c002bf4:	e1a00003 	mov	r0, r3
+ c002bf8:	e24bd00c 	sub	sp, fp, #12
+ c002bfc:	e89d6800 	ldm	sp, {fp, sp, lr}
+ c002c00:	e12fff1e 	bx	lr
+ c002c04:	01d5002c 	.word	0x01d5002c
+ c002c08:	01d50024 	.word	0x01d50024
+ c002c0c:	0c002f3c 	.word	0x0c002f3c
+ c002c10:	3e0f83e1 	.word	0x3e0f83e1
+
+0c002c14 <__aeabi_idiv>:
+ c002c14:	e3510000 	cmp	r1, #0
+ c002c18:	0a000043 	beq	c002d2c <.divsi3_skip_div0_test+0x110>
+
+0c002c1c <.divsi3_skip_div0_test>:
+ c002c1c:	e020c001 	eor	ip, r0, r1
+ c002c20:	42611000 	rsbmi	r1, r1, #0
+ c002c24:	e2512001 	subs	r2, r1, #1
+ c002c28:	0a000027 	beq	c002ccc <.divsi3_skip_div0_test+0xb0>
+ c002c2c:	e1b03000 	movs	r3, r0
+ c002c30:	42603000 	rsbmi	r3, r0, #0
+ c002c34:	e1530001 	cmp	r3, r1
+ c002c38:	9a000026 	bls	c002cd8 <.divsi3_skip_div0_test+0xbc>
+ c002c3c:	e1110002 	tst	r1, r2
+ c002c40:	0a000028 	beq	c002ce8 <.divsi3_skip_div0_test+0xcc>
+ c002c44:	e311020e 	tst	r1, #-536870912	; 0xe0000000
+ c002c48:	01a01181 	lsleq	r1, r1, #3
+ c002c4c:	03a02008 	moveq	r2, #8
+ c002c50:	13a02001 	movne	r2, #1
+ c002c54:	e3510201 	cmp	r1, #268435456	; 0x10000000
+ c002c58:	31510003 	cmpcc	r1, r3
+ c002c5c:	31a01201 	lslcc	r1, r1, #4
+ c002c60:	31a02202 	lslcc	r2, r2, #4
+ c002c64:	3afffffa 	bcc	c002c54 <.divsi3_skip_div0_test+0x38>
+ c002c68:	e3510102 	cmp	r1, #-2147483648	; 0x80000000
+ c002c6c:	31510003 	cmpcc	r1, r3
+ c002c70:	31a01081 	lslcc	r1, r1, #1
+ c002c74:	31a02082 	lslcc	r2, r2, #1
+ c002c78:	3afffffa 	bcc	c002c68 <.divsi3_skip_div0_test+0x4c>
+ c002c7c:	e3a00000 	mov	r0, #0
+ c002c80:	e1530001 	cmp	r3, r1
+ c002c84:	20433001 	subcs	r3, r3, r1
+ c002c88:	21800002 	orrcs	r0, r0, r2
+ c002c8c:	e15300a1 	cmp	r3, r1, lsr #1
+ c002c90:	204330a1 	subcs	r3, r3, r1, lsr #1
+ c002c94:	218000a2 	orrcs	r0, r0, r2, lsr #1
+ c002c98:	e1530121 	cmp	r3, r1, lsr #2
+ c002c9c:	20433121 	subcs	r3, r3, r1, lsr #2
+ c002ca0:	21800122 	orrcs	r0, r0, r2, lsr #2
+ c002ca4:	e15301a1 	cmp	r3, r1, lsr #3
+ c002ca8:	204331a1 	subcs	r3, r3, r1, lsr #3
+ c002cac:	218001a2 	orrcs	r0, r0, r2, lsr #3
+ c002cb0:	e3530000 	cmp	r3, #0
+ c002cb4:	11b02222 	lsrsne	r2, r2, #4
+ c002cb8:	11a01221 	lsrne	r1, r1, #4
+ c002cbc:	1affffef 	bne	c002c80 <.divsi3_skip_div0_test+0x64>
+ c002cc0:	e35c0000 	cmp	ip, #0
+ c002cc4:	42600000 	rsbmi	r0, r0, #0
+ c002cc8:	e12fff1e 	bx	lr
+ c002ccc:	e13c0000 	teq	ip, r0
+ c002cd0:	42600000 	rsbmi	r0, r0, #0
+ c002cd4:	e12fff1e 	bx	lr
+ c002cd8:	33a00000 	movcc	r0, #0
+ c002cdc:	01a00fcc 	asreq	r0, ip, #31
+ c002ce0:	03800001 	orreq	r0, r0, #1
+ c002ce4:	e12fff1e 	bx	lr
+ c002ce8:	e3510801 	cmp	r1, #65536	; 0x10000
+ c002cec:	21a01821 	lsrcs	r1, r1, #16
+ c002cf0:	23a02010 	movcs	r2, #16
+ c002cf4:	33a02000 	movcc	r2, #0
+ c002cf8:	e3510c01 	cmp	r1, #256	; 0x100
+ c002cfc:	21a01421 	lsrcs	r1, r1, #8
+ c002d00:	22822008 	addcs	r2, r2, #8
+ c002d04:	e3510010 	cmp	r1, #16
+ c002d08:	21a01221 	lsrcs	r1, r1, #4
+ c002d0c:	22822004 	addcs	r2, r2, #4
+ c002d10:	e3510004 	cmp	r1, #4
+ c002d14:	82822003 	addhi	r2, r2, #3
+ c002d18:	908220a1 	addls	r2, r2, r1, lsr #1
+ c002d1c:	e35c0000 	cmp	ip, #0
+ c002d20:	e1a00233 	lsr	r0, r3, r2
+ c002d24:	42600000 	rsbmi	r0, r0, #0
+ c002d28:	e12fff1e 	bx	lr
+ c002d2c:	e3500000 	cmp	r0, #0
+ c002d30:	c3e00102 	mvngt	r0, #-2147483648	; 0x80000000
+ c002d34:	b3a00102 	movlt	r0, #-2147483648	; 0x80000000
+ c002d38:	ea000007 	b	c002d5c <__aeabi_idiv0>
+
+0c002d3c <__aeabi_idivmod>:
+ c002d3c:	e3510000 	cmp	r1, #0
+ c002d40:	0afffff9 	beq	c002d2c <.divsi3_skip_div0_test+0x110>
+ c002d44:	e92d4003 	push	{r0, r1, lr}
+ c002d48:	ebffffb3 	bl	c002c1c <.divsi3_skip_div0_test>
+ c002d4c:	e8bd4006 	pop	{r1, r2, lr}
+ c002d50:	e0030092 	mul	r3, r2, r0
+ c002d54:	e0411003 	sub	r1, r1, r3
+ c002d58:	e12fff1e 	bx	lr
+
+0c002d5c <__aeabi_idiv0>:
+ c002d5c:	e12fff1e 	bx	lr

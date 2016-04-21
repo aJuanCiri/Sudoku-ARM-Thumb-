@@ -1,0 +1,30 @@
+   1              	# 1 "../data_abort_test.asm"
+   1              	.global start
+   0              	
+   0              	
+   0              	
+   2              	.arm
+   3              	.data
+   4              	.ltorg /*Garantiza la alineación*/
+   5              	.text
+   6              	
+   7              	.global Data_abort_test
+   8              	
+   9              	Data_abort_test:
+  10 0000 04E02DE5 		PUSH {lr}				/* Guarda la dirección desde la que se ha saltado */
+  11 0004 0C009FE5 		ldr r0, =0x4001			/* Apuntamos a una @memoria impar */
+  12 0008 0210A0E3 		mov r1, #2				/* r1 = 2 */
+  13 000c 002080E5 		str r2, [r0]			/* Guardamos en @r2 el valor de r1 */
+  14 0010 04E09DE4 		POP {lr}				/* Direccion de retorno */
+  15              	
+  16 0014 FEFFFFEA 	fin: B .
+  17 0018 01400000 		.end
+DEFINED SYMBOLS
+../data_abort_test.asm:9      .text:00000000 Data_abort_test
+../data_abort_test.asm:10     .text:00000000 $a
+../data_abort_test.asm:16     .text:00000014 fin
+../data_abort_test.asm:17     .text:00000018 $d
+                   .debug_aranges:0000000c $d
+
+UNDEFINED SYMBOLS
+start

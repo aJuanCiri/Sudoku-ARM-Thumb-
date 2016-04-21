@@ -1,0 +1,83 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"pilaDepuracion.c"
+  21              	.Ltext0:
+  22              		.file 1 "../pilaDepuracion.c"
+ 2877              		.align	2
+ 2878              		.global	push_debug
+ 2880              	push_debug:
+ 2881              	.LFB0:
+   1:../pilaDepuracion.c **** /*********************************************************************************************
+   2:../pilaDepuracion.c **** * Fichero:	pilaDepuracion.c
+   3:../pilaDepuracion.c **** * Autor:
+   4:../pilaDepuracion.c **** * Descrip:
+   5:../pilaDepuracion.c **** * Version:
+   6:../pilaDepuracion.c **** *********************************************************************************************/
+   7:../pilaDepuracion.c **** #include "44blib.h"
+   8:../pilaDepuracion.c **** #include <stdio.h>
+   9:../pilaDepuracion.c **** #include <stdlib.h>
+  10:../pilaDepuracion.c **** #include <inttypes.h>
+  11:../pilaDepuracion.c **** #include "timer4.h"
+  12:../pilaDepuracion.c **** 
+  13:../pilaDepuracion.c **** /*--- variables globales ---*/
+  14:../pilaDepuracion.c **** 
+  15:../pilaDepuracion.c **** /*--- declaracion de funciones ---*/
+  16:../pilaDepuracion.c **** 
+  17:../pilaDepuracion.c **** 
+  18:../pilaDepuracion.c **** void push_debug(int ID_evento, int auxData);
+  19:../pilaDepuracion.c **** 
+  20:../pilaDepuracion.c **** // Funcion encargada de apilar un nuevo elemento en la pilaDepuracion
+  21:../pilaDepuracion.c **** void push_debug(int ID_evento, int auxData){
+ 2882              		.loc 1 21 0
+ 2883              		.cfi_startproc
+ 2884              		@ Function supports interworking.
+ 2885              		@ args = 0, pretend = 0, frame = 16
+ 2886              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2887 0000 0DC0A0E1 		mov	ip, sp
+ 2888              	.LCFI0:
+ 2889              		.cfi_def_cfa_register 12
+ 2890 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2891 0008 04B04CE2 		sub	fp, ip, #4
+ 2892              		.cfi_offset 14, -8
+ 2893              		.cfi_offset 13, -12
+ 2894              		.cfi_offset 11, -16
+ 2895              	.LCFI1:
+ 2896              		.cfi_def_cfa 11, 4
+ 2897 000c 10D04DE2 		sub	sp, sp, #16
+ 2898 0010 18000BE5 		str	r0, [fp, #-24]
+ 2899 0014 1C100BE5 		str	r1, [fp, #-28]
+  22:../pilaDepuracion.c **** 	uint32_t tiempo = (leerTiempoTimer4());			// Tiempo en el que se ha producido la interrupción
+ 2900              		.loc 1 22 0
+ 2901 0018 FEFFFFEB 		bl	leerTiempoTimer4
+ 2902 001c 10000BE5 		str	r0, [fp, #-16]
+  23:../pilaDepuracion.c **** 	anadirElemento(ID_evento, auxData, tiempo);
+ 2903              		.loc 1 23 0
+ 2904 0020 18001BE5 		ldr	r0, [fp, #-24]
+ 2905 0024 1C101BE5 		ldr	r1, [fp, #-28]
+ 2906 0028 10201BE5 		ldr	r2, [fp, #-16]
+ 2907 002c FEFFFFEB 		bl	anadirElemento
+  24:../pilaDepuracion.c **** }
+ 2908              		.loc 1 24 0
+ 2909 0030 0CD04BE2 		sub	sp, fp, #12
+ 2910 0034 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2911 0038 1EFF2FE1 		bx	lr
+ 2912              		.cfi_endproc
+ 2913              	.LFE0:
+ 2915              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 pilaDepuracion.c
+C:\Users\a680669\AppData\Local\Temp\ccxu7ccf.s:2877   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccxu7ccf.s:2880   .text:00000000 push_debug
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+leerTiempoTimer4
+anadirElemento

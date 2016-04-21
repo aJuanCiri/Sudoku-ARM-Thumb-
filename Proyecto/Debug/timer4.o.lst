@@ -1,0 +1,437 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"timer4.c"
+  21              	.Ltext0:
+  22              		.file 1 "../timer4.c"
+ 2698              		.align	2
+ 2701              	actualizarTiempo:
+ 2702 0000 00000000 		.space	4
+ 2703              		.global	tiempoTotal
+ 2704              		.align	2
+ 2707              	tiempoTotal:
+ 2708 0004 00000000 		.space	4
+ 2709              		.text
+ 2710              		.align	2
+ 2711              		.global	timer4_ISR
+ 2713              	timer4_ISR:
+ 2714              	.LFB0:
+   1:../timer4.c   **** /*
+   2:../timer4.c   ****  * timer4.c
+   3:../timer4.c   ****  *
+   4:../timer4.c   ****  *  Created on: 14/12/2015
+   5:../timer4.c   ****  *      Author: a679934
+   6:../timer4.c   ****  */
+   7:../timer4.c   **** 
+   8:../timer4.c   **** /*--- ficheros de cabecera ---*/
+   9:../timer4.c   **** #include "44b.h"
+  10:../timer4.c   **** #include "44blib.h"
+  11:../timer4.c   **** #include <inttypes.h>
+  12:../timer4.c   **** #include "gestorPantalla.h"
+  13:../timer4.c   **** 
+  14:../timer4.c   **** /*--- declaracion de funciones ---*/
+  15:../timer4.c   **** void timer4_ISR(void) __attribute__ ((interrupt ("IRQ")));
+  16:../timer4.c   **** void timer4_init(void);
+  17:../timer4.c   **** void timer4_stop(void);
+  18:../timer4.c   **** volatile int actualizarTiempo = 0;
+  19:../timer4.c   **** volatile uint32_t tiempoTotal=0;
+  20:../timer4.c   **** 
+  21:../timer4.c   **** void timer4_ISR(void)
+  22:../timer4.c   **** {
+ 2715              		.loc 1 22 0
+ 2716              		.cfi_startproc
+ 2717              		@ Interrupt Service Routine.
+ 2718              		@ args = 0, pretend = 0, frame = 0
+ 2719              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2720 0000 04C02DE5 		str	ip, [sp, #-4]!
+ 2721 0004 0DC0A0E1 		mov	ip, sp
+ 2722              	.LCFI0:
+ 2723              		.cfi_def_cfa_register 12
+ 2724 0008 0CD82DE9 		stmfd	sp!, {r2, r3, fp, ip, lr, pc}
+ 2725 000c 04B04CE2 		sub	fp, ip, #4
+ 2726              		.cfi_offset 14, -8
+ 2727              		.cfi_offset 13, -12
+ 2728              		.cfi_offset 11, -16
+ 2729              		.cfi_offset 3, -20
+ 2730              		.cfi_offset 2, -24
+ 2731              	.LCFI1:
+ 2732              		.cfi_def_cfa 11, 4
+  23:../timer4.c   **** 	tiempoTotal++;
+ 2733              		.loc 1 23 0
+ 2734 0010 3C309FE5 		ldr	r3, .L2
+ 2735 0014 003093E5 		ldr	r3, [r3, #0]
+ 2736 0018 012083E2 		add	r2, r3, #1
+ 2737 001c 30309FE5 		ldr	r3, .L2
+ 2738 0020 002083E5 		str	r2, [r3, #0]
+  24:../timer4.c   **** 	actualizarTiempo = 1;
+ 2739              		.loc 1 24 0
+ 2740 0024 2C309FE5 		ldr	r3, .L2+4
+ 2741 0028 0120A0E3 		mov	r2, #1
+ 2742 002c 002083E5 		str	r2, [r3, #0]
+  25:../timer4.c   **** 	rI_ISPC |= BIT_TIMER4; // limpiar bit de pendiente del timer4
+ 2743              		.loc 1 25 0
+ 2744 0030 24309FE5 		ldr	r3, .L2+8
+ 2745 0034 20209FE5 		ldr	r2, .L2+8
+ 2746 0038 002092E5 		ldr	r2, [r2, #0]
+ 2747 003c 022C82E3 		orr	r2, r2, #512
+ 2748 0040 002083E5 		str	r2, [r3, #0]
+  26:../timer4.c   **** }
+ 2749              		.loc 1 26 0
+ 2750 0044 14D04BE2 		sub	sp, fp, #20
+ 2751 0048 0C689DE8 		ldmfd	sp, {r2, r3, fp, sp, lr}
+ 2752 004c 04C09DE4 		ldmfd	sp!, {ip}
+ 2753 0050 04F05EE2 		subs	pc, lr, #4
+ 2754              	.L3:
+ 2755              		.align	2
+ 2756              	.L2:
+ 2757 0054 00000000 		.word	tiempoTotal
+ 2758 0058 00000000 		.word	actualizarTiempo
+ 2759 005c 2400E001 		.word	31457316
+ 2760              		.cfi_endproc
+ 2761              	.LFE0:
+ 2763              		.align	2
+ 2764              		.global	timer4_stop
+ 2766              	timer4_stop:
+ 2767              	.LFB1:
+  27:../timer4.c   **** 
+  28:../timer4.c   **** void timer4_stop(void){
+ 2768              		.loc 1 28 0
+ 2769              		.cfi_startproc
+ 2770              		@ Function supports interworking.
+ 2771              		@ args = 0, pretend = 0, frame = 0
+ 2772              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2773 0060 0DC0A0E1 		mov	ip, sp
+ 2774              	.LCFI2:
+ 2775              		.cfi_def_cfa_register 12
+ 2776 0064 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2777 0068 04B04CE2 		sub	fp, ip, #4
+ 2778              		.cfi_offset 14, -8
+ 2779              		.cfi_offset 13, -12
+ 2780              		.cfi_offset 11, -16
+ 2781              	.LCFI3:
+ 2782              		.cfi_def_cfa 11, 4
+  29:../timer4.c   **** 	//Deshabilita interrupciones de timer4
+  30:../timer4.c   **** 	rINTMSK |= BIT_TIMER4;
+ 2783              		.loc 1 30 0
+ 2784 006c 2C309FE5 		ldr	r3, .L5
+ 2785 0070 28209FE5 		ldr	r2, .L5
+ 2786 0074 002092E5 		ldr	r2, [r2, #0]
+ 2787 0078 022C82E3 		orr	r2, r2, #512
+ 2788 007c 002083E5 		str	r2, [r3, #0]
+  31:../timer4.c   **** 	//Para el reloj timer4
+  32:../timer4.c   **** 	rTCON &= ~(0x100000);
+ 2789              		.loc 1 32 0
+ 2790 0080 1C309FE5 		ldr	r3, .L5+4
+ 2791 0084 18209FE5 		ldr	r2, .L5+4
+ 2792 0088 002092E5 		ldr	r2, [r2, #0]
+ 2793 008c 0126C2E3 		bic	r2, r2, #1048576
+ 2794 0090 002083E5 		str	r2, [r3, #0]
+  33:../timer4.c   **** }
+ 2795              		.loc 1 33 0
+ 2796 0094 0CD04BE2 		sub	sp, fp, #12
+ 2797 0098 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2798 009c 1EFF2FE1 		bx	lr
+ 2799              	.L6:
+ 2800              		.align	2
+ 2801              	.L5:
+ 2802 00a0 0C00E001 		.word	31457292
+ 2803 00a4 0800D501 		.word	30736392
+ 2804              		.cfi_endproc
+ 2805              	.LFE1:
+ 2807              		.align	2
+ 2808              		.global	timer4_reset
+ 2810              	timer4_reset:
+ 2811              	.LFB2:
+  34:../timer4.c   **** 
+  35:../timer4.c   **** void timer4_reset(void) {
+ 2812              		.loc 1 35 0
+ 2813              		.cfi_startproc
+ 2814              		@ Function supports interworking.
+ 2815              		@ args = 0, pretend = 0, frame = 0
+ 2816              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2817 00a8 0DC0A0E1 		mov	ip, sp
+ 2818              	.LCFI4:
+ 2819              		.cfi_def_cfa_register 12
+ 2820 00ac 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2821 00b0 04B04CE2 		sub	fp, ip, #4
+ 2822              		.cfi_offset 14, -8
+ 2823              		.cfi_offset 13, -12
+ 2824              		.cfi_offset 11, -16
+ 2825              	.LCFI5:
+ 2826              		.cfi_def_cfa 11, 4
+  36:../timer4.c   **** 	tiempoTotal = 0;
+ 2827              		.loc 1 36 0
+ 2828 00b4 10309FE5 		ldr	r3, .L8
+ 2829 00b8 0020A0E3 		mov	r2, #0
+ 2830 00bc 002083E5 		str	r2, [r3, #0]
+  37:../timer4.c   **** }
+ 2831              		.loc 1 37 0
+ 2832 00c0 0CD04BE2 		sub	sp, fp, #12
+ 2833 00c4 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2834 00c8 1EFF2FE1 		bx	lr
+ 2835              	.L9:
+ 2836              		.align	2
+ 2837              	.L8:
+ 2838 00cc 00000000 		.word	tiempoTotal
+ 2839              		.cfi_endproc
+ 2840              	.LFE2:
+ 2842              		.align	2
+ 2843              		.global	timer4_init
+ 2845              	timer4_init:
+ 2846              	.LFB3:
+  38:../timer4.c   **** 
+  39:../timer4.c   **** void timer4_init(void){ // iniciar timer4 para interrumpir cada segundo
+ 2847              		.loc 1 39 0
+ 2848              		.cfi_startproc
+ 2849              		@ Function supports interworking.
+ 2850              		@ args = 0, pretend = 0, frame = 0
+ 2851              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2852 00d0 0DC0A0E1 		mov	ip, sp
+ 2853              	.LCFI6:
+ 2854              		.cfi_def_cfa_register 12
+ 2855 00d4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2856 00d8 04B04CE2 		sub	fp, ip, #4
+ 2857              		.cfi_offset 14, -8
+ 2858              		.cfi_offset 13, -12
+ 2859              		.cfi_offset 11, -16
+ 2860              	.LCFI7:
+ 2861              		.cfi_def_cfa 11, 4
+  40:../timer4.c   **** 
+  41:../timer4.c   **** 	/* Configuraion controlador de interrupciones */
+  42:../timer4.c   **** 	rINTMSK &= ~(BIT_TIMER4);
+ 2862              		.loc 1 42 0
+ 2863 00dc B8309FE5 		ldr	r3, .L11
+ 2864 00e0 B4209FE5 		ldr	r2, .L11
+ 2865 00e4 002092E5 		ldr	r2, [r2, #0]
+ 2866 00e8 022CC2E3 		bic	r2, r2, #512
+ 2867 00ec 002083E5 		str	r2, [r3, #0]
+  43:../timer4.c   **** 
+  44:../timer4.c   **** 	/* Establece la rutina de servicio para TIMER4 */
+  45:../timer4.c   **** 	pISR_TIMER4=(unsigned)timer4_ISR;
+ 2868              		.loc 1 45 0
+ 2869 00f0 A8309FE5 		ldr	r3, .L11+4
+ 2870 00f4 A8209FE5 		ldr	r2, .L11+8
+ 2871 00f8 002083E5 		str	r2, [r3, #0]
+  46:../timer4.c   **** 
+  47:../timer4.c   **** 	/* Configura el Timer4 */
+  48:../timer4.c   ****     rTCFG0 |= ~(0x00FFFF); // preescalado del timer4 = 255 (compartirá preescalado con timer5)
+ 2872              		.loc 1 48 0
+ 2873 00fc A4209FE5 		ldr	r2, .L11+12
+ 2874 0100 A0309FE5 		ldr	r3, .L11+12
+ 2875 0104 003093E5 		ldr	r3, [r3, #0]
+ 2876 0108 0338E0E1 		mvn	r3, r3, asl #16
+ 2877 010c 2338E0E1 		mvn	r3, r3, lsr #16
+ 2878 0110 003082E5 		str	r3, [r2, #0]
+  49:../timer4.c   ****     rTCFG1 &= 0xFFF0FFFF; // divisor del timer4 = 1/4
+ 2879              		.loc 1 49 0
+ 2880 0114 90309FE5 		ldr	r3, .L11+16
+ 2881 0118 8C209FE5 		ldr	r2, .L11+16
+ 2882 011c 002092E5 		ldr	r2, [r2, #0]
+ 2883 0120 0F28C2E3 		bic	r2, r2, #983040
+ 2884 0124 002083E5 		str	r2, [r3, #0]
+  50:../timer4.c   ****     rTCFG1 |= 0x10000; // divisor del timer4 = 1/4
+ 2885              		.loc 1 50 0
+ 2886 0128 7C309FE5 		ldr	r3, .L11+16
+ 2887 012c 78209FE5 		ldr	r2, .L11+16
+ 2888 0130 002092E5 		ldr	r2, [r2, #0]
+ 2889 0134 012882E3 		orr	r2, r2, #65536
+ 2890 0138 002083E5 		str	r2, [r3, #0]
+  51:../timer4.c   ****     rTCNTB4 = 64516; // valor inicial de cuenta (la cuenta es descendente)
+ 2891              		.loc 1 51 0
+ 2892 013c 6C309FE5 		ldr	r3, .L11+20
+ 2893 0140 6C209FE5 		ldr	r2, .L11+24
+ 2894 0144 002083E5 		str	r2, [r3, #0]
+  52:../timer4.c   ****     rTCMPB4 = 0;// valor de comparación
+ 2895              		.loc 1 52 0
+ 2896 0148 68309FE5 		ldr	r3, .L11+28
+ 2897 014c 0020A0E3 		mov	r2, #0
+ 2898 0150 002083E5 		str	r2, [r3, #0]
+  53:../timer4.c   **** 	rTCON |= 0x200000; // activar manual update de los registros TCNTB4 y TCMPB4
+ 2899              		.loc 1 53 0
+ 2900 0154 60309FE5 		ldr	r3, .L11+32
+ 2901 0158 5C209FE5 		ldr	r2, .L11+32
+ 2902 015c 002092E5 		ldr	r2, [r2, #0]
+ 2903 0160 022682E3 		orr	r2, r2, #2097152
+ 2904 0164 002083E5 		str	r2, [r3, #0]
+  54:../timer4.c   **** 
+  55:../timer4.c   ****     rTCON |= 0x900000; // lanza el timer4 con auto reload
+ 2905              		.loc 1 55 0
+ 2906 0168 4C309FE5 		ldr	r3, .L11+32
+ 2907 016c 48209FE5 		ldr	r2, .L11+32
+ 2908 0170 002092E5 		ldr	r2, [r2, #0]
+ 2909 0174 092682E3 		orr	r2, r2, #9437184
+ 2910 0178 002083E5 		str	r2, [r3, #0]
+  56:../timer4.c   **** 	rTCON &= ~(0x200000); // Desactiva manual update del timer4
+ 2911              		.loc 1 56 0
+ 2912 017c 38309FE5 		ldr	r3, .L11+32
+ 2913 0180 34209FE5 		ldr	r2, .L11+32
+ 2914 0184 002092E5 		ldr	r2, [r2, #0]
+ 2915 0188 0226C2E3 		bic	r2, r2, #2097152
+ 2916 018c 002083E5 		str	r2, [r3, #0]
+  57:../timer4.c   **** }
+ 2917              		.loc 1 57 0
+ 2918 0190 0CD04BE2 		sub	sp, fp, #12
+ 2919 0194 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2920 0198 1EFF2FE1 		bx	lr
+ 2921              	.L12:
+ 2922              		.align	2
+ 2923              	.L11:
+ 2924 019c 0C00E001 		.word	31457292
+ 2925 01a0 44FF7F0C 		.word	209715012
+ 2926 01a4 00000000 		.word	timer4_ISR
+ 2927 01a8 0000D501 		.word	30736384
+ 2928 01ac 0400D501 		.word	30736388
+ 2929 01b0 3C00D501 		.word	30736444
+ 2930 01b4 04FC0000 		.word	64516
+ 2931 01b8 4000D501 		.word	30736448
+ 2932 01bc 0800D501 		.word	30736392
+ 2933              		.cfi_endproc
+ 2934              	.LFE3:
+ 2936              		.align	2
+ 2937              		.global	leerTiempoTimer4
+ 2939              	leerTiempoTimer4:
+ 2940              	.LFB4:
+  58:../timer4.c   **** 
+  59:../timer4.c   **** uint32_t leerTiempoTimer4() {
+ 2941              		.loc 1 59 0
+ 2942              		.cfi_startproc
+ 2943              		@ Function supports interworking.
+ 2944              		@ args = 0, pretend = 0, frame = 0
+ 2945              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2946 01c0 0DC0A0E1 		mov	ip, sp
+ 2947              	.LCFI8:
+ 2948              		.cfi_def_cfa_register 12
+ 2949 01c4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2950 01c8 04B04CE2 		sub	fp, ip, #4
+ 2951              		.cfi_offset 14, -8
+ 2952              		.cfi_offset 13, -12
+ 2953              		.cfi_offset 11, -16
+ 2954              	.LCFI9:
+ 2955              		.cfi_def_cfa 11, 4
+  60:../timer4.c   **** 	return tiempoTotal;
+ 2956              		.loc 1 60 0
+ 2957 01cc 10309FE5 		ldr	r3, .L14
+ 2958 01d0 003093E5 		ldr	r3, [r3, #0]
+  61:../timer4.c   **** }
+ 2959              		.loc 1 61 0
+ 2960 01d4 0300A0E1 		mov	r0, r3
+ 2961 01d8 0CD04BE2 		sub	sp, fp, #12
+ 2962 01dc 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2963 01e0 1EFF2FE1 		bx	lr
+ 2964              	.L15:
+ 2965              		.align	2
+ 2966              	.L14:
+ 2967 01e4 00000000 		.word	tiempoTotal
+ 2968              		.cfi_endproc
+ 2969              	.LFE4:
+ 2971              		.align	2
+ 2972              		.global	hayQueActualizarTiempo
+ 2974              	hayQueActualizarTiempo:
+ 2975              	.LFB5:
+  62:../timer4.c   **** 
+  63:../timer4.c   **** int hayQueActualizarTiempo() {
+ 2976              		.loc 1 63 0
+ 2977              		.cfi_startproc
+ 2978              		@ Function supports interworking.
+ 2979              		@ args = 0, pretend = 0, frame = 0
+ 2980              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2981 01e8 0DC0A0E1 		mov	ip, sp
+ 2982              	.LCFI10:
+ 2983              		.cfi_def_cfa_register 12
+ 2984 01ec 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2985 01f0 04B04CE2 		sub	fp, ip, #4
+ 2986              		.cfi_offset 14, -8
+ 2987              		.cfi_offset 13, -12
+ 2988              		.cfi_offset 11, -16
+ 2989              	.LCFI11:
+ 2990              		.cfi_def_cfa 11, 4
+  64:../timer4.c   **** 	return actualizarTiempo;
+ 2991              		.loc 1 64 0
+ 2992 01f4 10309FE5 		ldr	r3, .L17
+ 2993 01f8 003093E5 		ldr	r3, [r3, #0]
+  65:../timer4.c   **** }
+ 2994              		.loc 1 65 0
+ 2995 01fc 0300A0E1 		mov	r0, r3
+ 2996 0200 0CD04BE2 		sub	sp, fp, #12
+ 2997 0204 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2998 0208 1EFF2FE1 		bx	lr
+ 2999              	.L18:
+ 3000              		.align	2
+ 3001              	.L17:
+ 3002 020c 00000000 		.word	actualizarTiempo
+ 3003              		.cfi_endproc
+ 3004              	.LFE5:
+ 3006              		.align	2
+ 3007              		.global	desactivarActualizacion
+ 3009              	desactivarActualizacion:
+ 3010              	.LFB6:
+  66:../timer4.c   **** 
+  67:../timer4.c   **** void desactivarActualizacion() {
+ 3011              		.loc 1 67 0
+ 3012              		.cfi_startproc
+ 3013              		@ Function supports interworking.
+ 3014              		@ args = 0, pretend = 0, frame = 0
+ 3015              		@ frame_needed = 1, uses_anonymous_args = 0
+ 3016 0210 0DC0A0E1 		mov	ip, sp
+ 3017              	.LCFI12:
+ 3018              		.cfi_def_cfa_register 12
+ 3019 0214 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 3020 0218 04B04CE2 		sub	fp, ip, #4
+ 3021              		.cfi_offset 14, -8
+ 3022              		.cfi_offset 13, -12
+ 3023              		.cfi_offset 11, -16
+ 3024              	.LCFI13:
+ 3025              		.cfi_def_cfa 11, 4
+  68:../timer4.c   **** 	actualizarTiempo = 0;
+ 3026              		.loc 1 68 0
+ 3027 021c 10309FE5 		ldr	r3, .L20
+ 3028 0220 0020A0E3 		mov	r2, #0
+ 3029 0224 002083E5 		str	r2, [r3, #0]
+  69:../timer4.c   **** }
+ 3030              		.loc 1 69 0
+ 3031 0228 0CD04BE2 		sub	sp, fp, #12
+ 3032 022c 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 3033 0230 1EFF2FE1 		bx	lr
+ 3034              	.L21:
+ 3035              		.align	2
+ 3036              	.L20:
+ 3037 0234 00000000 		.word	actualizarTiempo
+ 3038              		.cfi_endproc
+ 3039              	.LFE6:
+ 3041              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 timer4.c
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2701   .bss:00000000 actualizarTiempo
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2698   .bss:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2707   .bss:00000004 tiempoTotal
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2710   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2713   .text:00000000 timer4_ISR
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2757   .text:00000054 $d
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2763   .text:00000060 $a
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2766   .text:00000060 timer4_stop
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2802   .text:000000a0 $d
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2807   .text:000000a8 $a
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2810   .text:000000a8 timer4_reset
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2838   .text:000000cc $d
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2842   .text:000000d0 $a
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2845   .text:000000d0 timer4_init
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2924   .text:0000019c $d
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2936   .text:000001c0 $a
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2939   .text:000001c0 leerTiempoTimer4
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2967   .text:000001e4 $d
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2971   .text:000001e8 $a
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:2974   .text:000001e8 hayQueActualizarTiempo
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:3002   .text:0000020c $d
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:3006   .text:00000210 $a
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:3009   .text:00000210 desactivarActualizacion
+C:\Users\a680669\AppData\Local\Temp\cciSeGHk.s:3037   .text:00000234 $d
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS

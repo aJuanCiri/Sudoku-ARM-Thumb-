@@ -1,0 +1,339 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"timer.c"
+  21              	.Ltext0:
+  22              		.file 1 "../timer.c"
+ 1891              		.align	2
+ 1894              	haLlegadoA500ms:
+ 1895 0000 00000000 		.space	4
+ 1896              		.global	veces10ms
+ 1897              		.align	2
+ 1900              	veces10ms:
+ 1901 0004 00000000 		.space	4
+ 1902              		.text
+ 1903              		.align	2
+ 1904              		.global	timer0_ISR
+ 1906              	timer0_ISR:
+ 1907              	.LFB0:
+   1:../timer.c    **** /*********************************************************************************************
+   2:../timer.c    **** * Fichero:		timer.c
+   3:../timer.c    **** * Autor:
+   4:../timer.c    **** * Descrip:		funciones de control del timer0 del s3c44b0x
+   5:../timer.c    **** * Version:
+   6:../timer.c    **** *********************************************************************************************/
+   7:../timer.c    **** 
+   8:../timer.c    **** /*--- ficheros de cabecera ---*/
+   9:../timer.c    **** #include "44b.h"
+  10:../timer.c    **** #include "44blib.h"
+  11:../timer.c    **** #include "gestorRebotes.h"
+  12:../timer.c    **** #include "gestorSudoku.h"
+  13:../timer.c    **** 
+  14:../timer.c    **** enum {botonIzquierdo = 0, botonDerecho = 1};
+  15:../timer.c    **** enum {false = 0, true = 1};
+  16:../timer.c    **** 
+  17:../timer.c    **** /*--- variables globales ---*/
+  18:../timer.c    **** int haLlegadoA500ms = false;	//vale true si se ha mantenido el botón izquierdo 500ms
+  19:../timer.c    **** int veces10ms = 0;				//Lleva la cuenta de las veces que han pasado 10ms
+  20:../timer.c    **** 
+  21:../timer.c    **** /*--- declaracion de funciones ---*/
+  22:../timer.c    **** // Para definir la rutina de captura de la interrupción del timer.
+  23:../timer.c    **** void timer0_ISR(void) __attribute__((interrupt("IRQ")));
+  24:../timer.c    **** void timer0_init(int);
+  25:../timer.c    **** 
+  26:../timer.c    **** /*--- codigo de las funciones ---*/
+  27:../timer.c    **** // Rutina de captura de una interrupción del timer.
+  28:../timer.c    **** void timer0_ISR(void)
+  29:../timer.c    **** {
+ 1908              		.loc 1 29 0
+ 1909              		.cfi_startproc
+ 1910              		@ Interrupt Service Routine.
+ 1911              		@ args = 0, pretend = 0, frame = 0
+ 1912              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1913 0000 04C02DE5 		str	ip, [sp, #-4]!
+ 1914 0004 0DC0A0E1 		mov	ip, sp
+ 1915              	.LCFI0:
+ 1916              		.cfi_def_cfa_register 12
+ 1917 0008 0FD82DE9 		stmfd	sp!, {r0, r1, r2, r3, fp, ip, lr, pc}
+ 1918 000c 04B04CE2 		sub	fp, ip, #4
+ 1919              		.cfi_offset 14, -8
+ 1920              		.cfi_offset 13, -12
+ 1921              		.cfi_offset 11, -16
+ 1922              		.cfi_offset 3, -20
+ 1923              		.cfi_offset 2, -24
+ 1924              		.cfi_offset 1, -28
+ 1925              		.cfi_offset 0, -32
+ 1926              	.LCFI1:
+ 1927              		.cfi_def_cfa 11, 4
+  30:../timer.c    **** 	//Si se pulsa el botón de selección y se esta manteniendo
+  31:../timer.c    **** 	if(botonIzquierdoPulsado() && seMantiene()){
+ 1928              		.loc 1 31 0
+ 1929 0010 FEFFFFEB 		bl	botonIzquierdoPulsado
+ 1930 0014 0030A0E1 		mov	r3, r0
+ 1931 0018 000053E3 		cmp	r3, #0
+ 1932 001c 2600000A 		beq	.L2
+ 1933              		.loc 1 31 0 is_stmt 0 discriminator 1
+ 1934 0020 FEFFFFEB 		bl	seMantiene
+ 1935 0024 0030A0E1 		mov	r3, r0
+ 1936 0028 000053E3 		cmp	r3, #0
+ 1937 002c 2200000A 		beq	.L2
+  32:../timer.c    **** 		veces10ms++;
+ 1938              		.loc 1 32 0 is_stmt 1
+ 1939 0030 AC309FE5 		ldr	r3, .L4
+ 1940 0034 003093E5 		ldr	r3, [r3, #0]
+ 1941 0038 012083E2 		add	r2, r3, #1
+ 1942 003c A0309FE5 		ldr	r3, .L4
+ 1943 0040 002083E5 		str	r2, [r3, #0]
+  33:../timer.c    **** 		//Si lleva 500ms asi se informa al gestor del sudoku
+  34:../timer.c    **** 		if(!haLlegadoA500ms && veces10ms==50){
+ 1944              		.loc 1 34 0
+ 1945 0044 9C309FE5 		ldr	r3, .L4+4
+ 1946 0048 003093E5 		ldr	r3, [r3, #0]
+ 1947 004c 000053E3 		cmp	r3, #0
+ 1948 0050 0C00001A 		bne	.L3
+ 1949              		.loc 1 34 0 is_stmt 0 discriminator 1
+ 1950 0054 88309FE5 		ldr	r3, .L4
+ 1951 0058 003093E5 		ldr	r3, [r3, #0]
+ 1952 005c 320053E3 		cmp	r3, #50
+ 1953 0060 0800001A 		bne	.L3
+  35:../timer.c    **** 			haLlegadoA500ms = true;
+ 1954              		.loc 1 35 0 is_stmt 1
+ 1955 0064 7C309FE5 		ldr	r3, .L4+4
+ 1956 0068 0120A0E3 		mov	r2, #1
+ 1957 006c 002083E5 		str	r2, [r3, #0]
+  36:../timer.c    **** 			gestionarSudoku(botonIzquierdo);
+ 1958              		.loc 1 36 0
+ 1959 0070 0000A0E3 		mov	r0, #0
+ 1960 0074 FEFFFFEB 		bl	gestionarSudoku
+  37:../timer.c    **** 			veces10ms = 0;
+ 1961              		.loc 1 37 0
+ 1962 0078 64309FE5 		ldr	r3, .L4
+ 1963 007c 0020A0E3 		mov	r2, #0
+ 1964 0080 002083E5 		str	r2, [r3, #0]
+ 1965 0084 0C0000EA 		b	.L2
+ 1966              	.L3:
+  38:../timer.c    **** 		}
+  39:../timer.c    **** 		//Si ha alcanzado los 500 ms, aumenta cada 300ms
+  40:../timer.c    **** 		else if(haLlegadoA500ms && veces10ms==30){
+ 1967              		.loc 1 40 0
+ 1968 0088 58309FE5 		ldr	r3, .L4+4
+ 1969 008c 003093E5 		ldr	r3, [r3, #0]
+ 1970 0090 000053E3 		cmp	r3, #0
+ 1971 0094 0800000A 		beq	.L2
+ 1972              		.loc 1 40 0 is_stmt 0 discriminator 1
+ 1973 0098 44309FE5 		ldr	r3, .L4
+ 1974 009c 003093E5 		ldr	r3, [r3, #0]
+ 1975 00a0 1E0053E3 		cmp	r3, #30
+ 1976 00a4 0400001A 		bne	.L2
+  41:../timer.c    **** 			veces10ms=0;
+ 1977              		.loc 1 41 0 is_stmt 1
+ 1978 00a8 34309FE5 		ldr	r3, .L4
+ 1979 00ac 0020A0E3 		mov	r2, #0
+ 1980 00b0 002083E5 		str	r2, [r3, #0]
+  42:../timer.c    **** 			gestionarSudoku(botonIzquierdo);
+ 1981              		.loc 1 42 0
+ 1982 00b4 0000A0E3 		mov	r0, #0
+ 1983 00b8 FEFFFFEB 		bl	gestionarSudoku
+ 1984              	.L2:
+  43:../timer.c    **** 		}
+  44:../timer.c    **** 	}
+  45:../timer.c    **** 	gestionarRebotes();  //Informa al gestor de rebotes que ya ha pasado el tiempo indicado
+ 1985              		.loc 1 45 0
+ 1986 00bc FEFFFFEB 		bl	gestionarRebotes
+  46:../timer.c    **** 	/* borrar bit en I_ISPC para desactivar la solicitud de interrupción*/
+  47:../timer.c    **** 	rI_ISPC |= BIT_TIMER0;
+ 1987              		.loc 1 47 0
+ 1988 00c0 24309FE5 		ldr	r3, .L4+8
+ 1989 00c4 20209FE5 		ldr	r2, .L4+8
+ 1990 00c8 002092E5 		ldr	r2, [r2, #0]
+ 1991 00cc 022A82E3 		orr	r2, r2, #8192
+ 1992 00d0 002083E5 		str	r2, [r3, #0]
+  48:../timer.c    **** }
+ 1993              		.loc 1 48 0
+ 1994 00d4 1CD04BE2 		sub	sp, fp, #28
+ 1995 00d8 0F689DE8 		ldmfd	sp, {r0, r1, r2, r3, fp, sp, lr}
+ 1996 00dc 04C09DE4 		ldmfd	sp!, {ip}
+ 1997 00e0 04F05EE2 		subs	pc, lr, #4
+ 1998              	.L5:
+ 1999              		.align	2
+ 2000              	.L4:
+ 2001 00e4 00000000 		.word	veces10ms
+ 2002 00e8 00000000 		.word	haLlegadoA500ms
+ 2003 00ec 2400E001 		.word	31457316
+ 2004              		.cfi_endproc
+ 2005              	.LFE0:
+ 2007              		.align	2
+ 2008              		.global	reiniciarValoresTimer0
+ 2010              	reiniciarValoresTimer0:
+ 2011              	.LFB1:
+  49:../timer.c    **** 
+  50:../timer.c    **** //Reinicia los valores empleados para gestionar la opción de mantener los botones
+  51:../timer.c    **** void reiniciarValoresTimer0(){
+ 2012              		.loc 1 51 0
+ 2013              		.cfi_startproc
+ 2014              		@ Function supports interworking.
+ 2015              		@ args = 0, pretend = 0, frame = 0
+ 2016              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2017 00f0 0DC0A0E1 		mov	ip, sp
+ 2018              	.LCFI2:
+ 2019              		.cfi_def_cfa_register 12
+ 2020 00f4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2021 00f8 04B04CE2 		sub	fp, ip, #4
+ 2022              		.cfi_offset 14, -8
+ 2023              		.cfi_offset 13, -12
+ 2024              		.cfi_offset 11, -16
+ 2025              	.LCFI3:
+ 2026              		.cfi_def_cfa 11, 4
+  52:../timer.c    **** 	haLlegadoA500ms = false;
+ 2027              		.loc 1 52 0
+ 2028 00fc 1C309FE5 		ldr	r3, .L7
+ 2029 0100 0020A0E3 		mov	r2, #0
+ 2030 0104 002083E5 		str	r2, [r3, #0]
+  53:../timer.c    **** 	veces10ms = 0;
+ 2031              		.loc 1 53 0
+ 2032 0108 14309FE5 		ldr	r3, .L7+4
+ 2033 010c 0020A0E3 		mov	r2, #0
+ 2034 0110 002083E5 		str	r2, [r3, #0]
+  54:../timer.c    **** }
+ 2035              		.loc 1 54 0
+ 2036 0114 0CD04BE2 		sub	sp, fp, #12
+ 2037 0118 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2038 011c 1EFF2FE1 		bx	lr
+ 2039              	.L8:
+ 2040              		.align	2
+ 2041              	.L7:
+ 2042 0120 00000000 		.word	haLlegadoA500ms
+ 2043 0124 00000000 		.word	veces10ms
+ 2044              		.cfi_endproc
+ 2045              	.LFE1:
+ 2047              		.align	2
+ 2048              		.global	timer0_init
+ 2050              	timer0_init:
+ 2051              	.LFB2:
+  55:../timer.c    **** 
+  56:../timer.c    **** // Inicializa los valores del timer.
+  57:../timer.c    **** void timer0_init(int tiempo)
+  58:../timer.c    **** {
+ 2052              		.loc 1 58 0
+ 2053              		.cfi_startproc
+ 2054              		@ Function supports interworking.
+ 2055              		@ args = 0, pretend = 0, frame = 8
+ 2056              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2057 0128 0DC0A0E1 		mov	ip, sp
+ 2058              	.LCFI4:
+ 2059              		.cfi_def_cfa_register 12
+ 2060 012c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2061 0130 04B04CE2 		sub	fp, ip, #4
+ 2062              		.cfi_offset 14, -8
+ 2063              		.cfi_offset 13, -12
+ 2064              		.cfi_offset 11, -16
+ 2065              	.LCFI5:
+ 2066              		.cfi_def_cfa 11, 4
+ 2067 0134 08D04DE2 		sub	sp, sp, #8
+ 2068 0138 10000BE5 		str	r0, [fp, #-16]
+  59:../timer.c    **** 	/* Configuraion controlador de interrupciones */
+  60:../timer.c    **** 	rINTMSK &= ~(BIT_TIMER0); // Emascara el bit del timer 0.
+ 2069              		.loc 1 60 0
+ 2070 013c 94309FE5 		ldr	r3, .L10
+ 2071 0140 90209FE5 		ldr	r2, .L10
+ 2072 0144 002092E5 		ldr	r2, [r2, #0]
+ 2073 0148 022AC2E3 		bic	r2, r2, #8192
+ 2074 014c 002083E5 		str	r2, [r3, #0]
+  61:../timer.c    **** 
+  62:../timer.c    **** 	/* Establece la rutina de servicio para TIMER0 */
+  63:../timer.c    **** 	pISR_TIMER0 = (unsigned) timer0_ISR;
+ 2075              		.loc 1 63 0
+ 2076 0150 84309FE5 		ldr	r3, .L10+4
+ 2077 0154 84209FE5 		ldr	r2, .L10+8
+ 2078 0158 002083E5 		str	r2, [r3, #0]
+  64:../timer.c    **** 
+  65:../timer.c    **** 	/* Configura el Timer0 */
+  66:../timer.c    **** 	rTCFG0 |= 0x000000FF; // ajusta el preescalado a 255
+ 2079              		.loc 1 66 0
+ 2080 015c 80309FE5 		ldr	r3, .L10+12
+ 2081 0160 7C209FE5 		ldr	r2, .L10+12
+ 2082 0164 002092E5 		ldr	r2, [r2, #0]
+ 2083 0168 FF2082E3 		orr	r2, r2, #255
+ 2084 016c 002083E5 		str	r2, [r3, #0]
+  67:../timer.c    **** 	rTCFG1 &= 0xFFFFFFF0; // selecciona la entrada del mux que proporciona el reloj. La 00 corresponde
+ 2085              		.loc 1 67 0
+ 2086 0170 70309FE5 		ldr	r3, .L10+16
+ 2087 0174 6C209FE5 		ldr	r2, .L10+16
+ 2088 0178 002092E5 		ldr	r2, [r2, #0]
+ 2089 017c 0F20C2E3 		bic	r2, r2, #15
+ 2090 0180 002083E5 		str	r2, [r3, #0]
+  68:../timer.c    **** 	rTCNTB0 = tiempo;// valor inicial de cuenta (la cuenta es descendente)
+ 2091              		.loc 1 68 0
+ 2092 0184 60309FE5 		ldr	r3, .L10+20
+ 2093 0188 10201BE5 		ldr	r2, [fp, #-16]
+ 2094 018c 002083E5 		str	r2, [r3, #0]
+  69:../timer.c    **** 	rTCMPB0 = 0;// valor de comparación
+ 2095              		.loc 1 69 0
+ 2096 0190 58309FE5 		ldr	r3, .L10+24
+ 2097 0194 0020A0E3 		mov	r2, #0
+ 2098 0198 002083E5 		str	r2, [r3, #0]
+  70:../timer.c    **** 	/* establecer update=manual (bit 1) + inverter=on (¿? será inverter off un cero en el bit 2 pone e
+  71:../timer.c    **** 	rTCON = (rTCON & 0xFFFFFFF0) | 0x2;
+ 2099              		.loc 1 71 0
+ 2100 019c 50309FE5 		ldr	r3, .L10+28
+ 2101 01a0 4C209FE5 		ldr	r2, .L10+28
+ 2102 01a4 002092E5 		ldr	r2, [r2, #0]
+ 2103 01a8 0F20C2E3 		bic	r2, r2, #15
+ 2104 01ac 022082E3 		orr	r2, r2, #2
+ 2105 01b0 002083E5 		str	r2, [r3, #0]
+  72:../timer.c    **** 	/* iniciar timer (bit 0) con auto-reload (bit 3)*/
+  73:../timer.c    **** 	rTCON = (rTCON & 0xFFFFFFF0) | 0x9;
+ 2106              		.loc 1 73 0
+ 2107 01b4 38309FE5 		ldr	r3, .L10+28
+ 2108 01b8 34209FE5 		ldr	r2, .L10+28
+ 2109 01bc 002092E5 		ldr	r2, [r2, #0]
+ 2110 01c0 0F20C2E3 		bic	r2, r2, #15
+ 2111 01c4 092082E3 		orr	r2, r2, #9
+ 2112 01c8 002083E5 		str	r2, [r3, #0]
+  74:../timer.c    **** }
+ 2113              		.loc 1 74 0
+ 2114 01cc 0CD04BE2 		sub	sp, fp, #12
+ 2115 01d0 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2116 01d4 1EFF2FE1 		bx	lr
+ 2117              	.L11:
+ 2118              		.align	2
+ 2119              	.L10:
+ 2120 01d8 0C00E001 		.word	31457292
+ 2121 01dc 54FF7F0C 		.word	209715028
+ 2122 01e0 00000000 		.word	timer0_ISR
+ 2123 01e4 0000D501 		.word	30736384
+ 2124 01e8 0400D501 		.word	30736388
+ 2125 01ec 0C00D501 		.word	30736396
+ 2126 01f0 1000D501 		.word	30736400
+ 2127 01f4 0800D501 		.word	30736392
+ 2128              		.cfi_endproc
+ 2129              	.LFE2:
+ 2131              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 timer.c
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:1894   .bss:00000000 haLlegadoA500ms
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:1891   .bss:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:1900   .bss:00000004 veces10ms
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:1903   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:1906   .text:00000000 timer0_ISR
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:2001   .text:000000e4 $d
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:2007   .text:000000f0 $a
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:2010   .text:000000f0 reiniciarValoresTimer0
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:2042   .text:00000120 $d
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:2047   .text:00000128 $a
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:2050   .text:00000128 timer0_init
+C:\Users\a680669\AppData\Local\Temp\ccV4785l.s:2120   .text:000001d8 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+botonIzquierdoPulsado
+seMantiene
+gestionarSudoku
+gestionarRebotes

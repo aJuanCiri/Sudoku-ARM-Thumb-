@@ -1,0 +1,174 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"itoa.c"
+  21              	.Ltext0:
+  22              		.file 1 "../itoa.c"
+ 965              		.align	2
+ 966              	.LC0:
+ 967 0000 30313233 		.ascii	"0123456789\000"
+ 967      34353637 
+ 967      383900
+ 968 000b 00       		.text
+ 969              		.align	2
+ 970              		.global	itoa
+ 972              	itoa:
+ 973              	.LFB0:
+   1:../itoa.c     **** /*
+   2:../itoa.c     ****  * itoa.c
+   3:../itoa.c     ****  */
+   4:../itoa.c     **** char* itoa(int i, char b[]){
+ 974              		.loc 1 4 0
+ 975              		.cfi_startproc
+ 976              		@ Function supports interworking.
+ 977              		@ args = 0, pretend = 0, frame = 32
+ 978              		@ frame_needed = 1, uses_anonymous_args = 0
+ 979 0000 0DC0A0E1 		mov	ip, sp
+ 980              	.LCFI0:
+ 981              		.cfi_def_cfa_register 12
+ 982 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 983 0008 04B04CE2 		sub	fp, ip, #4
+ 984              		.cfi_offset 14, -8
+ 985              		.cfi_offset 13, -12
+ 986              		.cfi_offset 11, -16
+ 987              	.LCFI1:
+ 988              		.cfi_def_cfa 11, 4
+ 989 000c 20D04DE2 		sub	sp, sp, #32
+ 990 0010 28000BE5 		str	r0, [fp, #-40]
+ 991 0014 2C100BE5 		str	r1, [fp, #-44]
+   5:../itoa.c     ****     char const digit[] = "0123456789";
+ 992              		.loc 1 5 0
+ 993 0018 28219FE5 		ldr	r2, .L5
+ 994 001c 20304BE2 		sub	r3, fp, #32
+ 995 0020 070092E8 		ldmia	r2, {r0, r1, r2}
+ 996 0024 0300A3E8 		stmia	r3!, {r0, r1}
+ 997 0028 B020C3E1 		strh	r2, [r3, #0]	@ movhi
+ 998 002c 023083E2 		add	r3, r3, #2
+ 999 0030 2228A0E1 		mov	r2, r2, lsr #16
+ 1000 0034 0020C3E5 		strb	r2, [r3, #0]
+   6:../itoa.c     ****     char* p = b;
+ 1001              		.loc 1 6 0
+ 1002 0038 2C301BE5 		ldr	r3, [fp, #-44]
+ 1003 003c 10300BE5 		str	r3, [fp, #-16]
+   7:../itoa.c     ****     if(i<0){
+ 1004              		.loc 1 7 0
+ 1005 0040 28301BE5 		ldr	r3, [fp, #-40]
+ 1006 0044 000053E3 		cmp	r3, #0
+ 1007 0048 080000AA 		bge	.L2
+   8:../itoa.c     ****         *p++ = '-';
+ 1008              		.loc 1 8 0
+ 1009 004c 10301BE5 		ldr	r3, [fp, #-16]
+ 1010 0050 2D20A0E3 		mov	r2, #45
+ 1011 0054 0020C3E5 		strb	r2, [r3, #0]
+ 1012 0058 10301BE5 		ldr	r3, [fp, #-16]
+ 1013 005c 013083E2 		add	r3, r3, #1
+ 1014 0060 10300BE5 		str	r3, [fp, #-16]
+   9:../itoa.c     ****         i *= -1;
+ 1015              		.loc 1 9 0
+ 1016 0064 28301BE5 		ldr	r3, [fp, #-40]
+ 1017 0068 003063E2 		rsb	r3, r3, #0
+ 1018 006c 28300BE5 		str	r3, [fp, #-40]
+ 1019              	.L2:
+  10:../itoa.c     ****     }
+  11:../itoa.c     ****     int shifter = i;
+ 1020              		.loc 1 11 0
+ 1021 0070 28301BE5 		ldr	r3, [fp, #-40]
+ 1022 0074 14300BE5 		str	r3, [fp, #-20]
+ 1023              	.L3:
+  12:../itoa.c     ****     do{
+  13:../itoa.c     ****         ++p;
+ 1024              		.loc 1 13 0 discriminator 1
+ 1025 0078 10301BE5 		ldr	r3, [fp, #-16]
+ 1026 007c 013083E2 		add	r3, r3, #1
+ 1027 0080 10300BE5 		str	r3, [fp, #-16]
+  14:../itoa.c     ****         shifter = shifter/10;
+ 1028              		.loc 1 14 0 discriminator 1
+ 1029 0084 14301BE5 		ldr	r3, [fp, #-20]
+ 1030 0088 BC209FE5 		ldr	r2, .L5+4
+ 1031 008c 9312C2E0 		smull	r1, r2, r3, r2
+ 1032 0090 4221A0E1 		mov	r2, r2, asr #2
+ 1033 0094 C33FA0E1 		mov	r3, r3, asr #31
+ 1034 0098 023063E0 		rsb	r3, r3, r2
+ 1035 009c 14300BE5 		str	r3, [fp, #-20]
+  15:../itoa.c     ****     }while(shifter);
+ 1036              		.loc 1 15 0 discriminator 1
+ 1037 00a0 14301BE5 		ldr	r3, [fp, #-20]
+ 1038 00a4 000053E3 		cmp	r3, #0
+ 1039 00a8 F2FFFF1A 		bne	.L3
+  16:../itoa.c     ****     *p = '\0';
+ 1040              		.loc 1 16 0
+ 1041 00ac 10301BE5 		ldr	r3, [fp, #-16]
+ 1042 00b0 0020A0E3 		mov	r2, #0
+ 1043 00b4 0020C3E5 		strb	r2, [r3, #0]
+ 1044              	.L4:
+  17:../itoa.c     ****     do{
+  18:../itoa.c     ****         *--p = digit[i%10];
+ 1045              		.loc 1 18 0 discriminator 1
+ 1046 00b8 10301BE5 		ldr	r3, [fp, #-16]
+ 1047 00bc 013043E2 		sub	r3, r3, #1
+ 1048 00c0 10300BE5 		str	r3, [fp, #-16]
+ 1049 00c4 28101BE5 		ldr	r1, [fp, #-40]
+ 1050 00c8 7C309FE5 		ldr	r3, .L5+4
+ 1051 00cc 9123C3E0 		smull	r2, r3, r1, r3
+ 1052 00d0 4321A0E1 		mov	r2, r3, asr #2
+ 1053 00d4 C13FA0E1 		mov	r3, r1, asr #31
+ 1054 00d8 022063E0 		rsb	r2, r3, r2
+ 1055 00dc 0230A0E1 		mov	r3, r2
+ 1056 00e0 0331A0E1 		mov	r3, r3, asl #2
+ 1057 00e4 023083E0 		add	r3, r3, r2
+ 1058 00e8 8330A0E1 		mov	r3, r3, asl #1
+ 1059 00ec 012063E0 		rsb	r2, r3, r1
+ 1060 00f0 1330E0E3 		mvn	r3, #19
+ 1061 00f4 0C104BE2 		sub	r1, fp, #12
+ 1062 00f8 022081E0 		add	r2, r1, r2
+ 1063 00fc 033082E0 		add	r3, r2, r3
+ 1064 0100 0020D3E5 		ldrb	r2, [r3, #0]	@ zero_extendqisi2
+ 1065 0104 10301BE5 		ldr	r3, [fp, #-16]
+ 1066 0108 0020C3E5 		strb	r2, [r3, #0]
+  19:../itoa.c     ****         i = i/10;
+ 1067              		.loc 1 19 0 discriminator 1
+ 1068 010c 28301BE5 		ldr	r3, [fp, #-40]
+ 1069 0110 34209FE5 		ldr	r2, .L5+4
+ 1070 0114 9312C2E0 		smull	r1, r2, r3, r2
+ 1071 0118 4221A0E1 		mov	r2, r2, asr #2
+ 1072 011c C33FA0E1 		mov	r3, r3, asr #31
+ 1073 0120 023063E0 		rsb	r3, r3, r2
+ 1074 0124 28300BE5 		str	r3, [fp, #-40]
+  20:../itoa.c     ****     }while(i);
+ 1075              		.loc 1 20 0 discriminator 1
+ 1076 0128 28301BE5 		ldr	r3, [fp, #-40]
+ 1077 012c 000053E3 		cmp	r3, #0
+ 1078 0130 E0FFFF1A 		bne	.L4
+  21:../itoa.c     ****     return b;
+ 1079              		.loc 1 21 0
+ 1080 0134 2C301BE5 		ldr	r3, [fp, #-44]
+  22:../itoa.c     **** }
+ 1081              		.loc 1 22 0
+ 1082 0138 0300A0E1 		mov	r0, r3
+ 1083 013c 0CD04BE2 		sub	sp, fp, #12
+ 1084 0140 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 1085 0144 1EFF2FE1 		bx	lr
+ 1086              	.L6:
+ 1087              		.align	2
+ 1088              	.L5:
+ 1089 0148 00000000 		.word	.LC0
+ 1090 014c 67666666 		.word	1717986919
+ 1091              		.cfi_endproc
+ 1092              	.LFE0:
+ 1094              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 itoa.c
+C:\Users\a680669\AppData\Local\Temp\ccW7YrwK.s:965    .rodata:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccW7YrwK.s:969    .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccW7YrwK.s:972    .text:00000000 itoa
+C:\Users\a680669\AppData\Local\Temp\ccW7YrwK.s:1089   .text:00000148 $d
+                     .debug_frame:00000010 $d
+
+NO UNDEFINED SYMBOLS

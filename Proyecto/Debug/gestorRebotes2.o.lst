@@ -1,0 +1,565 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"gestorRebotes2.c"
+  21              	.Ltext0:
+  22              		.file 1 "../gestorRebotes2.c"
+ 1952              		.align	2
+ 1955              	estado:
+ 1956 0000 00000000 		.space	4
+ 1957              		.comm	botonPulsado,4,4
+ 1958              		.global	tiempoAlPulsar_Soltar
+ 1959              		.data
+ 1960              		.align	2
+ 1963              	tiempoAlPulsar_Soltar:
+ 1964 0000 A8610000 		.word	25000
+ 1965              		.global	tiempoSiguePulsado
+ 1966              		.align	2
+ 1969              	tiempoSiguePulsado:
+ 1970 0004 E8030000 		.word	1000
+ 1971              		.text
+ 1972              		.align	2
+ 1973              		.global	gestionarRebotes
+ 1975              	gestionarRebotes:
+ 1976              	.LFB0:
+   1:../gestorRebotes2.c **** #include "44blib.h"
+   2:../gestorRebotes2.c **** #include "44b.h"
+   3:../gestorRebotes2.c **** #include "def.h"
+   4:../gestorRebotes2.c **** 
+   5:../gestorRebotes2.c **** enum {SinPulsar = 0, Pulsado = 1, Soltando = 2};
+   6:../gestorRebotes2.c **** enum {Izquierdo = 6, Derecho = 7};
+   7:../gestorRebotes2.c **** enum {false = 0, true = 1};
+   8:../gestorRebotes2.c **** 
+   9:../gestorRebotes2.c **** /*--- variables globales ---*/
+  10:../gestorRebotes2.c **** int estado = SinPulsar;
+  11:../gestorRebotes2.c **** int botonPulsado;
+  12:../gestorRebotes2.c **** int tiempoAlPulsar_Soltar = 25000;		//250 ms
+  13:../gestorRebotes2.c **** int tiempoSiguePulsado = 1000;			//10 ms
+  14:../gestorRebotes2.c **** 
+  15:../gestorRebotes2.c **** /*--- declaracion de funciones ---*/
+  16:../gestorRebotes2.c **** void gestionarRebotes();
+  17:../gestorRebotes2.c **** int estaPulsado();
+  18:../gestorRebotes2.c **** int estaSoltando();
+  19:../gestorRebotes2.c **** void pulsarBotonIzq();
+  20:../gestorRebotes2.c **** void pulsarBotonDer();
+  21:../gestorRebotes2.c **** void reiniciarBotones();
+  22:../gestorRebotes2.c **** 
+  23:../gestorRebotes2.c **** /*--- codigo de las funciones ---*/
+  24:../gestorRebotes2.c **** 
+  25:../gestorRebotes2.c **** /* Si el botón se estaba soltando, actualiza el estado como sinPulsar
+  26:../gestorRebotes2.c ****  * y reinicia los valores del timer además de los botones.
+  27:../gestorRebotes2.c ****  * Si esta pulsado, solicita al timer0 que le avise en [tiempoSiguePulsado] ms
+  28:../gestorRebotes2.c ****  */
+  29:../gestorRebotes2.c **** void gestionarRebotes(){
+ 1977              		.loc 1 29 0
+ 1978              		.cfi_startproc
+ 1979              		@ Function supports interworking.
+ 1980              		@ args = 0, pretend = 0, frame = 0
+ 1981              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1982 0000 0DC0A0E1 		mov	ip, sp
+ 1983              	.LCFI0:
+ 1984              		.cfi_def_cfa_register 12
+ 1985 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 1986 0008 04B04CE2 		sub	fp, ip, #4
+ 1987              		.cfi_offset 14, -8
+ 1988              		.cfi_offset 13, -12
+ 1989              		.cfi_offset 11, -16
+ 1990              	.LCFI1:
+ 1991              		.cfi_def_cfa 11, 4
+  30:../gestorRebotes2.c **** 	if(estaSoltando()){ //estado2
+ 1992              		.loc 1 30 0
+ 1993 000c FEFFFFEB 		bl	estaSoltando
+ 1994 0010 0030A0E1 		mov	r3, r0
+ 1995 0014 000053E3 		cmp	r3, #0
+ 1996 0018 0500000A 		beq	.L2
+ 1997              	.LBB2:
+  31:../gestorRebotes2.c **** 		estado = SinPulsar;  //va a estado0
+ 1998              		.loc 1 31 0
+ 1999 001c 3C309FE5 		ldr	r3, .L4
+ 2000 0020 0020A0E3 		mov	r2, #0
+ 2001 0024 002083E5 		str	r2, [r3, #0]
+  32:../gestorRebotes2.c **** 		reiniciarValoresTimer0();
+ 2002              		.loc 1 32 0
+ 2003 0028 FEFFFFEB 		bl	reiniciarValoresTimer0
+  33:../gestorRebotes2.c **** 		reiniciarBotones();  //Pendiente de implementar
+ 2004              		.loc 1 33 0
+ 2005 002c FEFFFFEB 		bl	reiniciarBotones
+ 2006 0030 070000EA 		b	.L1
+ 2007              	.L2:
+ 2008              	.LBE2:
+  34:../gestorRebotes2.c **** 	}
+  35:../gestorRebotes2.c **** 	else if(estaPulsado()){ //estado1
+ 2009              		.loc 1 35 0
+ 2010 0034 FEFFFFEB 		bl	estaPulsado
+ 2011 0038 0030A0E1 		mov	r3, r0
+ 2012 003c 000053E3 		cmp	r3, #0
+ 2013 0040 0300000A 		beq	.L1
+ 2014              	.LBB3:
+  36:../gestorRebotes2.c **** 		timer0_init(tiempoSiguePulsado);  //Falta el include del timer
+ 2015              		.loc 1 36 0
+ 2016 0044 18309FE5 		ldr	r3, .L4+4
+ 2017 0048 003093E5 		ldr	r3, [r3, #0]
+ 2018 004c 0300A0E1 		mov	r0, r3
+ 2019 0050 FEFFFFEB 		bl	timer0_init
+ 2020              	.L1:
+ 2021              	.LBE3:
+  37:../gestorRebotes2.c **** 	}
+  38:../gestorRebotes2.c **** }
+ 2022              		.loc 1 38 0
+ 2023 0054 0CD04BE2 		sub	sp, fp, #12
+ 2024 0058 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2025 005c 1EFF2FE1 		bx	lr
+ 2026              	.L5:
+ 2027              		.align	2
+ 2028              	.L4:
+ 2029 0060 00000000 		.word	estado
+ 2030 0064 00000000 		.word	tiempoSiguePulsado
+ 2031              		.cfi_endproc
+ 2032              	.LFE0:
+ 2034              		.align	2
+ 2035              		.global	estaPulsado
+ 2037              	estaPulsado:
+ 2038              	.LFB1:
+  39:../gestorRebotes2.c **** 
+  40:../gestorRebotes2.c **** int estaPulsado(){
+ 2039              		.loc 1 40 0
+ 2040              		.cfi_startproc
+ 2041              		@ Function supports interworking.
+ 2042              		@ args = 0, pretend = 0, frame = 0
+ 2043              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2044 0068 0DC0A0E1 		mov	ip, sp
+ 2045              	.LCFI2:
+ 2046              		.cfi_def_cfa_register 12
+ 2047 006c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2048 0070 04B04CE2 		sub	fp, ip, #4
+ 2049              		.cfi_offset 14, -8
+ 2050              		.cfi_offset 13, -12
+ 2051              		.cfi_offset 11, -16
+ 2052              	.LCFI3:
+ 2053              		.cfi_def_cfa 11, 4
+  41:../gestorRebotes2.c **** 	if(rPDATG & (1<<botonPulsado)){
+ 2054              		.loc 1 41 0
+ 2055 0074 54309FE5 		ldr	r3, .L9
+ 2056 0078 002093E5 		ldr	r2, [r3, #0]
+ 2057 007c 50309FE5 		ldr	r3, .L9+4
+ 2058 0080 003093E5 		ldr	r3, [r3, #0]
+ 2059 0084 0110A0E3 		mov	r1, #1
+ 2060 0088 1133A0E1 		mov	r3, r1, asl r3
+ 2061 008c 033002E0 		and	r3, r2, r3
+ 2062 0090 000053E3 		cmp	r3, #0
+ 2063 0094 0800000A 		beq	.L7
+ 2064              	.LBB4:
+  42:../gestorRebotes2.c **** 		timer0_init(tiempoAlPulsar_Soltar);
+ 2065              		.loc 1 42 0
+ 2066 0098 38309FE5 		ldr	r3, .L9+8
+ 2067 009c 003093E5 		ldr	r3, [r3, #0]
+ 2068 00a0 0300A0E1 		mov	r0, r3
+ 2069 00a4 FEFFFFEB 		bl	timer0_init
+  43:../gestorRebotes2.c **** 		estado = Soltando;
+ 2070              		.loc 1 43 0
+ 2071 00a8 2C309FE5 		ldr	r3, .L9+12
+ 2072 00ac 0220A0E3 		mov	r2, #2
+ 2073 00b0 002083E5 		str	r2, [r3, #0]
+  44:../gestorRebotes2.c **** 		return false;
+ 2074              		.loc 1 44 0
+ 2075 00b4 0030A0E3 		mov	r3, #0
+ 2076 00b8 000000EA 		b	.L8
+ 2077              	.L7:
+ 2078              	.LBE4:
+  45:../gestorRebotes2.c **** 	} return true;
+ 2079              		.loc 1 45 0
+ 2080 00bc 0130A0E3 		mov	r3, #1
+ 2081              	.L8:
+  46:../gestorRebotes2.c **** }
+ 2082              		.loc 1 46 0
+ 2083 00c0 0300A0E1 		mov	r0, r3
+ 2084 00c4 0CD04BE2 		sub	sp, fp, #12
+ 2085 00c8 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2086 00cc 1EFF2FE1 		bx	lr
+ 2087              	.L10:
+ 2088              		.align	2
+ 2089              	.L9:
+ 2090 00d0 4400D201 		.word	30539844
+ 2091 00d4 00000000 		.word	botonPulsado
+ 2092 00d8 00000000 		.word	tiempoAlPulsar_Soltar
+ 2093 00dc 00000000 		.word	estado
+ 2094              		.cfi_endproc
+ 2095              	.LFE1:
+ 2097              		.align	2
+ 2098              		.global	seMantiene
+ 2100              	seMantiene:
+ 2101              	.LFB2:
+  47:../gestorRebotes2.c **** 
+  48:../gestorRebotes2.c **** int seMantiene(){
+ 2102              		.loc 1 48 0
+ 2103              		.cfi_startproc
+ 2104              		@ Function supports interworking.
+ 2105              		@ args = 0, pretend = 0, frame = 0
+ 2106              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2107 00e0 0DC0A0E1 		mov	ip, sp
+ 2108              	.LCFI4:
+ 2109              		.cfi_def_cfa_register 12
+ 2110 00e4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2111 00e8 04B04CE2 		sub	fp, ip, #4
+ 2112              		.cfi_offset 14, -8
+ 2113              		.cfi_offset 13, -12
+ 2114              		.cfi_offset 11, -16
+ 2115              	.LCFI5:
+ 2116              		.cfi_def_cfa 11, 4
+  49:../gestorRebotes2.c **** 	return estado==Pulsado;
+ 2117              		.loc 1 49 0
+ 2118 00ec 1C309FE5 		ldr	r3, .L12
+ 2119 00f0 003093E5 		ldr	r3, [r3, #0]
+ 2120 00f4 010053E3 		cmp	r3, #1
+ 2121 00f8 0030A013 		movne	r3, #0
+ 2122 00fc 0130A003 		moveq	r3, #1
+  50:../gestorRebotes2.c **** }
+ 2123              		.loc 1 50 0
+ 2124 0100 0300A0E1 		mov	r0, r3
+ 2125 0104 0CD04BE2 		sub	sp, fp, #12
+ 2126 0108 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2127 010c 1EFF2FE1 		bx	lr
+ 2128              	.L13:
+ 2129              		.align	2
+ 2130              	.L12:
+ 2131 0110 00000000 		.word	estado
+ 2132              		.cfi_endproc
+ 2133              	.LFE2:
+ 2135              		.align	2
+ 2136              		.global	estaSoltando
+ 2138              	estaSoltando:
+ 2139              	.LFB3:
+  51:../gestorRebotes2.c **** 
+  52:../gestorRebotes2.c **** int estaSoltando(){
+ 2140              		.loc 1 52 0
+ 2141              		.cfi_startproc
+ 2142              		@ Function supports interworking.
+ 2143              		@ args = 0, pretend = 0, frame = 0
+ 2144              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2145 0114 0DC0A0E1 		mov	ip, sp
+ 2146              	.LCFI6:
+ 2147              		.cfi_def_cfa_register 12
+ 2148 0118 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2149 011c 04B04CE2 		sub	fp, ip, #4
+ 2150              		.cfi_offset 14, -8
+ 2151              		.cfi_offset 13, -12
+ 2152              		.cfi_offset 11, -16
+ 2153              	.LCFI7:
+ 2154              		.cfi_def_cfa 11, 4
+  53:../gestorRebotes2.c **** 	return estado == Soltando;
+ 2155              		.loc 1 53 0
+ 2156 0120 1C309FE5 		ldr	r3, .L15
+ 2157 0124 003093E5 		ldr	r3, [r3, #0]
+ 2158 0128 020053E3 		cmp	r3, #2
+ 2159 012c 0030A013 		movne	r3, #0
+ 2160 0130 0130A003 		moveq	r3, #1
+  54:../gestorRebotes2.c **** }
+ 2161              		.loc 1 54 0
+ 2162 0134 0300A0E1 		mov	r0, r3
+ 2163 0138 0CD04BE2 		sub	sp, fp, #12
+ 2164 013c 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2165 0140 1EFF2FE1 		bx	lr
+ 2166              	.L16:
+ 2167              		.align	2
+ 2168              	.L15:
+ 2169 0144 00000000 		.word	estado
+ 2170              		.cfi_endproc
+ 2171              	.LFE3:
+ 2173              		.align	2
+ 2174              		.global	pulsarBotonIzq
+ 2176              	pulsarBotonIzq:
+ 2177              	.LFB4:
+  55:../gestorRebotes2.c **** 
+  56:../gestorRebotes2.c **** void pulsarBotonIzq(){
+ 2178              		.loc 1 56 0
+ 2179              		.cfi_startproc
+ 2180              		@ Function supports interworking.
+ 2181              		@ args = 0, pretend = 0, frame = 0
+ 2182              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2183 0148 0DC0A0E1 		mov	ip, sp
+ 2184              	.LCFI8:
+ 2185              		.cfi_def_cfa_register 12
+ 2186 014c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2187 0150 04B04CE2 		sub	fp, ip, #4
+ 2188              		.cfi_offset 14, -8
+ 2189              		.cfi_offset 13, -12
+ 2190              		.cfi_offset 11, -16
+ 2191              	.LCFI9:
+ 2192              		.cfi_def_cfa 11, 4
+  57:../gestorRebotes2.c **** 	rINTMSK  |= (BIT_EINT4567);		//Desactivamos la ISR
+ 2193              		.loc 1 57 0
+ 2194 0154 40309FE5 		ldr	r3, .L18
+ 2195 0158 3C209FE5 		ldr	r2, .L18
+ 2196 015c 002092E5 		ldr	r2, [r2, #0]
+ 2197 0160 022682E3 		orr	r2, r2, #2097152
+ 2198 0164 002083E5 		str	r2, [r3, #0]
+  58:../gestorRebotes2.c **** 	estado = Pulsado; //va a Estado1
+ 2199              		.loc 1 58 0
+ 2200 0168 30309FE5 		ldr	r3, .L18+4
+ 2201 016c 0120A0E3 		mov	r2, #1
+ 2202 0170 002083E5 		str	r2, [r3, #0]
+  59:../gestorRebotes2.c **** 	botonPulsado = Izquierdo;
+ 2203              		.loc 1 59 0
+ 2204 0174 28309FE5 		ldr	r3, .L18+8
+ 2205 0178 0620A0E3 		mov	r2, #6
+ 2206 017c 002083E5 		str	r2, [r3, #0]
+  60:../gestorRebotes2.c **** 	timer0_init(tiempoAlPulsar_Soltar);
+ 2207              		.loc 1 60 0
+ 2208 0180 20309FE5 		ldr	r3, .L18+12
+ 2209 0184 003093E5 		ldr	r3, [r3, #0]
+ 2210 0188 0300A0E1 		mov	r0, r3
+ 2211 018c FEFFFFEB 		bl	timer0_init
+  61:../gestorRebotes2.c **** }
+ 2212              		.loc 1 61 0
+ 2213 0190 0CD04BE2 		sub	sp, fp, #12
+ 2214 0194 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2215 0198 1EFF2FE1 		bx	lr
+ 2216              	.L19:
+ 2217              		.align	2
+ 2218              	.L18:
+ 2219 019c 0C00E001 		.word	31457292
+ 2220 01a0 00000000 		.word	estado
+ 2221 01a4 00000000 		.word	botonPulsado
+ 2222 01a8 00000000 		.word	tiempoAlPulsar_Soltar
+ 2223              		.cfi_endproc
+ 2224              	.LFE4:
+ 2226              		.align	2
+ 2227              		.global	pulsarBotonDer
+ 2229              	pulsarBotonDer:
+ 2230              	.LFB5:
+  62:../gestorRebotes2.c **** 
+  63:../gestorRebotes2.c **** void pulsarBotonDer(){
+ 2231              		.loc 1 63 0
+ 2232              		.cfi_startproc
+ 2233              		@ Function supports interworking.
+ 2234              		@ args = 0, pretend = 0, frame = 0
+ 2235              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2236 01ac 0DC0A0E1 		mov	ip, sp
+ 2237              	.LCFI10:
+ 2238              		.cfi_def_cfa_register 12
+ 2239 01b0 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2240 01b4 04B04CE2 		sub	fp, ip, #4
+ 2241              		.cfi_offset 14, -8
+ 2242              		.cfi_offset 13, -12
+ 2243              		.cfi_offset 11, -16
+ 2244              	.LCFI11:
+ 2245              		.cfi_def_cfa 11, 4
+  64:../gestorRebotes2.c **** 	rINTMSK  |= (BIT_EINT4567);		//Desactivamos la ISR
+ 2246              		.loc 1 64 0
+ 2247 01b8 40309FE5 		ldr	r3, .L21
+ 2248 01bc 3C209FE5 		ldr	r2, .L21
+ 2249 01c0 002092E5 		ldr	r2, [r2, #0]
+ 2250 01c4 022682E3 		orr	r2, r2, #2097152
+ 2251 01c8 002083E5 		str	r2, [r3, #0]
+  65:../gestorRebotes2.c **** 	estado = Pulsado; //Va a Estado1
+ 2252              		.loc 1 65 0
+ 2253 01cc 30309FE5 		ldr	r3, .L21+4
+ 2254 01d0 0120A0E3 		mov	r2, #1
+ 2255 01d4 002083E5 		str	r2, [r3, #0]
+  66:../gestorRebotes2.c **** 	botonPulsado = Derecho;
+ 2256              		.loc 1 66 0
+ 2257 01d8 28309FE5 		ldr	r3, .L21+8
+ 2258 01dc 0720A0E3 		mov	r2, #7
+ 2259 01e0 002083E5 		str	r2, [r3, #0]
+  67:../gestorRebotes2.c **** 	timer0_init(tiempoAlPulsar_Soltar);
+ 2260              		.loc 1 67 0
+ 2261 01e4 20309FE5 		ldr	r3, .L21+12
+ 2262 01e8 003093E5 		ldr	r3, [r3, #0]
+ 2263 01ec 0300A0E1 		mov	r0, r3
+ 2264 01f0 FEFFFFEB 		bl	timer0_init
+  68:../gestorRebotes2.c **** }
+ 2265              		.loc 1 68 0
+ 2266 01f4 0CD04BE2 		sub	sp, fp, #12
+ 2267 01f8 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2268 01fc 1EFF2FE1 		bx	lr
+ 2269              	.L22:
+ 2270              		.align	2
+ 2271              	.L21:
+ 2272 0200 0C00E001 		.word	31457292
+ 2273 0204 00000000 		.word	estado
+ 2274 0208 00000000 		.word	botonPulsado
+ 2275 020c 00000000 		.word	tiempoAlPulsar_Soltar
+ 2276              		.cfi_endproc
+ 2277              	.LFE5:
+ 2279              		.align	2
+ 2280              		.global	reiniciarBotones
+ 2282              	reiniciarBotones:
+ 2283              	.LFB6:
+  69:../gestorRebotes2.c **** 
+  70:../gestorRebotes2.c **** void reiniciarBotones(){
+ 2284              		.loc 1 70 0
+ 2285              		.cfi_startproc
+ 2286              		@ Function supports interworking.
+ 2287              		@ args = 0, pretend = 0, frame = 0
+ 2288              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2289 0210 0DC0A0E1 		mov	ip, sp
+ 2290              	.LCFI12:
+ 2291              		.cfi_def_cfa_register 12
+ 2292 0214 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2293 0218 04B04CE2 		sub	fp, ip, #4
+ 2294              		.cfi_offset 14, -8
+ 2295              		.cfi_offset 13, -12
+ 2296              		.cfi_offset 11, -16
+ 2297              	.LCFI13:
+ 2298              		.cfi_def_cfa 11, 4
+  71:../gestorRebotes2.c **** 	rINTMSK    &= ~(BIT_EINT4567); // Enmascara todas las lineas excepto eint4567.
+ 2299              		.loc 1 71 0
+ 2300 021c 38309FE5 		ldr	r3, .L24
+ 2301 0220 34209FE5 		ldr	r2, .L24
+ 2302 0224 002092E5 		ldr	r2, [r2, #0]
+ 2303 0228 0226C2E3 		bic	r2, r2, #2097152
+ 2304 022c 002083E5 		str	r2, [r3, #0]
+  72:../gestorRebotes2.c **** 	/* Por precaucion, se vuelven a borrar los bits de INTPND y EXTINTPND */
+  73:../gestorRebotes2.c **** 	rI_ISPC    |= (BIT_EINT4567);
+ 2305              		.loc 1 73 0
+ 2306 0230 28309FE5 		ldr	r3, .L24+4
+ 2307 0234 24209FE5 		ldr	r2, .L24+4
+ 2308 0238 002092E5 		ldr	r2, [r2, #0]
+ 2309 023c 022682E3 		orr	r2, r2, #2097152
+ 2310 0240 002083E5 		str	r2, [r3, #0]
+  74:../gestorRebotes2.c **** 	rEXTINTPND = 0xf;
+ 2311              		.loc 1 74 0
+ 2312 0244 18309FE5 		ldr	r3, .L24+8
+ 2313 0248 0F20A0E3 		mov	r2, #15
+ 2314 024c 002083E5 		str	r2, [r3, #0]
+  75:../gestorRebotes2.c **** }
+ 2315              		.loc 1 75 0
+ 2316 0250 0CD04BE2 		sub	sp, fp, #12
+ 2317 0254 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2318 0258 1EFF2FE1 		bx	lr
+ 2319              	.L25:
+ 2320              		.align	2
+ 2321              	.L24:
+ 2322 025c 0C00E001 		.word	31457292
+ 2323 0260 2400E001 		.word	31457316
+ 2324 0264 5400D201 		.word	30539860
+ 2325              		.cfi_endproc
+ 2326              	.LFE6:
+ 2328              		.align	2
+ 2329              		.global	botonIzquierdoPulsado
+ 2331              	botonIzquierdoPulsado:
+ 2332              	.LFB7:
+  76:../gestorRebotes2.c **** 
+  77:../gestorRebotes2.c **** int botonIzquierdoPulsado(){
+ 2333              		.loc 1 77 0
+ 2334              		.cfi_startproc
+ 2335              		@ Function supports interworking.
+ 2336              		@ args = 0, pretend = 0, frame = 0
+ 2337              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2338 0268 0DC0A0E1 		mov	ip, sp
+ 2339              	.LCFI14:
+ 2340              		.cfi_def_cfa_register 12
+ 2341 026c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2342 0270 04B04CE2 		sub	fp, ip, #4
+ 2343              		.cfi_offset 14, -8
+ 2344              		.cfi_offset 13, -12
+ 2345              		.cfi_offset 11, -16
+ 2346              	.LCFI15:
+ 2347              		.cfi_def_cfa 11, 4
+  78:../gestorRebotes2.c **** 	return botonPulsado==Izquierdo;
+ 2348              		.loc 1 78 0
+ 2349 0274 1C309FE5 		ldr	r3, .L27
+ 2350 0278 003093E5 		ldr	r3, [r3, #0]
+ 2351 027c 060053E3 		cmp	r3, #6
+ 2352 0280 0030A013 		movne	r3, #0
+ 2353 0284 0130A003 		moveq	r3, #1
+  79:../gestorRebotes2.c **** }
+ 2354              		.loc 1 79 0
+ 2355 0288 0300A0E1 		mov	r0, r3
+ 2356 028c 0CD04BE2 		sub	sp, fp, #12
+ 2357 0290 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2358 0294 1EFF2FE1 		bx	lr
+ 2359              	.L28:
+ 2360              		.align	2
+ 2361              	.L27:
+ 2362 0298 00000000 		.word	botonPulsado
+ 2363              		.cfi_endproc
+ 2364              	.LFE7:
+ 2366              		.align	2
+ 2367              		.global	botonDerechoPulsado
+ 2369              	botonDerechoPulsado:
+ 2370              	.LFB8:
+  80:../gestorRebotes2.c **** 
+  81:../gestorRebotes2.c **** int botonDerechoPulsado(){
+ 2371              		.loc 1 81 0
+ 2372              		.cfi_startproc
+ 2373              		@ Function supports interworking.
+ 2374              		@ args = 0, pretend = 0, frame = 0
+ 2375              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2376 029c 0DC0A0E1 		mov	ip, sp
+ 2377              	.LCFI16:
+ 2378              		.cfi_def_cfa_register 12
+ 2379 02a0 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2380 02a4 04B04CE2 		sub	fp, ip, #4
+ 2381              		.cfi_offset 14, -8
+ 2382              		.cfi_offset 13, -12
+ 2383              		.cfi_offset 11, -16
+ 2384              	.LCFI17:
+ 2385              		.cfi_def_cfa 11, 4
+  82:../gestorRebotes2.c **** 	return botonPulsado==Derecho;
+ 2386              		.loc 1 82 0
+ 2387 02a8 1C309FE5 		ldr	r3, .L30
+ 2388 02ac 003093E5 		ldr	r3, [r3, #0]
+ 2389 02b0 070053E3 		cmp	r3, #7
+ 2390 02b4 0030A013 		movne	r3, #0
+ 2391 02b8 0130A003 		moveq	r3, #1
+  83:../gestorRebotes2.c **** }
+ 2392              		.loc 1 83 0
+ 2393 02bc 0300A0E1 		mov	r0, r3
+ 2394 02c0 0CD04BE2 		sub	sp, fp, #12
+ 2395 02c4 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2396 02c8 1EFF2FE1 		bx	lr
+ 2397              	.L31:
+ 2398              		.align	2
+ 2399              	.L30:
+ 2400 02cc 00000000 		.word	botonPulsado
+ 2401              		.cfi_endproc
+ 2402              	.LFE8:
+ 2404              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 gestorRebotes2.c
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:1955   .bss:00000000 estado
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:1952   .bss:00000000 $d
+                            *COM*:00000004 botonPulsado
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:1963   .data:00000000 tiempoAlPulsar_Soltar
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:1960   .data:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:1969   .data:00000004 tiempoSiguePulsado
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:1972   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:1975   .text:00000000 gestionarRebotes
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2138   .text:00000114 estaSoltando
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2282   .text:00000210 reiniciarBotones
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2037   .text:00000068 estaPulsado
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2029   .text:00000060 $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2034   .text:00000068 $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2090   .text:000000d0 $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2097   .text:000000e0 $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2100   .text:000000e0 seMantiene
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2131   .text:00000110 $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2135   .text:00000114 $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2169   .text:00000144 $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2173   .text:00000148 $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2176   .text:00000148 pulsarBotonIzq
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2219   .text:0000019c $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2226   .text:000001ac $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2229   .text:000001ac pulsarBotonDer
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2272   .text:00000200 $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2279   .text:00000210 $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2322   .text:0000025c $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2328   .text:00000268 $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2331   .text:00000268 botonIzquierdoPulsado
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2362   .text:00000298 $d
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2366   .text:0000029c $a
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2369   .text:0000029c botonDerechoPulsado
+C:\Users\a680669\AppData\Local\Temp\ccqudEcd.s:2400   .text:000002cc $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+reiniciarValoresTimer0
+timer0_init

@@ -1,0 +1,332 @@
+   1              	# 1 "../sudoku_2015_ARM-THUMB.asm"
+   1              	/************************************************************************************************/
+   0              	
+   0              	
+   0              	
+   2              	/* Fichero: sudoku_2015_ARM-THUMB.asm															*/
+   3              	/* Alejandro Guiu Pérez - 680669 																*/
+   4              	/* Álvaro Juan Ciriaco - 682531											    				    */
+   5              	/************************************************************************************************/
+   6              	
+   7              	.arm
+   8              	.data
+   9              	.ltorg 								/*Garantiza la alineación*/
+  10 0000 09000000 	NUM_FILAS:		.long 9				/*Cantidad de filas en la memoria*/
+  11 0004 10000000 	NUM_COLUMNAS:	.long 16 			/*Cantidad de columnas en la memoria*/
+  12              	.text
+  13              	
+  14              	.global sudoku_recalcular_arm_thumb
+  15              	.global sudoku_candidatos_thumb
+  16              	
+  17              	/**************************************************************************************************
+  18              	/* Recalcula el tablero y retorna el número de celdas vacías, los candidatos se calculan en THUMB *
+  19              	/* Parámetros:											    								      */
+  20              	/* r0 = @inicio del sudoku																	      */
+  21              	/**************************************************************************************************
+  22              	
+  23              	sudoku_recalcular_arm_thumb:
+  24 0000 04E02DE5 			PUSH {lr}					/*Se apila la dirección de salto desde la que se ha saltado*/
+  25 0004 F0012DE9 			PUSH {r4-r8}				/*Se apilan los registros que se van a utilizar*/
+  26 0008 0010A0E3 			mov r1, #0					/*i=0 (iterador de filas)*/
+  27 000c 0020A0E3 			mov r2, #0					/*j=0 (iterador de columnas)*/
+  28 0010 0030A0E3 			mov r3, #0					/*variable: Celdasvacias=0*/
+  29 0014 0070A0E3 			mov r7, #0					/*Vale 1 si ha habido alguna celda con error*/
+  30 0018 CC419FE5 			ldr r4, =NUM_FILAS			/*Se carga el número de filas*/
+  31 001c 004094E5 			ldr r4, [r4]
+  32 0020 C8519FE5 			ldr r5, =NUM_COLUMNAS		/*Se carga el número de columnas*/
+  33 0024 005095E5 			ldr r5, [r5]
+  34 0028 075045E2 			sub r5, r5, #7				/*r5 = valor real de columnas (NUM_COLUMNAS-7)*/
+  35              	for1:
+  36 002c 040051E1 			cmp r1, r4					/*Se compara i con el número de filas*/
+  37 0030 0000001A 			bne for2					/*Si son distintos, hace otra iteración*/
+  38 0034 0E0000EA 			b finalRec					/*Si son iguales, ha terminado, y se finaliza el bucle*/
+  39              	for2:
+  40 0038 050052E1 			cmp r2, r5					/*Se compara j con el número de columnas*/
+  41 003c 0900000A 			beq finFila					/*Si son iguales, se comprueba si hay que avanzar a la siguiente fila*/
+  42 0040 0F002DE9 			PUSH {r0-r3}				/*Si no es pista, preparamos pila para bl*/
+  43 0044 FEFFFFEB 			bl sudoku_candidatos_thumb	/* Llama a sudoku_candidatos_thumb */
+  44 0048 0080A0E1 			mov r8, r0					/*r8 guarda el resultado de la funcion, para poder restaurar los registros r0-r3*/
+  45 004c 0F00BDE8 			POP {r0-r3}					/*Se restauran los valores de los registros*/
+  46 0050 000058E3 			cmp r8, #0
+  47 0054 01308302 			addeq r3, r3, #1			/*Si es 0 incrementamos celdasVacias*/
+  48 0058 000058E3 			cmp r8, #0
+  49 005c 017087B2 			addlt r7, #1				/*si hay error se incrementa el contador de errores*/
+  50 0060 012082E2 			add r2, r2, #1				/*Incrementamos j*/
+  51 0064 F3FFFFEA 			b for2
+  52              	
+  53              	finFila:
+  54 0068 011081E2 			add r1, r1, #1				/*incrementamos i*/
+  55 006c 0020A0E3 	 		mov r2, #0					/*reiniciamos j*/
+  56 0070 EDFFFFEA 			b for1
+  57              	finalRec:
+  58 0074 0300A0E1 			mov r0, r3					/*Se sitúa el resultado en el registro 0 para devolverlo*/
+  59 0078 000057E3 			cmp r7, #0
+  60 007c 030000DA 			ble terminar
+  61 0080 0030A0E3 			mov r3, #0
+  62 0084 013043E2 			sub r3, r3, #1
+  63 0088 0070A0E1 			mov r7, r0
+  64 008c 970300E0 			mul r0, r7, r3				/*Se actualiza para que celdasVacias sea negativo*/
+  65              	terminar:
+  66 0090 F001BDE8 			POP {r4-r8}					/*Se desapilan los valores iniciales de los registros*/
+  67 0094 04F09DE4 			POP {pc}					/*Se salta a la función inicial*/
+  68              	
+  69              	/***********************************************************************************/
+  70              	/* Encuentra todos los candidatos de una celda, y los actualiza en la propia celda */
+  71              	/* Tras lo anterior, devuelve cierto si contiene un valor, o falso si esta vacía   */
+  72              	/***********************************************************************************/
+  73              	
+  74              	/*Paso de ARM a Thumb*/
+  75              	sudoku_candidatos_thumb:
+  76 0098 04E02DE5 			PUSH {lr}					/*Se apila la dirección desde la que se ha saltado*/
+  77 009c 50319FE5 			ldr r3, = sudoku_candidatos_thumb2+1
+  78 00a0 13FF2FE1 			bx r3						/*Salta a la función en modo thumb*/
+  79              	
+  80              	/*******************************************************************/
+  81              	/* Búsqueda y actualización de los candidatos de una celda en THUMB*/
+  82              	/* Parámetros:													   */
+  83              	/* r0 = @inicio del sudoku										   */
+  84              	/* r1 = fila													   */
+  85              	/* r2 = columna													   */
+  86              	/*******************************************************************/
+  87              	.thumb
+  88              	sudoku_candidatos_thumb2:
+  89 00a4 F7B4     			PUSH {r0-r2,r4-r7}			/*Se apilan los registros a usar*/
+  90 00a6 0023     			mov r3, #0					/*Se inicializa el iterador*/
+  91 00a8 4901     			LSL r1, #5					/*Se desplaza la fila 5 bits, teniendo los bytes respecto a la inicial*/
+  92 00aa 4018     			add r0, r0, r1				/*Situamos el puntero en el inicio de la fila con los candidatos a revisar*/
+  93 00ac 111C     			mov r1, r2
+  94 00ae 4900     			LSL r1, #1
+  95 00b0 4718     			add r7, r0, r1				/*r7 = @ de la celda principal*/
+  96 00b2 5149     			ldr r1, =0x01FF				/*r1 = Futuro valor de la casilla a la que estamos mirando candidatos*/
+  97 00b4 4E4E     			ldr r6, =NUM_COLUMNAS		/*Se carga el número de columnas*/
+  98 00b6 3668     			ldr r6, [r6]
+  99 00b8 073E     			sub r6, r6, #7
+ 100              	
+ 101              			/* ----------- WHILE QUE REVISA LA FILA ------------- */
+ 102              	whileColumnas:
+ 103 00ba B342     			cmp r3, r6					/*Se comprueba si se han revisado todas las columnas de la fila*/
+ 104 00bc 0FDA     			bge finColumnas
+ 105 00be 0133     			add r3, r3, #1				/*Se actualiza el iterador de celdas recorridas*/
+ 106 00c0 0288     			ldrh r2, [r0]				/*r2=valor que hay en @sudoku*/
+ 107 00c2 051C     			mov r5, r0
+ 108 00c4 0230     			add r0, r0, #2				/*r0 apunta a siguiente @sudoku*/
+ 109 00c6 BD42     			cmp r5, r7
+ 110 00c8 F7D0     			beq whileColumnas
+ 111 00ca 4C4D     			ldr r5, =0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ 112 00cc 2A42     			TST r2, r5					/*Se compara la celda con la máscara*/
+ 113 00ce F4D0     			beq whileColumnas			/*Si es vacia, se comprueba el siguiente, si no lo es, se elimina el candidat
+ 114              	
+ 115              			/* Eliminación de un candidato: */
+ 116 00d0 120B     			LSR r2, r2, #12				/*Sacamos el valor de la cuadricula en la que estamos (4 bits)*/
+ 117 00d2 013A     			sub r2, r2, #1				/*Se resta uno al candidato para el desplazamiento*/
+ 118 00d4 0124     			mov r4, #1					/*Ponemos el 1 y lo desplazamos hasta la posicion a borrar*/
+ 119 00d6 9440     			LSL r4, r4, r2				/*Se desplaza el 1 para eliminarlo*/
+ 120 00d8 E543     			mvn r5, r4					/*Negamos los bits*/
+ 121 00da 2940     			and r1, r5					/*Pone a 0 el bit que corresponde al candidato eliminado*/
+ 122 00dc EDE7     			b whileColumnas
+ 123              	
+ 124              	finColumnas:
+ 125 00de 0C1C     			mov r4, r1					/*Movemos candidatos a r4 para no perderlo al restaurar registros*/
+ 126 00e0 07BC     			POP {r0-r2}					/*Restauramos los registros con la columna, fila y @inicio del sudoku*/
+ 127 00e2 07B4     			PUSH {r0-r2}				/*Se mantienen guardados para su futura reutilización*/
+ 128 00e4 211C     			mov r1, r4					/*Volvemos a meter candidatos a r1*/
+ 129 00e6 5200     			LSL r2, #1					/*Se desplaza la columna 1 bit, teniendo los bytes respecto a la inicial*/
+ 130 00e8 8018     			add r0, r0, r2  			/*Se posiciona en la columna que hay que revisar*/
+ 131 00ea 404E     			ldr r6, =NUM_FILAS			/*Se carga el número de filas*/
+ 132 00ec 3668     			ldr r6, [r6]
+ 133 00ee 0023     			mov r3, #0					/*Reiniciamos el iterador*/
+ 134              	
+ 135              			/* ------------ WHILE QUE REVISA LA COLUMNA --------------*/
+ 136              	whileFilas:
+ 137 00f0 B342     			cmp r3, r6					/*Se comprueba si se han revisado todas las filas de la columna*/
+ 138 00f2 0FD0     			beq revisionRegion			/*si es asi, se pasa a revisar la región*/
+ 139 00f4 0133     			add r3, r3, #1				/*Se incrementa el iterador*/
+ 140 00f6 0288     			ldrh r2, [r0]				/*Se carga en r2 el valor*/
+ 141 00f8 051C     			mov r5, r0
+ 142 00fa 2030     			add r0, r0, #32				/*Se pasa a la siguiente fila*/
+ 143 00fc BD42     			cmp r5, r7
+ 144 00fe F7D0     			beq whileFilas
+ 145 0100 3E4D     			ldr r5, =0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ 146 0102 2A42     			TST r2, r5					/*Se compara la celda con la máscara*/
+ 147 0104 F4D0     			beq whileFilas				/*Si es vacia, se comprueba el siguiente, si no lo es, se elimina el candidato*
+ 148              	
+ 149              			/* Eliminación de un candidato: */
+ 150 0106 120B     			LSR r2, r2, #12				/*Sacamos el valor de la cuadricula en la que estamos (4 bits)*/
+ 151 0108 013A     			sub r2, r2, #1				/*Se resta uno al candidato para el desplazamiento*/
+ 152 010a 0124     			mov r4, #1					/*Ponemos el 1 y lo desplazamos hasta la posicion a borrar*/
+ 153 010c 9440     			LSL r4, r4, r2				/*Se desplaza el 1 para eliminarlo*/
+ 154 010e E543     			mvn r5, r4					/*Negamos los bits*/
+ 155 0110 2940     			and r1, r5					/*Pone a 0 el bit que corresponde al candidato eliminado*/
+ 156 0112 EDE7     			b whileFilas
+ 157              	
+ 158              			/* ------------ WHILE QUE REVISA LA REGIÓN -------------*/
+ 159              	revisionRegion:
+ 160 0114 8A46     			mov r10, r1					/*Guardamos los candidatos actuales en R10*/
+ 161 0116 07BC     			POP {r0-r2}					/*Restauramos la fila, columna y @ de inicio del sudoku en r1, r2 y r0 respectiva
+ 162 0118 01B4     			PUSH {r0}					/*Se guarda la @ de inicio del sudoku*/
+ 163              	
+ 164              			/* Cálculo de la primera celda de la región */
+ 165 011a 0629     			cmp r1, #6					/*Se calcula si la primera fila del cuadrante es 0,3 o 6*/
+ 166 011c 01DB     			blt fmenor6					/*Si es menor de 6 solo puede ser la fila 0 o la 3*/
+ 167 011e 0623     			mov r3, #6
+ 168 0120 04E0     			b recCol
+ 169 0122 0329     	fmenor6:cmp r1, #3					/*Si es menor de 3 solo puede ser la fila 0*/
+ 170 0124 01DB     			blt fmenor3
+ 171 0126 0323     			mov r3, #3
+ 172 0128 00E0     			b recCol
+ 173 012a 0023     	fmenor3:mov r3, #0					/*r3= FilaInicio */
+ 174              	
+ 175 012c 062A     	recCol: cmp r2, #6					/*Se calcula si la primera columna del cuadrante es 0,3 o 6*/
+ 176 012e 01DB     			blt cmenor6					/*Si es menor de 6 solo puede ser la columna 0 o la 3*/
+ 177 0130 0624     			mov r4, #6
+ 178 0132 04E0     			b finrev
+ 179 0134 032A     	cmenor6:cmp r2, #3
+ 180 0136 01DB     			blt cmenor3					/*Si es menor de 3 solo puede ser la columna 0*/
+ 181 0138 0324     			mov r4, #3
+ 182 013a 00E0     			b finrev
+ 183 013c 0024     	cmenor3:mov r4, #0					/*r4= ColumnaInicio */
+ 184              	
+ 185              			/* Fin del Cálculo de la primera celda de la región */
+ 186 013e 1D1C     	finrev:	mov r5, r3					/* filaX */
+ 187 0140 261C     			mov r6, r4					/* columnaX */
+ 188              	
+ 189              			/*FilaInicio=r3 ColumnaInicio=r4*/
+ 190 0142 1F1C     			mov r7, r3
+ 191 0144 7F01     			LSL r7, #5					/*Se calcula el desplazamiento por filas*/
+ 192 0146 C019     			add r0, r0, r7				/*Se aplica al puntero*/
+ 193 0148 271C     			mov r7, r4
+ 194 014a 7F00     			LSL r7, #1					/*Se calcula el desplazamiento por columnas*/
+ 195 014c C019     			add r0, r0, r7				/*Se aplica al puntero*/
+ 196 014e 0023     			mov r3, #0					/*r3=iterador (se reinicia a 0)*/
+ 197              	
+ 198              	whileRegion:
+ 199 0150 092B     			cmp r3, #9					/*Se itera mientras r3 distinto de 9, siendo 9 el número de celdas a revisar*/
+ 200 0152 2AD1     			bne revisarCandidatoRegion
+ 201 0154 01BC     			POP {r0}					/*Obtenemos @sudoku*/
+ 202 0156 4901     			LSL r1, #5					/*Nos situamos en la fila correcta*/
+ 203 0158 4018     			add r0, r0, r1
+ 204 015a 5200     			LSL r2, #1					/*Nos situamos en la columna correcta*/
+ 205 015c 8018     			add r0, r0, r2
+ 206 015e 5646     			mov r6, r10					/*Sacamos @ del dato del sudoku a actualizar candidatos:*/
+ 207 0160 0588     			ldrh r5, [r0]
+ 208 0162 6D0A     			LSR r5, r5, #9
+ 209 0164 6D02     			LSL r5, r5, #9
+ 210 0166 AE19     			add r6, r5, r6
+ 211 0168 311C     			mov r1, r6
+ 212 016a 360B     			LSR r6, r6, #12				/*Se saca el valor de la celda*/
+ 213 016c 002E     			cmp r6, #0					/*comprueba si tiene valor o no*/
+ 214 016e 15D0     			beq false					/*No tiene, y devuelve FALSE*/
+ 215              	
+ 216 0170 5746     			mov r7, r10					/*Candidatos de la celda*/
+ 217 0172 751E     			sub r5, r6, #1				/*Se resta uno al valor de la celda*/
+ 218 0174 0124     			mov r4, #1					/*Ponemos el 1 en r4 para comprobar si esta en candidatos*/
+ 219 0176 AC40     			LSL r4, r4, r5				/*Se desplaza el 1*/
+ 220 0178 3C40     			and r4, r4, r7				/*Si tiene valor 1 es que el valor estaba en candidatos*/
+ 221 017a 002C     			cmp r4, #0
+ 222 017c 06D0     			beq rechazamos
+ 223              	
+ 224 017e 204A     			ldr r2, =0xFBFF				/*Eliminamos el bit error*/
+ 225 0180 1140     			and r1, r2
+ 226 0182 0180     			strh r1, [r0]				/*Actualizamos los candidatos en memoria*/
+ 227 0184 0120     			mov r0, #1					/*Devuelve TRUE porque valor de la celda es distinto de 0*/
+ 228 0186 F0BC     			POP {r4-r7}					/*Restaura el valor de los registros usados*/
+ 229 0188 08BC     			POP {r3}
+ 230 018a 1847     			bx r3						/*FINAL DE LA EJECUCION DE LA FUNCIÓN: Salta a la función de llamada*/
+ 231              	
+ 232              	rechazamos:
+ 233 018c 1D4A     			ldr r2, =0x400
+ 234 018e 8918     			add r1, r1, r2				/*Añadimos bit error*/
+ 235 0190 0180     			strh r1, [r0]				/*Actualizamos los candidatos en memoria*/
+ 236 0192 0020     			mov r0, #0					/*Devuelve -1 porque da error, el valor de la celda no esta en candidatos*/
+ 237 0194 0138     			sub r0, r0, #1
+ 238 0196 F0BC     			POP {r4-r7}					/*Restaura valor de los registros usados*/
+ 239 0198 08BC     			POP {r3}
+ 240 019a 1847     			bx r3						/*FINAL DE LA EJECUCION DE LA FUNCIÓN: Salta a la función de llamada*/
+ 241              	
+ 242              	false:
+ 243 019c 184A     			ldr r2, =0xFBFF				/*Eliminamos bit error*/
+ 244 019e 1140     			and r1, r2
+ 245 01a0 0180     			strh r1, [r0]				/*Actualizamos los candidatos en memoria*/
+ 246 01a2 0020     			mov r0, #0					/*Devuelve FALSE porque valor de la celda es = 0*/
+ 247 01a4 F0BC     			POP {r4-r7}					/*Restaura el valor de los registros usados*/
+ 248 01a6 08BC     			POP {r3}
+ 249 01a8 1847     			bx r3						/*FINAL DE LA EJECUCION DE LA FUNCIÓN: Salta a la función de llamada*/
+ 250              	
+ 251              	revisarCandidatoRegion:
+ 252 01aa A046     			mov r8, r4					/*Guardamos r4 ya que se utiliza poco*/
+ 253 01ac A942     			cmp r1, r5					/*Comparamos filaX con fila*/
+ 254 01ae 0FD0     			beq avanzaEnRegion
+ 255 01b0 B242     			cmp r2, r6					/*Comparamos columnaX con columna*/
+ 256 01b2 0DD0     			beq avanzaEnRegion
+ 257 01b4 0488     			ldrh r4, [r0]				/*Sacamos el dato*/
+ 258 01b6 114F     			ldr r7, =0xF000				/*Se carga la máscara que permite averiguar si la celda esta vacía*/
+ 259 01b8 3C42     			TST r4, r7					/*Se compara la celda con la máscara*/
+ 260 01ba 09D0     			beq avanzaEnRegion			/*Si es vacia, se comprueba el siguiente, si no lo es, se elimina el candida
+ 261              	
+ 262              			/* Eliminación de un candidato: */
+ 263 01bc A946     			mov r9, r5					/*Se guarda r5 para poder utilizar el registro*/
+ 264 01be 5746     			mov r7, r10					/*r7 = candidatos actuales*/
+ 265 01c0 240B     			LSR r4, r4, #12				/*Se saca el valor de la celda actual*/
+ 266 01c2 013C     			sub r4, r4, #1				/*Se resta uno al candidato para el desplazamiento*/
+ 267 01c4 0125     			mov r5, #1					/*Se pone el 1 y se desplaza hasta la posición a borrar*/
+ 268 01c6 A540     			LSL r5, r5, r4				/*Se desplaza el 1 para eliminarlo*/
+ 269 01c8 ED43     			mvn r5, r5					/*Se niegan los bits*/
+ 270 01ca 2F40     			and r7, r5					/*Se pone a 0 el bit que corresponde al candidato eliminado*/
+ 271 01cc BA46     			mov r10, r7					/*Guaramos r10 los candidatos actualizados*/
+ 272 01ce 4D46     			mov r5, r9					/*Se restaura r5 con el valor de "fila"*/
+ 273              	
+ 274              	avanzaEnRegion:
+ 275 01d0 0133     			add r3, r3, #1				/*i++*/
+ 276 01d2 4446     			mov r4, r8					/*Se restaura el valor de r4*/
+ 277 01d4 A71C     			add r7, r4, #2				/*temp = ColumnaInicio+2*/
+ 278 01d6 BE42     			cmp r6, r7					/*¿columnaX==ColumnaInicio+2?*/
+ 279 01d8 03D1     			bne cambioColumnaEnRegion	/*Si no ha llegado al límite de la región, pasa a la siguiente columna*
+ 280 01da 261C     			mov r6, r4					/*Si ha llegado, se recoloca la columna y cambia de línea: ColumnaX=ColumnaInicio*
+ 281 01dc 0135     			add r5, r5, #1				/*filaX++*/
+ 282 01de 1C30     			add r0, r0, #28				/*Cambio de fila dentro de la región*/
+ 283 01e0 B6E7     			b whileRegion
+ 284              	cambioColumnaEnRegion:
+ 285 01e2 0230     			add r0, r0, #2				/*Cambio de columna dentro del cuadrante*/
+ 286 01e4 0136     			add r6, r6, #1				/*ColumnaX++*/
+ 287 01e6 B3E7     			b whileRegion
+ 288              	
+ 289 01e8 FEE7     	fin: B .
+ 290 01ea 00000000 		.end
+ 290      00000400 
+ 290      0000A500 
+ 290      0000FF01 
+ 290      000000F0 
+DEFINED SYMBOLS
+../sudoku_2015_ARM-THUMB.asm:10     .data:00000000 NUM_FILAS
+../sudoku_2015_ARM-THUMB.asm:11     .data:00000004 NUM_COLUMNAS
+../sudoku_2015_ARM-THUMB.asm:23     .text:00000000 sudoku_recalcular_arm_thumb
+../sudoku_2015_ARM-THUMB.asm:75     .text:00000098 sudoku_candidatos_thumb
+../sudoku_2015_ARM-THUMB.asm:24     .text:00000000 $a
+../sudoku_2015_ARM-THUMB.asm:35     .text:0000002c for1
+../sudoku_2015_ARM-THUMB.asm:39     .text:00000038 for2
+../sudoku_2015_ARM-THUMB.asm:57     .text:00000074 finalRec
+../sudoku_2015_ARM-THUMB.asm:53     .text:00000068 finFila
+../sudoku_2015_ARM-THUMB.asm:65     .text:00000090 terminar
+../sudoku_2015_ARM-THUMB.asm:88     .text:000000a4 sudoku_candidatos_thumb2
+../sudoku_2015_ARM-THUMB.asm:89     .text:000000a4 $t
+../sudoku_2015_ARM-THUMB.asm:102    .text:000000ba whileColumnas
+../sudoku_2015_ARM-THUMB.asm:124    .text:000000de finColumnas
+../sudoku_2015_ARM-THUMB.asm:136    .text:000000f0 whileFilas
+../sudoku_2015_ARM-THUMB.asm:159    .text:00000114 revisionRegion
+../sudoku_2015_ARM-THUMB.asm:169    .text:00000122 fmenor6
+../sudoku_2015_ARM-THUMB.asm:175    .text:0000012c recCol
+../sudoku_2015_ARM-THUMB.asm:173    .text:0000012a fmenor3
+../sudoku_2015_ARM-THUMB.asm:179    .text:00000134 cmenor6
+../sudoku_2015_ARM-THUMB.asm:186    .text:0000013e finrev
+../sudoku_2015_ARM-THUMB.asm:183    .text:0000013c cmenor3
+../sudoku_2015_ARM-THUMB.asm:198    .text:00000150 whileRegion
+../sudoku_2015_ARM-THUMB.asm:251    .text:000001aa revisarCandidatoRegion
+../sudoku_2015_ARM-THUMB.asm:242    .text:0000019c false
+../sudoku_2015_ARM-THUMB.asm:232    .text:0000018c rechazamos
+../sudoku_2015_ARM-THUMB.asm:274    .text:000001d0 avanzaEnRegion
+../sudoku_2015_ARM-THUMB.asm:284    .text:000001e2 cambioColumnaEnRegion
+../sudoku_2015_ARM-THUMB.asm:289    .text:000001e8 fin
+../sudoku_2015_ARM-THUMB.asm:290    .text:000001ea $d
+                   .debug_aranges:0000000c $d
+
+NO UNDEFINED SYMBOLS

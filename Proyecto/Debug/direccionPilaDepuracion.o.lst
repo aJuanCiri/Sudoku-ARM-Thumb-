@@ -1,0 +1,35 @@
+   1              	# 1 "../direccionPilaDepuracion.asm"
+   1              	.global start
+   0              	
+   0              	
+   0              	
+   2              	.arm
+   3              	.data
+   4              	.ltorg /*Garantiza la alineación*/
+   5              	.equ MODEMASK, 0x1f
+   6              	.equ USERMODE, 0x10
+   7              	.text
+   8              	
+   9              	.global direccionPila
+  10              	
+  11              	direccionPila:
+  12 0000 04E02DE5 		PUSH {lr}
+  13 0004 00000FE1 		mrs r0,cpsr /*Llevamos el registro de estado a r0 */
+  14 0008 1F00C0E3 		bic r0,r0,#MODEMASK /* Borramos los bits de modo de r0 */
+  15 000c 101080E3 		orr r1,r0,#USERMODE /* Añadimos el código del modo Undef y copiamos en r1 */
+  16 0010 01F02FE1 		msr cpsr_cxsf,r1
+  17              		//ldr sp,=UserStack
+  18 0014 04F09DE4 		POP {pc}
+  19              	
+  20 0018 FEFFFFEA 	fin: B .
+  21              		.end/
+DEFINED SYMBOLS
+../direccionPilaDepuracion.asm:5      *ABS*:0000001f MODEMASK
+../direccionPilaDepuracion.asm:6      *ABS*:00000010 USERMODE
+../direccionPilaDepuracion.asm:11     .text:00000000 direccionPila
+../direccionPilaDepuracion.asm:12     .text:00000000 $a
+../direccionPilaDepuracion.asm:20     .text:00000018 fin
+                   .debug_aranges:0000000c $d
+
+UNDEFINED SYMBOLS
+start

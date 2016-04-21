@@ -1,0 +1,202 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"Estados.c"
+  21              	.Ltext0:
+  22              		.file 1 "../Estados.c"
+ 1875              		.align	2
+ 1878              	state:
+ 1879 0000 00000000 		.space	4
+ 1880              		.global	pulsacion
+ 1881              		.align	2
+ 1884              	pulsacion:
+ 1885 0004 00000000 		.space	4
+ 1886              		.text
+ 1887              		.align	2
+ 1888              		.global	init_Estados
+ 1890              	init_Estados:
+ 1891              	.LFB0:
+   1:../Estados.c  **** /*********************************************************************************************
+   2:../Estados.c  **** * Fichero:		Estados.c
+   3:../Estados.c  **** * Autor:
+   4:../Estados.c  **** * Descrip:		máquina de estados para eliminar rebotes
+   5:../Estados.c  **** * Version:
+   6:../Estados.c  **** *********************************************************************************************/
+   7:../Estados.c  **** 
+   8:../Estados.c  **** #include "44b.h"
+   9:../Estados.c  **** #include "44blib.h"
+  10:../Estados.c  **** 
+  11:../Estados.c  **** /*--- variables globales ---*/
+  12:../Estados.c  **** extern int state = 0;		// Valor del estado.
+  13:../Estados.c  **** extern int pulsacion = 0;	//Valor de pulsacion
+  14:../Estados.c  **** 
+  15:../Estados.c  **** /*--- funciones externas ---*/
+  16:../Estados.c  **** extern void timer_init();
+  17:../Estados.c  **** /*
+  18:../Estados.c  **** 	Hay que modificar las variables pulsacion en la rutina de captura del
+  19:../Estados.c  **** 	botón y mirar que hacer con rINTMSK (cambiarlo en estado o en la rutina
+  20:../Estados.c  **** 	de captura del botón).
+  21:../Estados.c  **** */
+  22:../Estados.c  **** 
+  23:../Estados.c  **** /*
+  24:../Estados.c  **** 	Mirar si se deshabilita en INTMSK seguro.
+  25:../Estados.c  **** */
+  26:../Estados.c  **** 
+  27:../Estados.c  **** /*
+  28:../Estados.c  **** 	Revisar como hacer monitorización (modificar paso de parámetro al método que
+  29:../Estados.c  **** 	inicaliza timer).
+  30:../Estados.c  **** */
+  31:../Estados.c  **** 
+  32:../Estados.c  **** // Se detecta la pulsación en la rutina de captura del botón y se pone pulsacion=1.
+  33:../Estados.c  **** // Se identifica el botón y se actualiza el contador.
+  34:../Estados.c  **** // Se deshabilitan interrupciones ¿AQUI O EN RUTINA DE BOTÓN?
+  35:../Estados.c  **** // Se programa un retardo.
+  36:../Estados.c  **** void init_Estados(){
+ 1892              		.loc 1 36 0
+ 1893              		.cfi_startproc
+ 1894              		@ Function supports interworking.
+ 1895              		@ args = 0, pretend = 0, frame = 16
+ 1896              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1897 0000 0DC0A0E1 		mov	ip, sp
+ 1898              	.LCFI0:
+ 1899              		.cfi_def_cfa_register 12
+ 1900 0004 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 1901 0008 04B04CE2 		sub	fp, ip, #4
+ 1902              		.cfi_offset 14, -8
+ 1903              		.cfi_offset 13, -12
+ 1904              		.cfi_offset 11, -16
+ 1905              	.LCFI1:
+ 1906              		.cfi_def_cfa 11, 4
+ 1907 000c 10D04DE2 		sub	sp, sp, #16
+  37:../Estados.c  **** 	int pulsacion, valor, retardo, flanco, int_count, boton;
+  38:../Estados.c  **** 	// Se comprueba si se ha soltado el botón y sino se activa otro retardo.
+  39:../Estados.c  **** 	if(state == 1 && retardo == 1){
+ 1908              		.loc 1 39 0
+ 1909 0010 CC309FE5 		ldr	r3, .L7
+ 1910 0014 003093E5 		ldr	r3, [r3, #0]
+ 1911 0018 010053E3 		cmp	r3, #1
+ 1912 001c 0C00001A 		bne	.L2
+ 1913              		.loc 1 39 0 is_stmt 0 discriminator 1
+ 1914 0020 10301BE5 		ldr	r3, [fp, #-16]
+ 1915 0024 010053E3 		cmp	r3, #1
+ 1916 0028 0900001A 		bne	.L2
+ 1917              	.LBB2:
+  40:../Estados.c  **** 		// monitorizar botón MIRAR PDATG EL FLANCO.
+  41:../Estados.c  **** 		int flanco;//valor a introducir.
+  42:../Estados.c  **** 		if(flanco == 1){
+ 1918              		.loc 1 42 0 is_stmt 1
+ 1919 002c 14301BE5 		ldr	r3, [fp, #-20]
+ 1920 0030 010053E3 		cmp	r3, #1
+ 1921 0034 0300001A 		bne	.L3
+  43:../Estados.c  **** 			state = 2;
+ 1922              		.loc 1 43 0
+ 1923 0038 A4309FE5 		ldr	r3, .L7
+ 1924 003c 0220A0E3 		mov	r2, #2
+ 1925 0040 002083E5 		str	r2, [r3, #0]
+ 1926              	.LBE2:
+  39:../Estados.c  **** 	if(state == 1 && retardo == 1){
+ 1927              		.loc 1 39 0
+ 1928 0044 230000EA 		b	.L1
+ 1929              	.L3:
+ 1930              	.LBB3:
+  44:../Estados.c  **** 		}
+  45:../Estados.c  **** 		else{
+  46:../Estados.c  **** 			timer_init(valor);
+ 1931              		.loc 1 46 0
+ 1932 0048 18001BE5 		ldr	r0, [fp, #-24]
+ 1933 004c FEFFFFEB 		bl	timer_init
+ 1934              	.LBE3:
+  39:../Estados.c  **** 	if(state == 1 && retardo == 1){
+ 1935              		.loc 1 39 0
+ 1936 0050 200000EA 		b	.L1
+ 1937              	.L2:
+  47:../Estados.c  **** 		}
+  48:../Estados.c  **** 	}
+  49:../Estados.c  **** 	// Se suelta el pulsador y se activa de nuevo el retardo.
+  50:../Estados.c  **** 	else if(state == 2 && boton == 1){
+ 1938              		.loc 1 50 0
+ 1939 0054 88309FE5 		ldr	r3, .L7
+ 1940 0058 003093E5 		ldr	r3, [r3, #0]
+ 1941 005c 020053E3 		cmp	r3, #2
+ 1942 0060 0800001A 		bne	.L6
+ 1943              		.loc 1 50 0 is_stmt 0 discriminator 1
+ 1944 0064 1C301BE5 		ldr	r3, [fp, #-28]
+ 1945 0068 010053E3 		cmp	r3, #1
+ 1946 006c 0500001A 		bne	.L6
+  51:../Estados.c  **** 		state = 3;
+ 1947              		.loc 1 51 0 is_stmt 1
+ 1948 0070 6C309FE5 		ldr	r3, .L7
+ 1949 0074 0320A0E3 		mov	r2, #3
+ 1950 0078 002083E5 		str	r2, [r3, #0]
+  52:../Estados.c  **** 		timer_init(valor);			// Inicializa el retardo para filtrar rebotes.
+ 1951              		.loc 1 52 0
+ 1952 007c 18001BE5 		ldr	r0, [fp, #-24]
+ 1953 0080 FEFFFFEB 		bl	timer_init
+ 1954 0084 130000EA 		b	.L1
+ 1955              	.L6:
+  53:../Estados.c  **** 	}
+  54:../Estados.c  **** 	// Se habilitan de nuevo interrupciones y se quita la IRQ de pendientes.
+  55:../Estados.c  **** 	else if(state == 3 && retardo == 1){
+ 1956              		.loc 1 55 0
+ 1957 0088 54309FE5 		ldr	r3, .L7
+ 1958 008c 003093E5 		ldr	r3, [r3, #0]
+ 1959 0090 030053E3 		cmp	r3, #3
+ 1960 0094 0F00001A 		bne	.L1
+ 1961              		.loc 1 55 0 is_stmt 0 discriminator 1
+ 1962 0098 10301BE5 		ldr	r3, [fp, #-16]
+ 1963 009c 010053E3 		cmp	r3, #1
+ 1964 00a0 0C00001A 		bne	.L1
+  56:../Estados.c  **** 		state = 0;					// Cambia el estado.
+ 1965              		.loc 1 56 0 is_stmt 1
+ 1966 00a4 38309FE5 		ldr	r3, .L7
+ 1967 00a8 0020A0E3 		mov	r2, #0
+ 1968 00ac 002083E5 		str	r2, [r3, #0]
+  57:../Estados.c  **** 		rI_ISPC   |= BIT_EINT4567;		// Borra el bit pendiente en INTPND.
+ 1969              		.loc 1 57 0
+ 1970 00b0 30309FE5 		ldr	r3, .L7+4
+ 1971 00b4 2C209FE5 		ldr	r2, .L7+4
+ 1972 00b8 002092E5 		ldr	r2, [r2, #0]
+ 1973 00bc 022682E3 		orr	r2, r2, #2097152
+ 1974 00c0 002083E5 		str	r2, [r3, #0]
+  58:../Estados.c  **** 		rINTMSK &= ~(BIT_TIMER0);		// Habilita IRQ de los botones.
+ 1975              		.loc 1 58 0
+ 1976 00c4 20309FE5 		ldr	r3, .L7+8
+ 1977 00c8 1C209FE5 		ldr	r2, .L7+8
+ 1978 00cc 002092E5 		ldr	r2, [r2, #0]
+ 1979 00d0 022AC2E3 		bic	r2, r2, #8192
+ 1980 00d4 002083E5 		str	r2, [r3, #0]
+ 1981              	.L1:
+  59:../Estados.c  **** 	}
+  60:../Estados.c  **** }
+ 1982              		.loc 1 60 0
+ 1983 00d8 0CD04BE2 		sub	sp, fp, #12
+ 1984 00dc 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 1985 00e0 1EFF2FE1 		bx	lr
+ 1986              	.L8:
+ 1987              		.align	2
+ 1988              	.L7:
+ 1989 00e4 00000000 		.word	state
+ 1990 00e8 2400E001 		.word	31457316
+ 1991 00ec 0C00E001 		.word	31457292
+ 1992              		.cfi_endproc
+ 1993              	.LFE0:
+ 1995              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 Estados.c
+C:\Users\a680669\AppData\Local\Temp\ccY6zPxC.s:1878   .bss:00000000 state
+C:\Users\a680669\AppData\Local\Temp\ccY6zPxC.s:1875   .bss:00000000 $d
+C:\Users\a680669\AppData\Local\Temp\ccY6zPxC.s:1884   .bss:00000004 pulsacion
+C:\Users\a680669\AppData\Local\Temp\ccY6zPxC.s:1887   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccY6zPxC.s:1890   .text:00000000 init_Estados
+C:\Users\a680669\AppData\Local\Temp\ccY6zPxC.s:1989   .text:000000e4 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+timer_init

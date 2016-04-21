@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common
+END
+44b.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/44b.h
+END
+AscII8x16.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/AscII8x16.c
+END
+44blib.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/44blib.c
+END
+def.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/def.h
+END
+44blib.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/44blib.h
+END
+ev40boot.cs
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/ev40boot.cs
+END
+option.a
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/option.a
+END
+Memcfg.a
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/Memcfg.a
+END
+ram_ice.ld
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/ram_ice.ld
+END
+44binit.s
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/44binit.s
+END
+option.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/lec2008/!svn/ver/172/trunk/labs/P6/code/P6-ARM-sol/common/option.h
+END

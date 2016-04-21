@@ -1,0 +1,241 @@
+   1              		.cpu arm7tdmi
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 18, 4
+  11              		.file	"excepciones.c"
+  21              	.Ltext0:
+  22              		.file 1 "../excepciones.c"
+ 1874              		.align	2
+ 1875              		.global	exc_DataAbort
+ 1877              	exc_DataAbort:
+ 1878              	.LFB0:
+   1:../excepciones.c **** /*
+   2:../excepciones.c ****  * excepciones.c
+   3:../excepciones.c ****  *
+   4:../excepciones.c ****  *  Created on: 03/11/2015
+   5:../excepciones.c ****  *      Author: a679155
+   6:../excepciones.c ****  */
+   7:../excepciones.c **** 
+   8:../excepciones.c **** #include "44b.h"
+   9:../excepciones.c **** #include "44blib.h"
+  10:../excepciones.c **** extern void D8Led_symbol(int value);
+  11:../excepciones.c **** 
+  12:../excepciones.c **** // Rutinas para las capturas de las distintas excepciones.
+  13:../excepciones.c **** void exc_DataAbort(void) __attribute__((interrupt("ABORT")));
+  14:../excepciones.c **** void exc_Undefined(void) __attribute__((interrupt("UNDEF")));
+  15:../excepciones.c **** //void exc_PrefetchAbort(void) __attribute__((interrupt("ABORT")));
+  16:../excepciones.c **** 
+  17:../excepciones.c **** // Rutina para la captura de una DataAbort.
+  18:../excepciones.c **** void exc_DataAbort(){
+ 1879              		.loc 1 18 0
+ 1880              		.cfi_startproc
+ 1881              		@ Interrupt Service Routine.
+ 1882              		@ args = 0, pretend = 0, frame = 0
+ 1883              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1884 0000 04C02DE5 		str	ip, [sp, #-4]!
+ 1885 0004 0DC0A0E1 		mov	ip, sp
+ 1886              	.LCFI0:
+ 1887              		.cfi_def_cfa_register 12
+ 1888 0008 0FD82DE9 		stmfd	sp!, {r0, r1, r2, r3, fp, ip, lr, pc}
+ 1889 000c 04B04CE2 		sub	fp, ip, #4
+ 1890              		.cfi_offset 14, -8
+ 1891              		.cfi_offset 13, -12
+ 1892              		.cfi_offset 11, -16
+ 1893              		.cfi_offset 3, -20
+ 1894              		.cfi_offset 2, -24
+ 1895              		.cfi_offset 1, -28
+ 1896              		.cfi_offset 0, -32
+ 1897              	.LCFI1:
+ 1898              		.cfi_def_cfa 11, 4
+  19:../excepciones.c **** 	//push_debug(1,direccion);
+  20:../excepciones.c **** 	cod_Error(1);
+ 1899              		.loc 1 20 0
+ 1900 0010 18309FE5 		ldr	r3, .L2
+ 1901 0014 0100A0E3 		mov	r0, #1
+ 1902 0018 0FE0A0E1 		mov	lr, pc
+ 1903 001c 13FF2FE1 		bx	r3
+  21:../excepciones.c **** }
+ 1904              		.loc 1 21 0
+ 1905 0020 1CD04BE2 		sub	sp, fp, #28
+ 1906 0024 0F689DE8 		ldmfd	sp, {r0, r1, r2, r3, fp, sp, lr}
+ 1907 0028 04C09DE4 		ldmfd	sp!, {ip}
+ 1908 002c 04F05EE2 		subs	pc, lr, #4
+ 1909              	.L3:
+ 1910              		.align	2
+ 1911              	.L2:
+ 1912 0030 00000000 		.word	cod_Error
+ 1913              		.cfi_endproc
+ 1914              	.LFE0:
+ 1916              		.align	2
+ 1917              		.global	exc_Undefined
+ 1919              	exc_Undefined:
+ 1920              	.LFB1:
+  22:../excepciones.c **** 
+  23:../excepciones.c **** // Rutina para la captura de una Undefined.
+  24:../excepciones.c **** void exc_Undefined(){
+ 1921              		.loc 1 24 0
+ 1922              		.cfi_startproc
+ 1923              		@ ARM Exception Handler.
+ 1924              		@ args = 0, pretend = 0, frame = 0
+ 1925              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1926 0034 04C02DE5 		str	ip, [sp, #-4]!
+ 1927 0038 0DC0A0E1 		mov	ip, sp
+ 1928              	.LCFI2:
+ 1929              		.cfi_def_cfa_register 12
+ 1930 003c 0FD82DE9 		stmfd	sp!, {r0, r1, r2, r3, fp, ip, lr, pc}
+ 1931 0040 04B04CE2 		sub	fp, ip, #4
+ 1932              		.cfi_offset 14, -8
+ 1933              		.cfi_offset 13, -12
+ 1934              		.cfi_offset 11, -16
+ 1935              		.cfi_offset 3, -20
+ 1936              		.cfi_offset 2, -24
+ 1937              		.cfi_offset 1, -28
+ 1938              		.cfi_offset 0, -32
+ 1939              	.LCFI3:
+ 1940              		.cfi_def_cfa 11, 4
+  25:../excepciones.c **** 	//push_debug(2,direccion);
+  26:../excepciones.c **** 	cod_Error(2);
+ 1941              		.loc 1 26 0
+ 1942 0044 18309FE5 		ldr	r3, .L5
+ 1943 0048 0200A0E3 		mov	r0, #2
+ 1944 004c 0FE0A0E1 		mov	lr, pc
+ 1945 0050 13FF2FE1 		bx	r3
+  27:../excepciones.c **** }
+ 1946              		.loc 1 27 0
+ 1947 0054 1CD04BE2 		sub	sp, fp, #28
+ 1948 0058 0F689DE8 		ldmfd	sp, {r0, r1, r2, r3, fp, sp, lr}
+ 1949 005c 04C09DE4 		ldmfd	sp!, {ip}
+ 1950 0060 0EF0B0E1 		movs	pc, lr
+ 1951              	.L6:
+ 1952              		.align	2
+ 1953              	.L5:
+ 1954 0064 00000000 		.word	cod_Error
+ 1955              		.cfi_endproc
+ 1956              	.LFE1:
+ 1958              		.align	2
+ 1959              		.global	cod_Error
+ 1961              	cod_Error:
+ 1962              	.LFB2:
+  28:../excepciones.c **** 
+  29:../excepciones.c **** /*
+  30:../excepciones.c **** void exc_PrefetchAbort(){
+  31:../excepciones.c **** 
+  32:../excepciones.c **** 	cod_Error(3);
+  33:../excepciones.c **** }*/
+  34:../excepciones.c **** 
+  35:../excepciones.c **** // Código de error a mostrar en el display.
+  36:../excepciones.c **** void cod_Error(int error)
+  37:../excepciones.c **** {
+ 1963              		.loc 1 37 0
+ 1964              		.cfi_startproc
+ 1965              		@ Function supports interworking.
+ 1966              		@ args = 0, pretend = 0, frame = 8
+ 1967              		@ frame_needed = 1, uses_anonymous_args = 0
+ 1968 0068 0DC0A0E1 		mov	ip, sp
+ 1969              	.LCFI4:
+ 1970              		.cfi_def_cfa_register 12
+ 1971 006c 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 1972 0070 04B04CE2 		sub	fp, ip, #4
+ 1973              		.cfi_offset 14, -8
+ 1974              		.cfi_offset 13, -12
+ 1975              		.cfi_offset 11, -16
+ 1976              	.LCFI5:
+ 1977              		.cfi_def_cfa 11, 4
+ 1978 0074 08D04DE2 		sub	sp, sp, #8
+ 1979 0078 10000BE5 		str	r0, [fp, #-16]
+ 1980              	.L8:
+  38:../excepciones.c **** 
+  39:../excepciones.c **** 	while(1) {
+  40:../excepciones.c **** 		Delay(1000);
+ 1981              		.loc 1 40 0 discriminator 1
+ 1982 007c FA0FA0E3 		mov	r0, #1000
+ 1983 0080 FEFFFFEB 		bl	Delay
+  41:../excepciones.c **** 		D8Led_symbol(error);
+ 1984              		.loc 1 41 0 discriminator 1
+ 1985 0084 10001BE5 		ldr	r0, [fp, #-16]
+ 1986 0088 FEFFFFEB 		bl	D8Led_symbol
+  42:../excepciones.c **** 		Delay(1000);
+ 1987              		.loc 1 42 0 discriminator 1
+ 1988 008c FA0FA0E3 		mov	r0, #1000
+ 1989 0090 FEFFFFEB 		bl	Delay
+  43:../excepciones.c **** 		D8Led_symbol(16);
+ 1990              		.loc 1 43 0 discriminator 1
+ 1991 0094 1000A0E3 		mov	r0, #16
+ 1992 0098 FEFFFFEB 		bl	D8Led_symbol
+  44:../excepciones.c **** 	}
+ 1993              		.loc 1 44 0 discriminator 1
+ 1994 009c F6FFFFEA 		b	.L8
+ 1995              		.cfi_endproc
+ 1996              	.LFE2:
+ 1998              		.align	2
+ 1999              		.global	iniciar
+ 2001              	iniciar:
+ 2002              	.LFB3:
+  45:../excepciones.c **** }
+  46:../excepciones.c **** 
+  47:../excepciones.c **** // Carga las funciones que van a tratar cada tipo de interrupción.
+  48:../excepciones.c **** void iniciar(){
+ 2003              		.loc 1 48 0
+ 2004              		.cfi_startproc
+ 2005              		@ Function supports interworking.
+ 2006              		@ args = 0, pretend = 0, frame = 0
+ 2007              		@ frame_needed = 1, uses_anonymous_args = 0
+ 2008 00a0 0DC0A0E1 		mov	ip, sp
+ 2009              	.LCFI6:
+ 2010              		.cfi_def_cfa_register 12
+ 2011 00a4 00D82DE9 		stmfd	sp!, {fp, ip, lr, pc}
+ 2012 00a8 04B04CE2 		sub	fp, ip, #4
+ 2013              		.cfi_offset 14, -8
+ 2014              		.cfi_offset 13, -12
+ 2015              		.cfi_offset 11, -16
+ 2016              	.LCFI7:
+ 2017              		.cfi_def_cfa 11, 4
+  49:../excepciones.c **** 	pISR_DABORT = (unsigned) exc_DataAbort;
+ 2018              		.loc 1 49 0
+ 2019 00ac 1C309FE5 		ldr	r3, .L10
+ 2020 00b0 1C209FE5 		ldr	r2, .L10+4
+ 2021 00b4 002083E5 		str	r2, [r3, #0]
+  50:../excepciones.c **** 	pISR_UNDEF = (unsigned) exc_Undefined;
+ 2022              		.loc 1 50 0
+ 2023 00b8 18309FE5 		ldr	r3, .L10+8
+ 2024 00bc 18209FE5 		ldr	r2, .L10+12
+ 2025 00c0 002083E5 		str	r2, [r3, #0]
+  51:../excepciones.c **** 	//pISR_PABORT = (unsigned) exc_PrefetchAbort;
+  52:../excepciones.c **** }
+ 2026              		.loc 1 52 0
+ 2027 00c4 0CD04BE2 		sub	sp, fp, #12
+ 2028 00c8 00689DE8 		ldmfd	sp, {fp, sp, lr}
+ 2029 00cc 1EFF2FE1 		bx	lr
+ 2030              	.L11:
+ 2031              		.align	2
+ 2032              	.L10:
+ 2033 00d0 10FF7F0C 		.word	209714960
+ 2034 00d4 00000000 		.word	exc_DataAbort
+ 2035 00d8 04FF7F0C 		.word	209714948
+ 2036 00dc 00000000 		.word	exc_Undefined
+ 2037              		.cfi_endproc
+ 2038              	.LFE3:
+ 2040              	.Letext0:
+DEFINED SYMBOLS
+                            *ABS*:00000000 excepciones.c
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1874   .text:00000000 $a
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1877   .text:00000000 exc_DataAbort
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1912   .text:00000030 $d
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1961   .text:00000068 cod_Error
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1916   .text:00000034 $a
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1919   .text:00000034 exc_Undefined
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1954   .text:00000064 $d
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:1958   .text:00000068 $a
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:2001   .text:000000a0 iniciar
+C:\Users\a680669\AppData\Local\Temp\ccHUGZAy.s:2033   .text:000000d0 $d
+                     .debug_frame:00000010 $d
+
+UNDEFINED SYMBOLS
+Delay
+D8Led_symbol

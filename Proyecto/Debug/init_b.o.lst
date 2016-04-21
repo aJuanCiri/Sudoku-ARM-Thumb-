@@ -1,0 +1,118 @@
+   1              	# 1 "../init_b.asm"
+   1              	.text
+   0              	
+   0              	
+   0              	
+   2              	#        ENTRY                  /*  mark the first instruction to call */
+   3              	.global inicioSudoku
+   4              	inicioSudoku:
+   5              	.arm /*indicates that we are using the ARM instruction set */
+   6              	#------standard initial code
+   7              	# --- Setup interrupt / exception vectors
+   8 0000 FFFFFFEA 	      B       Reset_Handler
+   9              	/* In this version we do not use the following handlers */
+  10              	###################################################################################################
+  11              	#-----------Undefined_Handler:
+  12              	#      B       Undefined_Handler
+  13              	#----------SWI_Handler:
+  14              	#      B       SWI_Handler
+  15              	#----------Prefetch_Handler:
+  16              	#      B       Prefetch_Handler
+  17              	#----------Abort_Handler:
+  18              	#      B       Abort_Handler
+  19              	#         NOP      /* Reserved vector */
+  20              	#----------IRQ_Handler:
+  21              	#      B       IRQ_Handler
+  22              	#----------FIQ_Handler:
+  23              	#      B       FIQ_Handler
+  24              	###################################################################################################
+  25              	# Reset Handler:
+  26              	# the processor starts executing this code after system reset
+  27              	###################################################################################################
+  28              	Reset_Handler:
+  29              	#
+  30 0004 01D9A0E3 	        MOV     sp, #0x4000      /*  set up stack pointer (r13) */
+  31              	#
+  32              	#  USING A .C FUNCTION
+  33              	#
+  34              	# FUNCTION CALL the parameters are stored in r0 and r1
+  35              	# If there are 4 or less parameters when calling a C function the compiler assumes that they have
+  36              	# been stored in r0-r3. If there are more parameters you have to store them in the data stack using
+  37              	# function __c_copy is in copy.c
+  38 0008 0C009FE5 	        LDR     r0, =cuadricula  /*  puntero a la cuadricula */
+  39              	
+  40              	.extern     sudoku9x9
+  41 000c 0C509FE5 	        ldr         r5, = sudoku9x9
+  42 0010 0FE0A0E1 	        mov         lr, pc
+  43 0014 15FF2FE1 	        bx          r5
+  44              	
+  45              	stop:
+  46 0018 FEFFFFEA 	        B       stop        /*  end of program */
+  47              	
+  48              	###################################################################################################
+  49              	.data
+  50              	.ltorg /*guarantees the alignment*/
+  51              	.align 5
+  52              	
+  53              	# huecos para cuadrar
+  54              	cuadricula:
+  55              	     /* 9 filas de 16 entradas para facilitar la visualizacion y 16 bits por celda */
+  56 0000 00980068 	    .hword   0x9800,0x6800,0x0000,0x0000,0x0000,0x0000,0x7800,0x0000,0x8800,0,0,0,0,0,0,0
+  56      00000000 
+  56      00000000 
+  56      00780000 
+  56      00880000 
+  57 0020 00880000 	    .hword   0x8800,0x0000,0x0000,0x0000,0x0000,0x4800,0x3800,0x0000,0x0000,0,0,0,0,0,0,0
+  57      00000000 
+  57      00000048 
+  57      00380000 
+  57      00000000 
+  58 0040 00180000 	    .hword   0x1800,0x0000,0x0000,0x5800,0x0000,0x0000,0x0000,0x0000,0x0000,0,0,0,0,0,0,0
+  58      00000058 
+  58      00000000 
+  58      00000000 
+  58      00000000 
+  59 0060 00000000 	    .hword   0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0x1800,0x7800,0x6800,0,0,0,0,0,0,0
+  59      00000000 
+  59      00000000 
+  59      00180078 
+  59      00680000 
+  60 0080 00280000 	    .hword   0x2800,0x0000,0x0000,0x0000,0x9800,0x3800,0x0000,0x0000,0x5800,0,0,0,0,0,0,0
+  60      00000000 
+  60      00980038 
+  60      00000000 
+  60      00580000 
+  61 00a0 00780000 	    .hword   0x7800,0x0000,0x8800,0x0000,0x0000,0x0000,0x0000,0x0000,0x0000,0,0,0,0,0,0,0
+  61      00880000 
+  61      00000000 
+  61      00000000 
+  61      00000000 
+  62 00c0 00000000 	    .hword   0x0000,0x0000,0x7800,0x0000,0x3800,0x2800,0x0000,0x4800,0x0000,0,0,0,0,0,0,0
+  62      00780000 
+  62      00380028 
+  62      00000048 
+  62      00000000 
+  63 00e0 00380088 	    .hword   0x3800,0x8800,0x2800,0x1800,0x0000,0x5800,0x6800,0x0000,0x0000,0,0,0,0,0,0,0
+  63      00280018 
+  63      00000058 
+  63      00680000 
+  63      00000000 
+  64 0100 00000048 	    .hword   0x0000,0x4800,0x1800,0x0000,0x0000,0x9800,0x5800,0x2800,0x0000,0,0,0,0,0,0,0
+  64      00180000 
+  64      00000098 
+  64      00580028 
+  64      00000000 
+  65              	
+  66              	.end
+DEFINED SYMBOLS
+       ../init_b.asm:4      .text:00000000 inicioSudoku
+       ../init_b.asm:28     .text:00000004 Reset_Handler
+       ../init_b.asm:8      .text:00000000 $a
+       ../init_b.asm:54     .data:00000000 cuadricula
+       ../init_b.asm:45     .text:00000018 stop
+       ../init_b.asm:51     .data:00000000 $d
+       ../init_b.asm:49     .text:0000001c $d
+                   .debug_aranges:0000000c $d
+
+UNDEFINED SYMBOLS
+sudoku9x9
